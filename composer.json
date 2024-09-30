@@ -1,40 +1,39 @@
 {
-  "name": "zaengle/craft-never-stale",
-  "description": "Experimental NeverStale integration",
+  "name": "zaengle/craft-neverstale",
+  "description": "Neverstale integration for CraftCMS",
   "type": "craft-plugin",
   "require": {
     "php": ">=8.2",
-    "craftcms/cms": "^5.4.0"
+    "craftcms/cms": "5.x-dev"
   },
   "require-dev": {
+    "roave/security-advisories": "dev-latest",
     "craftcms/ecs": "dev-main",
     "craftcms/phpstan": "dev-main"
   },
+  "license": "proprietary",
   "autoload": {
     "psr-4": {
       "zaengle\\neverstale\\": "src/"
     }
   },
+  "minimum-stability": "dev",
+  "config": {
+    "sort-packages": true,
+    "allow-plugins": {
+      "yiisoft/yii2-composer": true,
+      "craftcms/plugin-installer": true
+    }
+  },
   "extra": {
-    "handle": "_never-stale",
-    "name": "NeverStale",
+    "handle": "neverstale",
+    "name": "Neverstale",
     "developer": "Zaengle",
-    "documentationUrl": "",
-    "class": "zaengle\\neverstale\\NeverStale"
+    "documentationUrl": ""
   },
   "scripts": {
     "check-cs": "ecs check --ansi",
     "fix-cs": "ecs check --ansi --fix",
     "phpstan": "phpstan --memory-limit=1G"
-  },
-  "config": {
-    "sort-packages": true,
-    "platform": {
-      "php": "8.2"
-    },
-    "allow-plugins": {
-      "yiisoft/yii2-composer": true,
-      "craftcms/plugin-installer": true
-    }
   }
 }

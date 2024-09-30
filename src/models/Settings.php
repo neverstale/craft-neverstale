@@ -10,4 +10,17 @@ use craft\base\Model;
  */
 class Settings extends Model
 {
+    public bool $enable = true;
+    public string $apiKey = '';
+    public string $apiSecret = '';
+
+    /**
+     * @inheritDoc
+     */
+    public function defineRules(): array
+    {
+        return [
+            [['apiKey', 'apiSecret'], 'required'],
+        ];
+    }
 }

@@ -1,6 +1,43 @@
-{# @var plugin \zaengle\neverstale\NeverStale #}
+{# @var plugin \zaengle\neverstale\Plugin #}
 {# @var settings \zaengle\neverstale\models\Settings #}
 
-{% import '_includes/forms.twig' as forms %}
+{%- import '_includes/forms.twig' as forms %}
 
-{# ... #}
+{%- macro configOverrideWarning(setting, fileConfig) -%}
+  {%- if craft.neverstale.config.getConfigFile(setting) is not null -%}
+    {{- "This is being overridden by the `#{setting}` setting in the `config/neverstale.php` file." |raw }}
+  {%- else -%}
+    {{ false }}
+  {%- endif -%}
+{%- endmacro %}
+
+{{ forms.lightswitchField({
+  first: true,
+  label: 'Enable Neverstale sync' | t('neverstale'),
+  name: 'enable',
+  on: settings.enable,
+  warning: _self.configOverrideWarning('enable'),
+  disabled: craft.neverstale.config.isOverriddenByFile('enable'),
+}) }}
+
+{{ forms.autosuggestField({
+  label: 'API Key' | t('neverstale'),
+  name: 'apiKey',
+  required: true,
+  value: settings.apiKey,
+  suggestEnvVars: true,
+  errors: settings.getErrors('apiKey'),
+  warning: _self.configOverrideWarning('apiKey'),
+  disabled: craft.neverstale.config.isOverriddenByFile('apiKey'),
+}) }}
+
+{{ forms.autosuggestField({
+  label: 'API Secret' | t('neverstale'),
+  name: 'apiSecret',
+  required: true,
+  value: settings.apiSecret,
+  suggestEnvVars: true,
+  errors: settings.getErrors('apiSecret'),
+  warning: _self.configOverrideWarning('apiSecret'),
+  disabled: craft.neverstale.config.isOverriddenByFile('apiSecret'),
+}) }}

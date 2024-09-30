@@ -1,0 +1,29 @@
+{%- requirePermission('neverstale:scan') %}
+{%- import '_includes/forms' as forms %}
+
+<h2>Scan content from Craft with Neverstale</h2>
+
+<p>Normally, content is automatically scanned when published. You should only need to manually content when first installing, or if new entry types have been added to the site.</p>
+
+<form {{ attr({
+  id: "neverstale-scan",
+  class: 'utility',
+  method: 'POST',
+}) }}>
+{% for entryType in entryTypes %}
+    {{ actionInput('neverstale/scan/batch') }}
+    {{ csrfInput() }}
+
+    {{ forms.checkboxGroup({
+      label: entryType.name|t('site'),
+      name: 'entryTypes[]',
+      value: entryType.id,
+      checked: true,
+    }) }}
+
+
+{% endfor %}
+  <div class="buttons">
+    <button type="submit" class="btn submit">Scan selected</button>
+  </div>
+</form>
