@@ -2,7 +2,6 @@
 
 namespace zaengle\neverstale\elements\db;
 
-use craft\base\ElementInterface;
 use craft\elements\db\ElementQuery;
 use craft\elements\Entry;
 use craft\helpers\Db;
@@ -58,7 +57,6 @@ class NeverstaleSubmissionQuery extends ElementQuery
             'bar' => ['bar' => true],
             default => parent::statusCondition($status),
         };
-
     }
 
     protected function beforePrepare(): bool

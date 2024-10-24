@@ -2,7 +2,6 @@
 
 namespace zaengle\neverstale\services;
 
-use craft\base\ElementInterface;
 use craft\elements\Entry;
 use craft\helpers\ElementHelper;
 use craft\models\Section;

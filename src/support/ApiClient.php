@@ -4,6 +4,7 @@ namespace zaengle\neverstale\support;
 
 use GuzzleHttp\Client;
 use GuzzleHttp\Psr7\Response;
+
 /**
  * Neverstale API Client
  *
@@ -27,7 +28,7 @@ class ApiClient
             'base_uri' => $this->baseUri,
             'headers' => [
 //                @todo implement authentication for requests
-            ]
+            ],
         ]);
     }
 

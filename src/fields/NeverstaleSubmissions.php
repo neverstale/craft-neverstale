@@ -4,8 +4,8 @@ namespace zaengle\neverstale\fields;
 
 use craft\base\ElementInterface;
 use craft\base\SortableFieldInterface;
-use craft\helpers\Html;
 use craft\fields\BaseRelationField;
+use craft\helpers\Html;
 
 use zaengle\neverstale\elements\NeverstaleSubmission;
 use zaengle\neverstale\Plugin;

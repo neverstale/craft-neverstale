@@ -5,11 +5,11 @@ namespace zaengle\neverstale\elements;
 use Craft;
 use craft\base\Element;
 use craft\db\Query;
+use craft\elements\conditions\ElementConditionInterface;
 use craft\elements\db\EagerLoadPlan;
+use craft\elements\db\ElementQueryInterface;
 use craft\elements\Entry;
 use craft\elements\User;
-use craft\elements\conditions\ElementConditionInterface;
-use craft\elements\db\ElementQueryInterface;
 use craft\helpers\ArrayHelper;
 use craft\helpers\Cp;
 use craft\helpers\Db;
@@ -146,7 +146,6 @@ class NeverstaleSubmission extends Element
     public function afterSave(bool $isNew): void
     {
         if (!$this->propagating) {
-
             Plugin::log("Saving submission $this->id", 'info');
             // @todo perhaps move this to a record?
             $rows = Db::upsert('{{%neverstale_submissions}}', [
@@ -327,7 +326,7 @@ class NeverstaleSubmission extends Element
             [
                 'template' => 'site/template/path',
                 'variables' => ['submission' => $this],
-            ]
+            ],
         ];
     }
 

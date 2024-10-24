@@ -1,6 +1,7 @@
 <?php
 
 namespace zaengle\neverstale\enums;
+
 /**
  * Neverstale Permission Enum
  *

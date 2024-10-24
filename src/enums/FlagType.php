@@ -17,4 +17,3 @@ enum FlagType: string
     case TimeSensitive = 'timeSensitive';
     case Other = 'other';
 }
-

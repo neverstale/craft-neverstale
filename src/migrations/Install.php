@@ -5,7 +5,6 @@ namespace zaengle\neverstale\migrations;
 use Craft;
 use craft\db\Migration;
 use craft\helpers\Db;
-use craft\helpers\MigrationHelper;
 
 /**
  * Neverstale Install Migration

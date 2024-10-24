@@ -16,7 +16,7 @@ class ScanUtility extends Utility
         return Plugin::t('Neverstale: Scan site');
     }
 
-    static function id(): string
+    public static function id(): string
     {
         return 'neverscale-scan';
     }
@@ -26,7 +26,7 @@ class ScanUtility extends Utility
         return 'wrench';
     }
 
-    static function contentHtml(): string
+    public static function contentHtml(): string
     {
         // @todo complete this
         $entryTypesBySite = collect(Craft::$app->getSites()->getAllSites())->mapWithKeys(function($site) {
@@ -36,7 +36,7 @@ class ScanUtility extends Utility
                     'name' => $site->name,
                     'id' => $site->id,
                     'entryTypes' => $entryTypes,
-                ]
+                ],
             ];
         });
 

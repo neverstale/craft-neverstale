@@ -22,9 +22,9 @@ class Api extends Component
     public function upsert(NeverstaleSubmission $submission): void
     {
 //        try {
-            $apiSubmission = $submission->formatForApi();
+        $apiSubmission = $submission->formatForApi();
 
-            $response = $this->client->upsert(
+        $response = $this->client->upsert(
                 $apiSubmission->getApiId(),
                 $apiSubmission->getApiData()
             );

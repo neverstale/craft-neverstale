@@ -15,7 +15,7 @@ use craft\queue\BaseJob;
  */
 class ScanEntryTypeJob extends BaseJob
 {
-    function execute($queue): void
+    public function execute($queue): void
     {
         // ...
     }

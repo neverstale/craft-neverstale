@@ -3,8 +3,6 @@
 namespace zaengle\neverstale;
 
 use Craft;
-use Monolog\Formatter\LineFormatter;
-use Psr\Log\LogLevel;
 use craft\base\Element;
 use craft\base\Model;
 use craft\base\Plugin as BasePlugin;
@@ -24,9 +22,11 @@ use craft\services\Elements;
 use craft\services\Fields;
 use craft\services\UserPermissions;
 use craft\services\Utilities;
-use craft\web\UrlManager;
 use craft\web\twig\variables\Cp as CpVariable;
 use craft\web\twig\variables\CraftVariable;
+use craft\web\UrlManager;
+use Monolog\Formatter\LineFormatter;
+use Psr\Log\LogLevel;
 use yii\base\Event;
 use yii\base\InvalidConfigException;
 use zaengle\neverstale\behaviors\PreviewNeverstaleSubmissionBehavior;
@@ -129,7 +129,7 @@ class Plugin extends BasePlugin
     {
         Craft::getLogger()->log($message, $level, self::getInstance()->getHandle());
     }
-    public static function t():string
+    public static function t(): string
     {
         return Craft::t('neverstale', ...func_get_args());
     }
@@ -173,7 +173,7 @@ class Plugin extends BasePlugin
         $this->registerCpNavItems();
         $this->registerEntryTableAttributes();
 
-        Event::on(Fields::class, Fields::EVENT_REGISTER_FIELD_TYPES, function (RegisterComponentTypesEvent $event) {
+        Event::on(Fields::class, Fields::EVENT_REGISTER_FIELD_TYPES, function(RegisterComponentTypesEvent $event) {
             $event->types[] = NeverstaleSubmissions::class;
         });
 
@@ -194,7 +194,7 @@ class Plugin extends BasePlugin
          * Attach the NeverstaleSubmission behavior to the Entry element, adding a neverstaleSubmission property that points
          * to the most recent submission for the entry
          */
-        Event::on(Entry::class, Model::EVENT_DEFINE_BEHAVIORS, function (DefineBehaviorsEvent $event) {
+        Event::on(Entry::class, Model::EVENT_DEFINE_BEHAVIORS, function(DefineBehaviorsEvent $event) {
             /** @var Entry $entry */
             $entry = $event->sender;
 
@@ -206,11 +206,11 @@ class Plugin extends BasePlugin
     {
         Event::on(Entry::class, Entry::EVENT_REGISTER_TABLE_ATTRIBUTES, function(RegisterElementTableAttributesEvent $event) {
             $event->tableAttributes[self::$neverstaleStatusAttribute] = [
-                'label' => Plugin::t('Neverstale Status')
+                'label' => Plugin::t('Neverstale Status'),
             ];
         });
 
-        Event::on(Entry::class, Entry::EVENT_PREP_QUERY_FOR_TABLE_ATTRIBUTE, function (ElementIndexTableAttributeEvent $event) {
+        Event::on(Entry::class, Entry::EVENT_PREP_QUERY_FOR_TABLE_ATTRIBUTE, function(ElementIndexTableAttributeEvent $event) {
             $attr = $event->attribute;
             if ($attr !== self::$neverstaleStatusAttribute) {
                 return;
@@ -304,12 +304,12 @@ class Plugin extends BasePlugin
             $event->rules = array_merge($event->rules, [
                 'neverstale' => ['template' => 'neverstale/submissions/_index.twig'],
                 'neverstale/submissions' => ['template' => 'neverstale/submissions/_index.twig'],
-                'neverstale/submissions/<submissionId:\\d+>' =>  'neverstale/submissions/show',
+                'neverstale/submissions/<submissionId:\\d+>' => 'neverstale/submissions/show',
             ]);
         });
     }
 
-    private function registerCpNavItems():void
+    private function registerCpNavItems(): void
     {
         Event::on(
             CpVariable::class,

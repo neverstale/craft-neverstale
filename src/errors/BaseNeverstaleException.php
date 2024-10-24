@@ -3,6 +3,7 @@
 namespace zaengle\neverstale\errors;
 
 use yii\base\Exception;
+
 /**
  * Neverstale Base Exception
  *
@@ -15,4 +16,3 @@ class BaseNeverstaleException extends Exception
 {
     public string $name = 'Neverstale Exception';
 }
-

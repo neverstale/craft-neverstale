@@ -59,7 +59,7 @@ class Settings extends Model
             }
             // Value from config file is a static array of section handles
             return $this->collectAllSections()->filter(
-                fn ($section) => in_array($section->handle, $configValue, true)
+                fn($section) => in_array($section->handle, $configValue, true)
             )->toArray();
         }
         // not overridden, but no specific sections are enabled
@@ -68,7 +68,7 @@ class Settings extends Model
         }
         // Use the value from the Craft CP
         return $this->collectAllSections()->filter(
-            fn ($section) => in_array($section->id, $this->enabledSectionIds, true)
+            fn($section) => in_array($section->id, $this->enabledSectionIds, true)
         )->toArray();
     }
 
@@ -97,7 +97,7 @@ class Settings extends Model
     {
         Typecast::properties(static::class, $values);
 
-        if(isset($values['enabledSectionIds']) && $values['enabledSectionIds'][0] === '*') {
+        if (isset($values['enabledSectionIds']) && $values['enabledSectionIds'][0] === '*') {
             $values['allowAllSections'] = true;
             $values['enabledSectionIds'] = [];
         }

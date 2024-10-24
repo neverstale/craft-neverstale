@@ -4,6 +4,7 @@ namespace zaengle\neverstale\services;
 
 use Craft;
 use yii\base\Component;
+
 /**
  * Neverstale Config Service
  *
