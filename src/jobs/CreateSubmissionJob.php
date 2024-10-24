@@ -5,21 +5,22 @@ namespace zaengle\neverstale\jobs;
 use Craft;
 use craft\errors\ElementNotFoundException;
 use craft\errors\InvalidElementException;
+use craft\helpers\Queue as QueueHelper;
 use craft\queue\BaseJob;
 use zaengle\neverstale\elements\NeverstaleSubmission;
 use zaengle\neverstale\Plugin;
 
 /**
- *  Neverstale Send Submission Job
+ * Create Submission Job
  *
  * @author Zaengle
  * @package zaengle/craft-neverstale
  * @since 1.0.0
  * @see https://github.com/zaengle/craft-neverstale
  */
-class SendSubmissionJob extends BaseJob
+class CreateSubmissionJob extends BaseJob
 {
-    public int $submissionId;
+    public int $elementId;
 
     /**
      * @throws ElementNotFoundException
@@ -27,16 +28,20 @@ class SendSubmissionJob extends BaseJob
      */
     public function execute($queue): void
     {
-        $submission = Craft::$app->getElements()->getElementById($this->submissionId, NeverstaleSubmission::class);
+        $element = Craft::$app->getElements()->getElementById($this->elementId);
 
-        if (!$submission) {
-            throw new ElementNotFoundException("NeverstaleSubmission with ID {$this->submissionId} not found");
+        if (!$element) {
+            throw new ElementNotFoundException();
         }
-        Plugin::getInstance()->api->upsert($submission);
-    }
+        /** @var NeverstaleSubmission $submission */
+        $submission = Plugin::getInstance()->submission->createOrUpdate($element);
 
+        QueueHelper::push(new SendSubmissionJob([
+            'submissionId' => $submission->id,
+        ]));
+    }
     protected function defaultDescription(): ?string
     {
-        return 'Submit a pending submission to the Neverstale API';
+        return 'Create a pending Neverstale submission';
     }
 }

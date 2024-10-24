@@ -11,6 +11,7 @@ use craft\elements\User;
 use craft\elements\conditions\ElementConditionInterface;
 use craft\elements\db\ElementQueryInterface;
 use craft\helpers\ArrayHelper;
+use craft\helpers\Cp;
 use craft\helpers\Db;
 use craft\helpers\UrlHelper;
 use craft\web\CpScreenResponseBehavior;
@@ -19,25 +20,31 @@ use yii\base\InvalidConfigException;
 use yii\web\Response;
 use zaengle\neverstale\elements\conditions\NeverstaleSubmissionCondition;
 use zaengle\neverstale\elements\db\NeverstaleSubmissionQuery;
-use zaengle\neverstale\enums\FlagType;
+use zaengle\neverstale\enums\Permission;
 use zaengle\neverstale\enums\SubmissionStatus;
 use zaengle\neverstale\models\ApiSubmission;
 use zaengle\neverstale\Plugin;
 
 /**
- * Submission element type
+ * Neverstale Submission Custom Element Type
  *
+ * @author Zaengle
+ * @package zaengle/craft-neverstale
+ * @since 1.0.0
+ * @see https://github.com/zaengle/craft-neverstale
+ *
+ * @property-read null|string $entryCpUrl
  * @property-read null|string $postEditUrl
  */
 class NeverstaleSubmission extends Element
 {
     public int $entryId;
-    public int|null $siteId;
+    public int|null $siteId = null;
     public bool $isSent = false;
     public bool $isProcessed = false;
     public int $flagCount = 0;
 
-    private ?Entry $entry;
+    private ?Entry $entry = null;
 
     /**
      * @var array<string>
@@ -48,19 +55,19 @@ class NeverstaleSubmission extends Element
 
     public static function displayName(): string
     {
-        return Craft::t('neverstale', 'Neverstale Submission');
+        return Plugin::t('Neverstale Submission');
     }
     public static function lowerDisplayName(): string
     {
-        return Craft::t('neverstale', 'Neverstale submission');
+        return Plugin::t('Neverstale submission');
     }
     public static function pluralDisplayName(): string
     {
-        return Craft::t('neverstale', 'Neverstale Submissions');
+        return Plugin::t('Neverstale Submissions');
     }
     public static function pluralLowerDisplayName(): string
     {
-        return Craft::t('neverstale', 'Neverstale submissions');
+        return Plugin::t('Neverstale submissions');
     }
     public static function refHandle(): ?string
     {
@@ -91,26 +98,19 @@ class NeverstaleSubmission extends Element
         return true;
     }
 
+    /**
+     * @return array<string, array<string, string>>
+     */
     public static function statuses(): array
     {
-        return [
-            SubmissionStatus::Pending->value => [
-                'label' => SubmissionStatus::Pending->label(),
-                'color' => SubmissionStatus::Pending->color(),
-            ],
-            SubmissionStatus::Processing->value => [
-                'label' => SubmissionStatus::Processing->label(),
-                'color' => SubmissionStatus::Processing->color(),
-            ],
-            SubmissionStatus::Clean->value => [
-                'label' =>SubmissionStatus::Clean->label(),
-                'color' => SubmissionStatus::Clean->color(),
-            ],
-            SubmissionStatus::Flagged->value => [
-                'label' => SubmissionStatus::Flagged->label(),
-                'color' => SubmissionStatus::Flagged->color(),
-            ],
-        ];
+        return collect(SubmissionStatus::cases())
+            ->reduce(function($statuses, $status): array {
+                $statuses[$status->value] = [
+                    'label' => $status->label(),
+                    'color' => $status->color(),
+                ];
+                return $statuses;
+            }, []);
     }
     public static function eagerLoadingMap(array $sourceElements, string $handle): array|null|false
     {
@@ -119,10 +119,10 @@ class NeverstaleSubmission extends Element
 
         // The “handle” is the key that users will specify
         // when eager-loading this relationship:
-        if ($handle === 'neverstaleSubmissions') {
-            // Do a fresh selection from the products table
-            // to create a map of element IDs to vendor IDs,
-            // excluding products with no vendor ID:
+        if ($handle === 'neverstaleSubmission') {
+            // Do a fresh selection from the submissions table
+            // to create a map of submission IDs to entry IDs,
+            // excluding submissions with no entry ID:
             $map = (new Query())
                 ->select(['id as source', 'entryId as target'])
                 ->from(['{{%neverstale_submissions}}'])
@@ -131,6 +131,7 @@ class NeverstaleSubmission extends Element
                     ['id' => $sourceElementIds],
                     ['not', ['entryId' => null]],
                 ])
+                ->orderBy(['dateCreated' => SORT_DESC])
                 ->all();
 
             return [
@@ -140,6 +141,27 @@ class NeverstaleSubmission extends Element
         }
 
         return parent::eagerLoadingMap($sourceElements, $handle);
+    }
+
+    public function afterSave(bool $isNew): void
+    {
+        if (!$this->propagating) {
+
+            Plugin::log("Saving submission $this->id", 'info');
+            // @todo perhaps move this to a record?
+            $rows = Db::upsert('{{%neverstale_submissions}}', [
+                'id' => $this->id,
+                'entryId' => $this->entryId,
+                'siteId' => $this->siteId,
+            ], [
+                'isSent' => $this->isSent,
+                'isProcessed' => $this->isProcessed,
+            ]);
+
+            Plugin::log("Saved $rows submission", 'info');
+        }
+
+        parent::afterSave($isNew);
     }
 
     public function setEagerLoadedElements(string $handle, array $elements, EagerLoadPlan $plan): void
@@ -189,6 +211,11 @@ class NeverstaleSubmission extends Element
         return $this->entry = Craft::$app->getEntries()->getEntryById($this->entryId, $this->siteId);
     }
 
+    public function getUiLabel(): string
+    {
+        return "#{$this->id}: {$this->getEntry()?->title}";
+    }
+
     /**
      * @throws InvalidConfigException
      */
@@ -207,7 +234,7 @@ class NeverstaleSubmission extends Element
         return [
             [
                 'key' => '*',
-                'label' => Craft::t('neverstale', 'All Neverstale Submissions'),
+                'label' => Plugin::t('All Neverstale Submissions'),
             ],
         ];
     }
@@ -253,20 +280,30 @@ class NeverstaleSubmission extends Element
     {
         return [
             'id' => ['label' => Craft::t('app', 'ID')],
+            'status' => ['label' => Craft::t('app', 'Status')],
+            'entry' => ['label' => Craft::t('app', 'Entry')],
             'uid' => ['label' => Craft::t('app', 'UID')],
             'dateCreated' => ['label' => Craft::t('app', 'Date Created')],
             'dateUpdated' => ['label' => Craft::t('app', 'Date Updated')],
-            // ...
         ];
     }
 
     protected static function defineDefaultTableAttributes(string $source): array
     {
         return [
-            'link',
+            'entry',
+            'status',
             'dateCreated',
-            // ...
+            'dateUpdated',
         ];
+    }
+
+    protected function tableAttributeHtml(string $attribute): string
+    {
+        return match ($attribute) {
+            'entry' => Cp::elementChipHtml($this->getEntry()),
+            default => parent::tableAttributeHtml($attribute),
+        };
     }
 
     protected function defineRules(): array
@@ -280,21 +317,6 @@ class NeverstaleSubmission extends Element
     {
         // If submissions should have URLs, define their URI format here
         return null;
-    }
-
-    protected function previewTargets(): array
-    {
-        $previewTargets = [];
-        $url = $this->getUrl();
-        if ($url) {
-            $previewTargets[] = [
-                'label' => Craft::t('app', 'Primary {type} page', [
-                    'type' => self::lowerDisplayName(),
-                ]),
-                'url' => $url,
-            ];
-        }
-        return $previewTargets;
     }
 
     protected function route(): array|string|null
@@ -334,7 +356,7 @@ class NeverstaleSubmission extends Element
             return true;
         }
         // todo: implement user permissions
-        return $user->can('deleteSubmissions');
+        return $user->can(Permission::Delete->value);
     }
 
     public function canCreateDrafts(User $user): bool
@@ -344,7 +366,7 @@ class NeverstaleSubmission extends Element
 
     protected function cpEditUrl(): ?string
     {
-        return sprintf('submissions/%s', $this->getCanonicalId());
+        return UrlHelper::cpUrl('neverstale/submissions/' . $this->getCanonicalId());
     }
 
     public function getPostEditUrl(): ?string
@@ -363,26 +385,20 @@ class NeverstaleSubmission extends Element
         ]);
     }
 
-    public function afterSave(bool $isNew): void
-    {
-        if (!$this->propagating) {
-            Db::upsert('{{%neverstale_submissions}}', [
-                'id' => $this->id,
-            ], [
-                'entryId' => $this->entryId,
-                'siteId' => $this->siteId,
-                'isSent' => $this->isSent,
-                'isProcessed' => $this->isProcessed,
-            ]);
-        }
-
-        parent::afterSave($isNew);
-    }
-
     public function formatForApi(): ApiSubmission
     {
         return Plugin::getInstance()->format->forApi($this);
     }
+
+    public function getEntryCpUrl(): ?string
+    {
+        if ($entry = $this->getEntry()) {
+            return $entry->getCpEditUrl();
+        }
+
+        return null;
+    }
+
 
     protected static function defineSearchableAttributes(): array
     {
@@ -390,5 +406,4 @@ class NeverstaleSubmission extends Element
             'flagTypes',
         ];
     }
-
 }

@@ -2,32 +2,31 @@
 
 namespace zaengle\neverstale\fields;
 
-use Craft;
 use craft\base\ElementInterface;
-use craft\base\Field;
-use craft\base\PreviewableFieldInterface;
 use craft\base\SortableFieldInterface;
-use craft\elements\db\ElementQueryInterface;
 use craft\helpers\Html;
-use craft\helpers\StringHelper;
-use yii\db\ExpressionInterface;
-use yii\db\Schema;
-
-
 use craft\fields\BaseRelationField;
+
 use zaengle\neverstale\elements\NeverstaleSubmission;
+use zaengle\neverstale\Plugin;
+
 /**
- * Neverstale Submissions field type
+ * Neverstale Related Submissions Field Type
+ *
+ * @author Zaengle
+ * @package zaengle/craft-neverstale
+ * @since 1.0.0
+ * @see https://github.com/zaengle/craft-neverstale
  *
  * @property-read array $elementValidationRules
  * @property-read null|string $settingsHtml
  * @property-read null|string|array $elementConditionRuleType
  */
-class NeverstaleSubmissions extends BaseRelationField implements PreviewableFieldInterface, SortableFieldInterface
+class NeverstaleSubmissions extends BaseRelationField implements SortableFieldInterface
 {
     public static function displayName(): string
     {
-        return Craft::t('neverstale', 'Neverstale Submissions');
+        return Plugin::t('Neverstale Submissions');
     }
 
     public static function icon(): string
@@ -39,7 +38,10 @@ class NeverstaleSubmissions extends BaseRelationField implements PreviewableFiel
     {
         return 'mixed';
     }
-
+    /**
+     * @inheritdoc
+     * @return array<string, string>
+     */
     public function attributeLabels(): array
     {
         return array_merge(parent::attributeLabels(), [

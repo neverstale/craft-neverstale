@@ -6,7 +6,12 @@ use Craft;
 use craft\elements\conditions\ElementCondition;
 
 /**
- * Submission condition
+ * Neverstale Submission Condition
+ *
+ * @author Zaengle
+ * @package zaengle/craft-neverstale
+ * @since 1.0.0
+ * @see https://github.com/zaengle/craft-neverstale
  */
 class NeverstaleSubmissionCondition extends ElementCondition
 {

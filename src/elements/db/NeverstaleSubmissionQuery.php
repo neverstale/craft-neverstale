@@ -4,16 +4,23 @@ namespace zaengle\neverstale\elements\db;
 
 use craft\base\ElementInterface;
 use craft\elements\db\ElementQuery;
+use craft\elements\Entry;
 use craft\helpers\Db;
 
 /**
- * Neverstale Submission query
+ * Neverstale Submission Query
+ *
+ * @author Zaengle
+ * @package zaengle/craft-neverstale
+ * @since 1.0.0
+ * @see https://github.com/zaengle/craft-neverstale
  */
 class NeverstaleSubmissionQuery extends ElementQuery
 {
-    public mixed $isSent;
-    public mixed $isProcessed;
-    public mixed $entryId;
+    public mixed $isSent = null;
+    public mixed $isProcessed = null;
+    public mixed $entryId = null;
+    public mixed $siteId = null;
 
     public function isSent(bool $value): self
     {
@@ -28,16 +35,17 @@ class NeverstaleSubmissionQuery extends ElementQuery
         return $this;
     }
 
-    public function elementId(int $value): self
+    public function entryId(int $value): self
     {
         $this->entryId = $value;
 
         return $this;
     }
 
-    public function element(ElementInterface $value): self
+    public function entry(Entry $value): self
     {
         $this->entryId = $value->id;
+        $this->siteId = $value->siteId;
 
         return $this;
     }
@@ -60,6 +68,8 @@ class NeverstaleSubmissionQuery extends ElementQuery
         $this->query->select([
             'neverstale_submissions.isSent',
             'neverstale_submissions.isProcessed',
+            'neverstale_submissions.entryId',
+            'neverstale_submissions.siteId',
         ]);
 
         if ($this->isSent) {
@@ -71,9 +81,12 @@ class NeverstaleSubmissionQuery extends ElementQuery
         }
 
         if ($this->entryId) {
-            $this->subQuery->andWhere(Db::parsenumericparam('neverstale_submissions.elementId', $this->entryId));
+            $this->subQuery->andWhere(Db::parsenumericparam('neverstale_submissions.entryId', $this->entryId));
         }
 
+        if ($this->siteId) {
+            $this->subQuery->andWhere(Db::parsenumericparam('neverstale_submissions.siteId', $this->siteId));
+        }
 
         return parent::beforePrepare();
     }

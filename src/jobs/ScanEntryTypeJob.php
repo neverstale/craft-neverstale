@@ -6,7 +6,12 @@ use Craft;
 use craft\queue\BaseJob;
 
 /**
- * Scan Entry Type Job queue job
+ * Neverstale Scan EntryType Job
+ *
+ * @author Zaengle
+ * @package zaengle/craft-neverstale
+ * @since 1.0.0
+ * @see https://github.com/zaengle/craft-neverstale
  */
 class ScanEntryTypeJob extends BaseJob
 {

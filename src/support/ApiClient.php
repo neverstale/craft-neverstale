@@ -4,13 +4,17 @@ namespace zaengle\neverstale\support;
 
 use GuzzleHttp\Client;
 use GuzzleHttp\Psr7\Response;
-
+/**
+ * Neverstale API Client
+ *
+ * @author Zaengle
+ * @package zaengle/craft-neverstale
+ * @since 1.0.0
+ * @see https://github.com/zaengle/craft-neverstale
+ */
 class ApiClient
 {
-
     public string $apiKey;
-    public string $apiSecret;
-
     public string $baseUri = 'https://app.neverstale.io/api/v1';
 
     private Client $client;
@@ -18,7 +22,6 @@ class ApiClient
     public function __construct(array $config = [])
     {
         $this->apiKey = $config['apiKey'];
-        $this->apiSecret = $config['apiSecret'];
         $this->baseUri = $config['baseUri'] ?? $this->baseUri;
         $this->client = new Client([
             'base_uri' => $this->baseUri,

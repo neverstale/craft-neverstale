@@ -10,6 +10,11 @@ use zaengle\neverstale\Plugin;
 /**
  * Element Context model
  *
+ * @author Zaengle
+ * @package zaengle/craft-neverstale
+ * @since 1.0.0
+ * @see https://github.com/zaengle/craft-neverstale
+ *
  * @property-read ElementInterface $this->element
  */
 class ElementContext extends Model

@@ -1,15 +1,43 @@
-{# @var plugin \zaengle\neverstale\Plugin #}
-{# @var settings \zaengle\neverstale\models\Settings #}
+{#
+  Neverstale Plugin Settings
+
+  @author Zaengle
+  @package zaengle/craft-neverstale
+  @since 1.0.0
+  @see https://github.com/zaengle/craft-neverstale
+
+  @var plugin \zaengle\neverstale\Plugin
+  @var settings \zaengle\neverstale\models\Settings
+#}
+
 
 {%- import '_includes/forms.twig' as forms %}
 
 {%- macro configOverrideWarning(setting, fileConfig) -%}
   {%- if craft.neverstale.config.getConfigFile(setting) is not null -%}
-    {{- "This is being overridden by the `#{setting}` setting in the `config/neverstale.php` file." |raw }}
+    {{- 'This setting is being overridden by the `{setting}` value in the `config/neverstale.php` file.'|t('neverstale', params = {
+      setting: setting,
+    }) }}
   {%- else -%}
     {{ false }}
   {%- endif -%}
 {%- endmacro %}
+
+<h2>Neverstale Credentials</h2>
+
+{{ forms.autosuggestField({
+  label: 'API Key' | t('neverstale'),
+  instructions: 'You can find your API key in your Neverstale account settings.'|t('neverstale'),
+  name: 'apiKey',
+  required: true,
+  value: settings.apiKey,
+  suggestEnvVars: true,
+  errors: settings.getErrors('apiKey'),
+  warning: _self.configOverrideWarning('apiKey'),
+  disabled: craft.neverstale.config.isOverriddenByFile('apiKey'),
+}) }}
+
+<h2>Content settings</h2>
 
 {{ forms.lightswitchField({
   first: true,
@@ -20,24 +48,18 @@
   disabled: craft.neverstale.config.isOverriddenByFile('enable'),
 }) }}
 
-{{ forms.autosuggestField({
-  label: 'API Key' | t('neverstale'),
-  name: 'apiKey',
-  required: true,
-  value: settings.apiKey,
-  suggestEnvVars: true,
-  errors: settings.getErrors('apiKey'),
-  warning: _self.configOverrideWarning('apiKey'),
-  disabled: craft.neverstale.config.isOverriddenByFile('apiKey'),
-}) }}
-
-{{ forms.autosuggestField({
-  label: 'API Secret' | t('neverstale'),
-  name: 'apiSecret',
-  required: true,
-  value: settings.apiSecret,
-  suggestEnvVars: true,
-  errors: settings.getErrors('apiSecret'),
-  warning: _self.configOverrideWarning('apiSecret'),
-  disabled: craft.neverstale.config.isOverriddenByFile('apiSecret'),
+{{ forms.checkboxSelectField({
+  id: 'enabledSections',
+  label: 'Which Sections should be enabled for Neverstale sync?' | t('neverstale'),
+  name: 'enabledSectionIds',
+  showAllOption: true,
+  warning: _self.configOverrideWarning('sections'),
+  instructions: 'Choose which sections you want to sync with Neverstale.'|t('neverstale'),
+  options: craft.app.entries.allSections() | map(section => {
+    label: section.name,
+    id: section.handle,
+    value: section.id,
+    disabled: craft.neverstale.config.isOverriddenByFile('sections'),
+    checked: section.id in (settings.enabledSections | map(section => section.id ?? null)),
+  }),
 }) }}

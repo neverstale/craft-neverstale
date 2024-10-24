@@ -4,6 +4,7 @@ namespace zaengle\neverstale\utilities;
 
 use Craft;
 use craft\base\Utility;
+use zaengle\neverstale\Plugin;
 
 /**
  * Scan utility
@@ -12,7 +13,7 @@ class ScanUtility extends Utility
 {
     public static function displayName(): string
     {
-        return Craft::t('neverstale', 'Neverstale: Scan site');
+        return Plugin::t('Neverstale: Scan site');
     }
 
     static function id(): string
@@ -27,7 +28,7 @@ class ScanUtility extends Utility
 
     static function contentHtml(): string
     {
-
+        // @todo complete this
         $entryTypesBySite = collect(Craft::$app->getSites()->getAllSites())->mapWithKeys(function($site) {
             $entryTypes = Craft::$app->getEntries()->getEntryTypesBySiteId($site->id);
             return [

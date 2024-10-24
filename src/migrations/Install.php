@@ -8,11 +8,15 @@ use craft\helpers\Db;
 use craft\helpers\MigrationHelper;
 
 /**
- * Install migration.
+ * Neverstale Install Migration
+ *
+ * @author Zaengle
+ * @package zaengle/craft-neverstale
+ * @since 1.0.0
+ * @see https://github.com/zaengle/craft-neverstale
  */
 class Install extends Migration
 {
-    public static string $submissionTable = '{{%neverstale_submissions}}';
     /**
      * @inheritdoc
      */
@@ -30,18 +34,18 @@ class Install extends Migration
      */
     public function safeDown(): bool
     {
-        if ($this->db->tableExists(self::$submissionTable)) {
-            Db::dropAllForeignKeysToTable(self::$submissionTable);
+        if ($this->db->tableExists('{{%neverstale_submissions}}')) {
+            Db::dropAllForeignKeysToTable('{{%neverstale_submissions}}');
         }
-        $this->dropTableIfExists(self::$submissionTable);
+        $this->dropTableIfExists('{{%neverstale_submissions}}');
 
         return true;
     }
 
     public function createTables(): void
     {
-        $this->archiveTableIfExists(self::$submissionTable);
-        $this->createTable(self::$submissionTable, [
+        $this->archiveTableIfExists('{{%neverstale_submissions}}');
+        $this->createTable('{{%neverstale_submissions}}', [
             'id' => $this->primaryKey(),
             'entryId' => $this->integer(),
             'siteId' => $this->integer(),
@@ -58,15 +62,34 @@ class Install extends Migration
 
     public function addForeignKeys(): void
     {
-        $this->addForeignKey(null, self::$submissionTable, 'id', '{{%elements}}', 'id', 'CASCADE', null);
-        $this->addForeignKey(null, self::$submissionTable, 'entryId', '{{%elements}}', 'id', 'CASCADE', null);
-        $this->addForeignKey(null, self::$submissionTable, 'siteId', '{{%sites}}', 'id', 'CASCADE', null);
+        $this->addForeignKey(
+            null,
+            '{{%neverstale_submissions}}',
+            'id',
+            '{{%elements}}',
+            'id',
+            'CASCADE',
+        null);
+        $this->addForeignKey(
+            null,
+            '{{%neverstale_submissions}}',
+            'entryId',
+            '{{%elements}}',
+            'id',
+            'CASCADE',
+        null);
+        $this->addForeignKey(
+            null,
+            '{{%neverstale_submissions}}',
+            'siteId',
+            '{{%sites}}',
+            'id',
+            'CASCADE',
+        null);
     }
 
     public function createIndexes(): void
     {
-        $this->createIndex(null, self::$submissionTable, 'id', false);
-        $this->createIndex(null, self::$submissionTable, 'entryId', false);
-        $this->createIndex(null, self::$submissionTable, 'uid', false);
+        $this->createIndex(null, '{{%neverstale_submissions}}', 'uid', false);
     }
 }

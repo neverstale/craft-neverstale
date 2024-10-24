@@ -2,23 +2,36 @@
 
 namespace zaengle\neverstale\enums;
 
-use Craft;
+use craft\enums\Color;
+use zaengle\neverstale\Plugin;
 
+/**
+ * Neverstale Submission Status Enum
+ *
+ * @author Zaengle
+ * @package zaengle/craft-neverstale
+ * @since 1.0.0
+ * @see https://github.com/zaengle/craft-neverstale
+ */
 enum SubmissionStatus: string
 {
     case Pending = 'pending';
     case Processing = 'processing';
     case Flagged = 'flagged';
     case Clean = 'clean';
+    case Failed = 'failed';
+    case Archived = 'archived';
 
     // get the color of the status
-    public function color(): string
+    public function color(): Color
     {
         return match ($this) {
-            self::Pending => 'fb923c', // --orange-400
-            self::Processing => '6d28d9', // --violet-700
-            self::Clean => '11a697', // --teal-550
-            self::Flagged => 'dc2626', // --red-600
+            self::Pending => Color::Orange,
+            self::Processing => Color::Purple,
+            self::Clean => Color::Teal,
+            self::Flagged => Color::Fuchsia,
+            self::Failed => Color::Red,
+            self::Archived => Color::Gray,
         };
     }
 
@@ -26,10 +39,24 @@ enum SubmissionStatus: string
     public function label(): string
     {
         return match ($this) {
-            self::Pending => Craft::t('neverstale','Pending'),
-            self::Processing => Craft::t('neverstale','Processing'),
-            self::Clean => Craft::t('neverstale','Clean'),
-            self::Flagged => Craft::t('neverstale','Flagged'),
+            self::Pending => Plugin::t('Pending'),
+            self::Processing => Plugin::t('Processing'),
+            self::Clean => Plugin::t('Clean'),
+            self::Flagged => Plugin::t('Flagged'),
+            self::Failed => Plugin::t('Failed'),
+            self::Archived => Plugin::t('Archived'),
+        };
+    }
+
+    public function icon(): string
+    {
+        return match ($this) {
+            self::Pending => 'clock',
+            self::Processing => 'hammer',
+            self::Clean => 'check',
+            self::Flagged => 'flag',
+            self::Failed => 'triangle-exclamation',
+            self::Archived => 'file',
         };
     }
 }

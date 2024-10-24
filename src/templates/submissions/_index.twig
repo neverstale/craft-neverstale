@@ -1,4 +1,13 @@
+{#
+  Neverstale Submission Element Index Template
+
+  @author Zaengle
+  @package zaengle/craft-neverstale
+  @since 1.0.0
+  @see https://github.com/zaengle/craft-neverstale
+#}
+
 {% extends '_layouts/elementindex' %}
-{% set title = 'Submissions'|t('app') %}
+{% set title = 'Submissions'|t('neverstale') %}
 {% set elementType = 'zaengle\\neverstale\\elements\\NeverstaleSubmission' %}
-{% set canHaveDrafts = true %}
+{% set canHaveDrafts = false %}
