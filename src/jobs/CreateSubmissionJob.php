@@ -8,6 +8,7 @@ use craft\errors\InvalidElementException;
 use craft\helpers\Queue as QueueHelper;
 use craft\queue\BaseJob;
 use zaengle\neverstale\elements\NeverstaleSubmission;
+use zaengle\neverstale\helpers\SubmissionJobHelper;
 use zaengle\neverstale\Plugin;
 
 /**
@@ -20,28 +21,35 @@ use zaengle\neverstale\Plugin;
  */
 class CreateSubmissionJob extends BaseJob
 {
-    public int $elementId;
-
+    public int $entryId;
     /**
      * @throws ElementNotFoundException
      * @throws InvalidElementException
      */
     public function execute($queue): void
     {
-        $element = Craft::$app->getElements()->getElementById($this->elementId);
+        $entry = Craft::$app->getElements()->getElementById($this->entryId);
 
-        if (!$element) {
+        if (!$entry) {
             throw new ElementNotFoundException();
         }
         /** @var NeverstaleSubmission $submission */
-        $submission = Plugin::getInstance()->submission->createOrUpdate($element);
+        $submission = Plugin::getInstance()->submission->forEntry($entry);
 
-        QueueHelper::push(new SendSubmissionJob([
+        if (SubmissionJobHelper::hasInProgressJob($queue, $submission)) {
+            Plugin::info("[CreateSubmissionJob] Skipping submission for {$submission->id} because there is already a job in progress");
+            return;
+        }
+
+        $submission->addJob(new IngestSubmissionJob([
             'submissionId' => $submission->id,
+            'entryId' => $submission->entryId,
+            'createdAt' => new \DateTime(),
         ]));
+
     }
     protected function defaultDescription(): ?string
     {
-        return 'Create a pending Neverstale submission';
+        return "Neverstale sync check for entry #{$this->entryId}";
     }
 }

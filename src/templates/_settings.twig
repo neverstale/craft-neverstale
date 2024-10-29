@@ -14,7 +14,7 @@
 {%- import '_includes/forms.twig' as forms %}
 
 {%- macro configOverrideWarning(setting, fileConfig) -%}
-  {%- if craft.neverstale.config.getConfigFile(setting) is not null -%}
+  {%- if craft.neverstale.config.get(setting) is not null -%}
     {{- 'This setting is being overridden by the `{setting}` value in the `config/neverstale.php` file.'|t('neverstale', params = {
       setting: setting,
     }) }}
@@ -27,7 +27,7 @@
 
 {{ forms.autosuggestField({
   label: 'API Key' | t('neverstale'),
-  instructions: 'You can find your API key in your Neverstale account settings.'|t('neverstale'),
+  instructions: 'You can find your API key in Neverstale after you create your Content Source'|t('neverstale'),
   name: 'apiKey',
   required: true,
   value: settings.apiKey,
@@ -35,6 +35,18 @@
   errors: settings.getErrors('apiKey'),
   warning: _self.configOverrideWarning('apiKey'),
   disabled: craft.neverstale.config.isOverriddenByFile('apiKey'),
+}) }}
+
+{{ forms.autosuggestField({
+  label: 'Webhook Secret' | t('neverstale'),
+  instructions: 'You can find your Webhook Secret in your Neverstale account settings.'|t('neverstale'),
+  name: 'webhookSecret',
+  required: true,
+  value: settings.webhookSecret,
+  suggestEnvVars: true,
+  errors: settings.getErrors('webhookSecret'),
+  warning: _self.configOverrideWarning('webhookSecret'),
+  disabled: craft.neverstale.config.isOverriddenByFile('webhookSecret'),
 }) }}
 
 <h2>Content settings</h2>

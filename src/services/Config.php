@@ -28,7 +28,7 @@ class Config extends Component
     /**
      * @return array<string, mixed>
      */
-    public function getConfigFile(?string $key = null): mixed
+    public function get(?string $key = null): mixed
     {
         if (!$this->fileConfig) {
             $this->fileConfig = Craft::$app->config->getConfigFromFile('neverstale');
@@ -43,6 +43,6 @@ class Config extends Component
 
     public function isOverriddenByFile(string $key): bool
     {
-        return array_key_exists($key, $this->getConfigFile());
+        return array_key_exists($key, $this->get());
     }
 }

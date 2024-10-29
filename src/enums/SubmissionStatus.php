@@ -21,6 +21,7 @@ enum SubmissionStatus: string
     case Clean = 'clean';
     case Failed = 'failed';
     case Archived = 'archived';
+    case Unknown = 'unknown';
 
     // get the color of the status
     public function color(): Color
@@ -29,9 +30,10 @@ enum SubmissionStatus: string
             self::Pending => Color::Orange,
             self::Processing => Color::Purple,
             self::Clean => Color::Teal,
-            self::Flagged => Color::Fuchsia,
+            self::Flagged => Color::Red,
             self::Failed => Color::Red,
             self::Archived => Color::Gray,
+            default => Color::Gray,
         };
     }
 
@@ -45,6 +47,7 @@ enum SubmissionStatus: string
             self::Flagged => Plugin::t('Flagged'),
             self::Failed => Plugin::t('Failed'),
             self::Archived => Plugin::t('Archived'),
+            default => Plugin::t('Unknown'),
         };
     }
 
@@ -57,6 +60,7 @@ enum SubmissionStatus: string
             self::Flagged => 'flag',
             self::Failed => 'triangle-exclamation',
             self::Archived => 'file',
+            default => 'question',
         };
     }
 }

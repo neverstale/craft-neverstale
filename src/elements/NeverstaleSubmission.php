@@ -4,6 +4,7 @@ namespace zaengle\neverstale\elements;
 
 use Craft;
 use craft\base\Element;
+use craft\base\ElementInterface;
 use craft\db\Query;
 use craft\elements\conditions\ElementConditionInterface;
 use craft\elements\db\EagerLoadPlan;
@@ -11,19 +12,28 @@ use craft\elements\db\ElementQueryInterface;
 use craft\elements\Entry;
 use craft\elements\User;
 use craft\helpers\ArrayHelper;
+use craft\helpers\Queue as QueueHelper;
 use craft\helpers\Cp;
 use craft\helpers\Db;
 use craft\helpers\UrlHelper;
+use craft\queue\JobInterface;
+
+use craft\queue\QueueInterface;
 use craft\web\CpScreenResponseBehavior;
 use DateTime;
 use yii\base\InvalidConfigException;
 use yii\web\Response;
+
+use zaengle\neverstale\Plugin;
 use zaengle\neverstale\elements\conditions\NeverstaleSubmissionCondition;
 use zaengle\neverstale\elements\db\NeverstaleSubmissionQuery;
 use zaengle\neverstale\enums\Permission;
 use zaengle\neverstale\enums\SubmissionStatus;
-use zaengle\neverstale\models\ApiSubmission;
-use zaengle\neverstale\Plugin;
+use zaengle\neverstale\helpers\SubmissionJobHelper;
+use zaengle\neverstale\models\ApiData;
+use zaengle\neverstale\models\ApiTransaction;
+use zaengle\neverstale\records\Submission as SubmissionRecord;
+use zaengle\neverstale\services\Submission as SubmissionService;
 
 /**
  * Neverstale Submission Custom Element Type
@@ -35,24 +45,38 @@ use zaengle\neverstale\Plugin;
  *
  * @property-read null|string $entryCpUrl
  * @property-read null|string $postEditUrl
+ * @property-read string $webhookUrl
+ * @property-read array $transactionLog
+ * @property-read array $jobIds
  */
 class NeverstaleSubmission extends Element
 {
     public int $entryId;
     public int|null $siteId = null;
+    public ?string $neverstaleId = null;
     public bool $isSent = false;
     public bool $isProcessed = false;
+    public bool $isFailed = false;
     public int $flagCount = 0;
-
+    protected array $transactionLog = [];
+    protected array $jobIds = [];
     private ?Entry $entry = null;
-
     /**
      * @var array<string>
      */
     public array $flagTypes = [];
-
-    public ?DateTime $nextFlagDate;
-
+    public ?DateTime $nextFlagDate = null;
+    public function logTransaction(ApiTransaction $item): void
+    {
+        $this->transactionLog[] = $item->toArray([
+            'transactionStatus',
+            'message',
+            'neverstaleId',
+            'channelId',
+            'customId',
+            'createdAt'
+        ]);
+    }
     public static function displayName(): string
     {
         return Plugin::t('Neverstale Submission');
@@ -77,27 +101,10 @@ class NeverstaleSubmission extends Element
     {
         return true;
     }
-
-    public static function hasTitles(): bool
-    {
-        return false;
-    }
-
-    public static function hasUris(): bool
-    {
-        return false;
-    }
-
-    public static function isLocalized(): bool
-    {
-        return false;
-    }
-
     public static function hasStatuses(): bool
     {
         return true;
     }
-
     /**
      * @return array<string, array<string, string>>
      */
@@ -112,6 +119,11 @@ class NeverstaleSubmission extends Element
                 return $statuses;
             }, []);
     }
+    /**
+     * @param array $sourceElements
+     * @param string $handle
+     * @return array<string,mixed>|false|null
+     */
     public static function eagerLoadingMap(array $sourceElements, string $handle): array|null|false
     {
         // Memoize the source element IDs:
@@ -145,22 +157,102 @@ class NeverstaleSubmission extends Element
 
     public function afterSave(bool $isNew): void
     {
-        if (!$this->propagating) {
-            Plugin::log("Saving submission $this->id", 'info');
-            // @todo perhaps move this to a record?
-            $rows = Db::upsert('{{%neverstale_submissions}}', [
-                'id' => $this->id,
-                'entryId' => $this->entryId,
-                'siteId' => $this->siteId,
-            ], [
-                'isSent' => $this->isSent,
-                'isProcessed' => $this->isProcessed,
-            ]);
+        Plugin::log("Saving submission $this->id", 'info');
+        // Get the submission record
+        if (!$isNew) {
+            $record = $this->getRecord();
 
-            Plugin::log("Saved $rows submission", 'info');
+            if (!$record) {
+                throw new \Exception('Invalid submission ID: ' . $this->id);
+            }
+        } else {
+            $record = new SubmissionRecord();
+            $record->id = $this->id;
         }
 
+        $record->entryId = $this->entryId;
+        $record->siteId = $this->siteId;
+        $record->isSent = $this->isSent;
+        $record->isProcessed = $this->isProcessed;
+        $record->isFailed = $this->isFailed;
+        $record->neverstaleId = $this->neverstaleId;
+        $record->transactionLog = $this->transactionLog;
+        $record->flagCount = $this->flagCount;
+        $record->flagTypes = $this->flagTypes;
+        $record->jobIds = $this->jobIds;
+        $record->nextFlagDate = Db::prepareDateForDb($this->nextFlagDate);
+
+        $record->save(false);
+
         parent::afterSave($isNew);
+    }
+
+    public function setProcessing(ApiTransaction $transaction): void
+    {
+        $this->isProcessed = false;
+        $this->logTransaction($transaction);
+    }
+    public function setFailed(ApiTransaction $transaction): void
+    {
+        $this->isSent = true;
+        $this->isFailed = true;
+        $this->isProcessed = false;
+        $this->logTransaction($transaction);
+    }
+
+    public function setFlagged(ApiTransaction $transaction): void
+    {
+        $this->logTransaction($transaction);
+    }
+    public function setClean(ApiTransaction $transaction): void
+    {
+        $this->logTransaction($transaction);
+    }
+
+    public function getWebhookUrl()
+    {
+        return UrlHelper::actionUrl("neverstale/submissions/webhook/");
+    }
+
+    public function addJob(JobInterface $job): void
+    {
+        $jobId = QueueHelper::push($job, SubmissionJobHelper::getPriority(), SubmissionJobHelper::getDelay());
+
+        Plugin::log('added Job ID: ' . $jobId . ' to submission ID: ' . $this->id);
+
+        $this->jobIds = array_merge($this->getJobIds(), [(int) $jobId]);
+
+        Craft::$app->getElements()->saveElement($this);
+    }
+    public function cleanOldJobs(QueueInterface $queue): void
+    {
+        $oldJobs = SubmissionJobHelper::getOldJobs($queue, $this);
+        collect($this->jobIds)
+            ->filter(fn(int $jobId) => $oldJobs->contains($jobId))
+            ->each(fn(int $jobId) => $this->removeJob($jobId));
+
+        Craft::$app->getElements()->saveElement($this);
+    }
+    public function removeJob(int $jobId): void
+    {
+        $this->jobIds = array_filter($this->jobIds, fn(int $id) => $id !== $jobId);
+    }
+    public function getJobIds(): array
+    {
+        return $this->getRecord()?->getJobIds() ?? [];
+    }
+
+    public function getTransactionLog(): array
+    {
+        return $this->getRecord()?->getTransactionLog() ?? [];
+    }
+
+    public function getRecord(): ?SubmissionRecord
+    {
+        if ($this->id === null) {
+            return null;
+        }
+        return SubmissionRecord::findOne($this->id);
     }
 
     public function setEagerLoadedElements(string $handle, array $elements, EagerLoadPlan $plan): void
@@ -191,10 +283,15 @@ class NeverstaleSubmission extends Element
         return SubmissionStatus::Clean->value;
     }
 
-    public function setEntry(Entry $entry = null): void
+    public function getStatusColor(): string
+    {
+        return SubmissionStatus::from($this->getStatus())->color()->value;
+    }
+
+    public function setEntry(Entry|ElementInterface $entry): void
     {
         $this->entry = $entry;
-        $this->entryId = $entry?->id;
+        $this->entryId = $entry->id;
     }
 
     public function getEntry(): ?Entry
@@ -297,19 +394,12 @@ class NeverstaleSubmission extends Element
         ];
     }
 
-    protected function tableAttributeHtml(string $attribute): string
+    protected function attributeHtml(string $attribute): string
     {
         return match ($attribute) {
             'entry' => Cp::elementChipHtml($this->getEntry()),
-            default => parent::tableAttributeHtml($attribute),
+            default => parent::attributeHtml($attribute),
         };
-    }
-
-    protected function defineRules(): array
-    {
-        return array_merge(parent::defineRules(), [
-            // ...
-        ]);
     }
 
     public function getUriFormat(): ?string
@@ -335,8 +425,8 @@ class NeverstaleSubmission extends Element
         if (parent::canView($user)) {
             return true;
         }
-        // todo: implement user permissions
-        return $user->can('viewSubmissions');
+
+        return $user->can(Permission::View->value);
     }
 
     public function canSave(User $user): bool
@@ -354,7 +444,7 @@ class NeverstaleSubmission extends Element
         if (parent::canSave($user)) {
             return true;
         }
-        // todo: implement user permissions
+
         return $user->can(Permission::Delete->value);
     }
 
@@ -384,11 +474,29 @@ class NeverstaleSubmission extends Element
         ]);
     }
 
-    public function formatForApi(): ApiSubmission
+    public function toApiData(): ApiData
     {
         return Plugin::getInstance()->format->forApi($this);
     }
 
+    /**
+     * Get the front-end URL for the related entry
+     *
+     * Used when formatting data for submission to the API
+     */
+    public function getEntryUrl(): ?string
+    {
+        if ($entry = $this->getEntry()) {
+            return $entry->getUrl();
+        }
+
+        return null;
+    }
+    /**
+     * Get the URL to edit the related entry in the Craft CP
+     *
+     * Used when formatting data for submission to the API
+     */
     public function getEntryCpUrl(): ?string
     {
         if ($entry = $this->getEntry()) {
@@ -398,11 +506,15 @@ class NeverstaleSubmission extends Element
         return null;
     }
 
-
     protected static function defineSearchableAttributes(): array
     {
         return [
             'flagTypes',
         ];
+    }
+
+    public function save(): bool
+    {
+        return SubmissionService::save($this);
     }
 }

@@ -2,9 +2,11 @@
 
 namespace zaengle\neverstale\services;
 
+use Craft;
 use yii\base\Component;
 use zaengle\neverstale\elements\NeverstaleSubmission;
-use zaengle\neverstale\models\ApiSubmission;
+use zaengle\neverstale\models\ApiData;
+use zaengle\neverstale\Plugin;
 
 /**
  * Neverstale Format service
@@ -18,9 +20,40 @@ use zaengle\neverstale\models\ApiSubmission;
  */
 class Format extends Component
 {
-    public function forApi(NeverstaleSubmission $submission): ApiSubmission
+    /**
+     * Format a Submission for sending to the Neverstale API
+     *
+     * @param NeverstaleSubmission $submission
+     * @return ApiData
+     */
+    public function forApi(NeverstaleSubmission $submission): ApiData
     {
-        // @todo handle custom transforms here
-        return ApiSubmission::fromSubmission($submission);
+        $apiData = ApiData::fromSubmission($submission);
+
+        // Apply any user supplied transformations to the data before submission
+        if ($transformer = $this->getCustomTransformer()) {
+            return $transformer($apiData);
+        }
+
+        return $apiData;
+    }
+    /**
+     * Get the custom data transformer from the plugin config, if one exists
+     * @return callable|null
+     */
+    public function getCustomTransformer(): ?callable
+    {
+        $transformer = Plugin::getInstance()->config->get('transformer');
+
+        if (is_callable($transformer)) {
+            return $transformer;
+        }
+        return null;
+    }
+    public function entryContent(\craft\elements\Entry $entry): string
+    {
+        return trim(Craft::$app->view->renderTemplate('neverstale/format/_submission', [
+            'entry' => $entry,
+        ]));
     }
 }

@@ -29,6 +29,7 @@ class Settings extends Model
      */
     public mixed $enable = true;
     public string $apiKey = '';
+    public string $webhookSecret = '';
 
     /** @var int[] */
     public array $enabledSectionIds = [];
@@ -52,7 +53,7 @@ class Settings extends Model
     public function getEnabledSections(): array
     {
         if ($this->sectionsIsOverridden()) {
-            $configValue = Plugin::getInstance()->config->getConfigFile(self::SECTION_CONFIG_KEY);
+            $configValue = Plugin::getInstance()->config->get(self::SECTION_CONFIG_KEY);
             // Value from config file is a callable, so use it to filter the sections
             if (is_callable($configValue)) {
                 return $this->collectAllSections()->filter($configValue)->toArray();

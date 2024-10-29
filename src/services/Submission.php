@@ -3,11 +3,15 @@
 namespace zaengle\neverstale\services;
 
 use Craft;
+use craft\elements\Entry;
 use craft\base\ElementInterface;
 use craft\errors\ElementNotFoundException;
 use craft\errors\InvalidElementException;
 use craft\helpers\Queue;
+use Illuminate\Support\Collection;
 use yii\base\Component;
+use yii\base\Exception;
+use zaengle\neverstale\elements\db\NeverstaleSubmissionQuery;
 use zaengle\neverstale\elements\NeverstaleSubmission;
 use zaengle\neverstale\enums\SubmissionStatus;
 use zaengle\neverstale\jobs\CreateSubmissionJob;
@@ -25,61 +29,73 @@ use zaengle\neverstale\Plugin;
  */
 class Submission extends Component
 {
-    public function queue(ElementInterface $element): int
+    public function queue(Entry $entry): int
     {
         return Queue::push(new CreateSubmissionJob([
-            'elementId' => $element->id,
+            'entryId' => $entry->id,
         ]));
     }
 
-    public function createOrUpdate(ElementInterface $element): ?ElementInterface
+    public function forEntry(Entry $entry): ?NeverstaleSubmission
     {
-        $existingSubmissions = NeverstaleSubmission::find()
-            ->entryId($element->canonicalId)
-            ->siteId($element->siteId);
+        /** @var NeverstaleSubmissionQuery $query */
+        $query = NeverstaleSubmission::find();
+        /** @var Collection<NeverstaleSubmission> $existingSubmissions */
+        $existingSubmissions = $query
+            ->entryId($entry->canonicalId)
+            ->siteId($entry->siteId)
+            ->collect();
 
-        $pendingSubmissions = $existingSubmissions->where(fn(NeverstaleSubmission $submission) => $submission->status === SubmissionStatus::Pending->value);
+        $pendingSubmissions = $existingSubmissions->where(
+            fn(NeverstaleSubmission $submission) => $submission->status === SubmissionStatus::Pending->value
+        );
 
         if ($pendingSubmissions->count()) {
             return $pendingSubmissions->first();
         }
 
-        $processingSubmissions = $existingSubmissions->where(fn(NeverstaleSubmission $submission) => $submission->status === SubmissionStatus::Processing->value);
+        $processingSubmissions = $existingSubmissions->where(
+            fn(NeverstaleSubmission $submission) => $submission->status === SubmissionStatus::Processing->value
+        );
 
         if ($processingSubmissions->count()) {
             // @todo: what logic do we actually want here?
             return $processingSubmissions->first();
         }
-        $submission = new NeverstaleSubmission([
-            'entryId' => $element->canonicalId,
-            'siteId' => $element->siteId,
-        ]);
 
-        Plugin::log('Created NeverstaleSubmission for Element with ID ' . $this->elementId . ' and submission id:' . $submission->id, 'info');
+        $submission = self::create($entry);
 
+        Plugin::log(Plugin::t("Created NeverstaleSubmission #{submissionId} for Entry #{entryId}", [
+            'entryId' => $entry->id,
+            'submissionId' => $submission->id,
+        ]));
 
-        if (!Craft::$app->getElements()->saveElement($submission)) {
-            throw new InvalidElementException($submission);
+        if (!self::save($submission)) {
+            throw new InvalidElementException($submission, 'Failed to save NeverstaleSubmission');
         }
 
         return $submission;
     }
-
-    /**
-     * @throws ElementNotFoundException
-     * @throws InvalidElementException
-     */
-    public function create(ElementInterface $element): ?ElementInterface
+    public static function create(Entry $entry): NeverstaleSubmission
     {
-        $submission = new NeverstaleSubmission([
-            'entryId' => $element->canonicalId,
-            'siteId' => $element->siteId,
+        return new NeverstaleSubmission([
+            'entryId' => $entry->canonicalId,
+            'siteId' => $entry->siteId,
         ]);
+    }
+    /**
+     * @throws \Throwable
+     * @throws Exception
+     * @throws ElementNotFoundException
+     */
+    public static function save(NeverstaleSubmission $submission): bool
+    {
+        $saved = Craft::$app->getElements()->saveElement($submission);
 
-        if (!Craft::$app->getElements()->saveElement($submission)) {
-            throw new InvalidElementException($submission);
+        if (!$saved) {
+            Plugin::error("Failed to save submission #{$submission->id}" . print_r($submission->getErrors(), true));
         }
 
-        return $submission;
+        return $saved;
     }
 }

@@ -3,6 +3,9 @@
 namespace zaengle\neverstale;
 
 use Craft;
+use craft\helpers\App;
+use Monolog\Formatter\LineFormatter;
+use Psr\Log\LogLevel;
 use craft\base\Element;
 use craft\base\Model;
 use craft\base\Plugin as BasePlugin;
@@ -22,11 +25,9 @@ use craft\services\Elements;
 use craft\services\Fields;
 use craft\services\UserPermissions;
 use craft\services\Utilities;
+use craft\web\UrlManager;
 use craft\web\twig\variables\Cp as CpVariable;
 use craft\web\twig\variables\CraftVariable;
-use craft\web\UrlManager;
-use Monolog\Formatter\LineFormatter;
-use Psr\Log\LogLevel;
 use yii\base\Event;
 use yii\base\InvalidConfigException;
 use zaengle\neverstale\behaviors\PreviewNeverstaleSubmissionBehavior;
@@ -37,10 +38,11 @@ use zaengle\neverstale\fields\NeverstaleSubmissions;
 use zaengle\neverstale\models\Settings;
 use zaengle\neverstale\services\Api;
 use zaengle\neverstale\services\Config;
-use zaengle\neverstale\services\Element as ElementService;
+use zaengle\neverstale\services\Entry as EntryService;
 use zaengle\neverstale\services\Format as FormatService;
 use zaengle\neverstale\services\Submission as SubmissionService;
 use zaengle\neverstale\support\ApiClient;
+use zaengle\neverstale\utilities\PreviewSubmission;
 use zaengle\neverstale\utilities\ScanUtility;
 
 /**
@@ -56,7 +58,7 @@ use zaengle\neverstale\utilities\ScanUtility;
  * @method static Plugin getInstance()
  * @method Settings getSettings()
  *
- * @property-read ElementService $element
+ * @property-read EntryService $entry
  * @property-read FormatService $format
  * @property-read Settings $settings
  * @property-read SubmissionService $submission
@@ -77,7 +79,7 @@ class Plugin extends BasePlugin
     {
         return [
             'components' => [
-                'element' => ElementService::class,
+                'entry' => EntryService::class,
                 'format' => FormatService::class,
                 'submission' => SubmissionService::class,
                 'config' => Config::class,
@@ -96,10 +98,12 @@ class Plugin extends BasePlugin
                 'api' => [
                     'class' => Api::class,
                     'client' => new ApiClient([
+                        'baseUri' => App::env('NEVERSTALE_API_BASE_URI'),
                         'apiKey' => $this->getSettings()->apiKey,
                     ]),
                 ],
             ]);
+
         });
     }
     /**
@@ -200,6 +204,9 @@ class Plugin extends BasePlugin
 
             $event->behaviors['previewNeverstaleSubmission'] = PreviewNeverstaleSubmissionBehavior::class;
         });
+        Event::on(Utilities::class, Utilities::EVENT_REGISTER_UTILITIES, function (RegisterComponentTypesEvent $event) {
+            $event->types[] = PreviewSubmission::class;
+        });
     }
 
     private function registerEntryTableAttributes(): void
@@ -248,6 +255,9 @@ class Plugin extends BasePlugin
         }
     }
 
+    /**
+     * @see \zaengle\neverstale\services\Entry
+     */
     private function registerOnElementSaveHandler(): void
     {
         Event::on(
@@ -258,7 +268,7 @@ class Plugin extends BasePlugin
                  * @var Entry $entry
                  */
                 $entry = $event->sender;
-                if ($this->element->isSubmittable($entry)) {
+                if ($this->entry->isSubmittable($entry)) {
                     $this->submission->queue($entry);
                 }
             }
@@ -274,10 +284,13 @@ class Plugin extends BasePlugin
                     'heading' => 'Neverstale',
                     'permissions' => [
                         Permission::Scan->value => [
-                            'label' => 'Scan site content for stale entries',
+                            'label' => self::t('Scan site content for stale entries'),
                         ],
                         Permission::View->value => [
-                            'label' => 'View Neverstale submissions',
+                            'label' => self::t('View Neverstale submissions'),
+                        ],
+                        Permission::Delete->value => [
+                            'label' => self::t('Delete Neverstale submissions'),
                         ],
                     ],
                 ];
@@ -317,15 +330,15 @@ class Plugin extends BasePlugin
             function(RegisterCpNavItemsEvent $event) {
                 $event->navItems[] = [
                     'url' => 'neverstale',
-                    'label' => 'Neverstale',
+                    'label' => self::t('Neverstale'),
                     'icon' => '@neverstale/resources/icon.svg',
                     'subnav' => [
                         'submissions' => [
-                            'label' => 'Submissions',
+                            'label' => self::t('Submissions'),
                             'url' => 'neverstale/submissions',
                         ],
                         'settings' => [
-                            'label' => 'Settings',
+                            'label' => self::t('Settings'),
                             'url' => 'settings/plugins/neverstale',
                         ],
                     ],
@@ -333,6 +346,10 @@ class Plugin extends BasePlugin
             }
         );
     }
+
+    /**
+     * Write log messages to a custom log target
+     */
     private function registerLogTarget(): void
     {
         Craft::getLogger()->dispatcher->targets[] = new MonologTarget([
@@ -340,7 +357,7 @@ class Plugin extends BasePlugin
             'categories' => [self::getInstance()->getHandle()],
             'level' => LogLevel::INFO,
             'logContext' => false,
-            'allowLineBreaks' => false,
+            'allowLineBreaks' => true,
             'formatter' => new LineFormatter(
                 format: "%datetime% %message%\n",
                 dateFormat: 'Y-m-d H:i:s',

@@ -12,83 +12,118 @@
 {%- extends '_layouts/cp' %}
 {%- import '_includes/forms' as forms %}
 
-{% set crumbs = [
+{%- set crumbs = [
   { label: 'Neverstale' | t('neverstale'), url: url('neverstale') },
   { label: 'Submissions' | t('neverstale'), url: url('neverstale') },
   { label: "##{submission.id}", url: submission.cpEditUrl },
 ] %}
 
-{% block actionButton %}
+{%- set title = "Neverstale: #{submission.entry.title}" %}
+
+{%- block actionButton %}
   {{ tag('a', {
-    class: 'btn submit',
-    href: actionUrl('neverstale/submissions/send', {
-      id: submission.id,
+    class: 'btn',
+    href: url('utilities/preview-neverstale-submission', {
+      entryId: submission.entry.id,
     }),
-    text: 'Resubmit to Neverstale'|t('neverstale'),
+    text: 'Preview Entry Data'|t('neverstale'),
   }) }}
-{% endblock %}
+  <form method="post">
+    {{ hiddenInput('submissionId', submission.id) }}
+    {{ actionInput('neverstale/submissions/ingest') }}
+    {{ csrfInput() }}
+    {{ tag('button', {
+      type: 'submit',
+      class: 'btn submit',
+      text: 'Resubmit to Neverstale'|t('neverstale'),
+    }) }}
+  </form>
+{%- endblock %}
 
-{% block main %}
-  <input type="hidden" name="action" value="workflow/submissions/save-submission">
-  <input type="hidden" name="entryId" value="{{ submission.entryId }}">
-  <input type="hidden" name="siteId" value="{{ submission.siteId }}">
-  <input type="hidden" name="submissionId" value="{{ submission.id }}">
-
-  {{ redirectInput('neverstale') }}
-  {{ csrfInput() }}
-
+{%- block main %}
   <div id="content" class="content-pane">
-    <h1>Neverstale Submission for entry: {{ submission.entry.title }}</h1>
-  </div>
-
-{% endblock %}
-
-{% block details %}
-<dl id="meta-details" class="meta ">
-  {% block meta %}
-    <div class="data">
-      <dt class="heading">{{ 'Submission ID' | t('neverstale') }}</dt>
-      <dd class="value">{{ submission.id }}</dd>
-    </div>
-    <div class="data">
-      <dt class="heading">{{ 'Neverstale ID' | t('neverstale') }}</dt>
-      <dd class="value"><code>{{ submission.uid }}</code></dd>
-    </div>
-    <div class="data">
-      <dt class="heading">{{ 'Entry' | t('app') }}</dt>
-      {% set entry = submission.getEntry() %}
-      <dd class="value">
-        {% if entry %}
-          {{ elementChip(entry) }}
-        {% else %}
-          {{ '[Deleted element]' | t('neverstale') }}
-        {% endif %}
-      </dd>
-    </div>
-    <div class="data">
-      <dt class="heading">{{ 'Status' | t('app') }}</dt>
-      <dd class="value">
-        <span class="status {{ submission.status }}"></span>
-        <span>{{ submission.status | title | t('neverstale') }}</span>
-      </dd>
-    </div>
-
-    {% if craft.app.getIsMultiSite() %}
+    <h2>Submission Details</h2>
+    <dl id="meta-details" class="meta ns-meta">
       <div class="data">
-        <dt class="heading">{{ 'Site' | t('neverstale') }}</dt>
-        <dd class="value">{{ submission.site }}</dd>
+        <dt class="heading">{{ 'ID' | t('neverstale') }}</dt>
+        <dd class="value">{{ submission.id }}</dd>
       </div>
-    {% endif %}
+      <div class="data">
+        <dt class="heading">{{ 'UID' | t('neverstale') }}</dt>
+        <dd class="value"><code>{{ submission.uid }}</code></dd>
+      </div>
+      <div class="data">
+        <dt class="heading">{{ 'Neverstale ID' | t('neverstale') }}</dt>
+        <dd class="value"><code>{{ submission.neverstaleId }}</code></dd>
+      </div>
+      <div class="data">
+        <dt class="heading">{{ 'Entry' | t('app') }}</dt>
 
-    <div class="data">
-      <dt class="heading">{{ 'Created at' | t('app') }}</dt>
-      <dd id="date-created-value" class="value">{{ submission.dateCreated | datetime('short') }}</dd>
-    </div>
+        <dd class="value">
+          {% if submission.entry %}
+            {{ elementChip(submission.entry) }}
+          {% else %}
+            {{ '[Deleted element]' | t('neverstale') }}
+          {% endif %}
+        </dd>
+      </div>
+      <div class="data">
+        <dt class="heading">{{ 'Status' | t('app') }}</dt>
+        <dd class="value">
+          <span class="status {{ submission.statusColor }}"></span>
+          <span>{{ submission.status | title | t('neverstale') }}</span>
+        </dd>
+      </div>
 
-    <div class="data">
-      <dt class="heading">{{ 'Updated at' | t('app') }}</dt>
-      <dd id="date-updated-value" class="value">{{ submission.dateUpdated | datetime('short') }}</dd>
+      {% if craft.app.getIsMultiSite() %}
+        <div class="data">
+          <dt class="heading">{{ 'Site' | t('neverstale') }}</dt>
+          <dd class="value">{{ submission.site }}</dd>
+        </div>
+      {% endif %}
+
+      <div class="data">
+        <dt class="heading">{{ 'Created at' | t('app') }}</dt>
+        <dd id="date-created-value" class="value">{{ submission.dateCreated | datetime('short') }}</dd>
+      </div>
+
+      <div class="data">
+        <dt class="heading">{{ 'Updated at' | t('app') }}</dt>
+        <dd id="date-updated-value" class="value">{{ submission.dateUpdated | datetime('short') }}</dd>
+      </div>
+    </dl>
+    <hr>
+    <h2>Transaction Log</h2>
+    <div class="table-responsive">
+      <table class="table table-condensed table-bordered table-striped">
+        <thead>
+        <tr>
+          <th>When</th>
+{#          <th>Result</th>#}
+          <th>Message</th>
+        </tr>
+        </thead>
+        <tbody>
+        {% for log in submission.transactionLog %}
+          <tr>
+            <td>{{ log.createdAt | datetime('short') }}</td>
+{#            <td>{{ log.status | title }}</td>#}
+            <td>{{ log.message }}</td>
+          </tr>
+        {% else %}
+          <tr>
+            <td colspan="3">{{ 'No transaction log entries yet' | t('neverstale') }}</td>
+          </tr>
+        {% endfor %}
+        </tbody>
+      </table>
     </div>
-  {% endblock %}
-</dl>
+  </div>
 {% endblock %}
+{% css %}
+.ns-meta {
+  border: 1px solid #e5e7eb;
+  border-radius: 4px;
+}
+
+{% endcss %}

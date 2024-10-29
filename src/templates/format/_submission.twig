@@ -1,0 +1,100 @@
+{#
+  Neverstale Default Submission Formatter
+  ========================================
+
+  @author Zaengle
+  @package zaengle/craft-neverstale
+  @since 1.0.0
+  @see https://github.com/zaengle/craft-neverstale
+  @var entry \craft\elements\Entry
+
+  This template is used to format the content of an entry when it is sent to Neverstale.
+
+  You can override this template by copying it to your site's templates folder passing
+  the path to the new template `submissionTemplate` setting in the plugin's settings.
+
+  Note: The plugin uses the value of the `data-neverstale-content` attribute to identify the field that the content is for. This is used to link  Neverstale flags back to the correct
+  field in the entry after it has been processed by Neverstale. If you overide this template, make sure to keep this attribute in place if you want to preserve that functionality.
+
+#}
+
+{#
+  Render a summary of a relation field, e.g. an entry, category, or asset field.
+
+  @param relations array<ElementInterface>
+#}
+{%- macro renderRelationSummary(relations) %}
+<ul>
+    {% for relation in relations %}
+      <li>{{ relation.title }}</li>
+    {% endfor %}
+  </ul>
+{% endmacro %}
+
+{#
+  Render a string representation of a Craft field value, based on the field type.
+
+  @param field \craft\base\Field
+  @param value mixed
+  @param prefix string A prefix to add to the field handle when rendering the field, e.g. for Matrix fields
+#}
+{%- macro renderField(field, value, prefix = '') %}
+<div data-neverstale-content="{{ prefix }}{{ field.handle }}">
+    <dt>{{ field.name }}</dt>
+    <dd>
+    {%- if field is instance of('craft\\fields\\Matrix') %}
+      {#  Matrix fields #}
+      {% for block in value %}
+        <dl>
+        {%- for blockField in block.getFieldLayout().getCustomFields() -%}
+          {{- _self.renderField(blockField, block, "#{field.handle}-") -}}
+        {%- endfor %}
+        </dl>
+      {%- endfor %}
+    {% elseif value is instance of('craft\\elements\\db\\ElementQuery') %}
+      <!--  Relationship fields -->
+
+      {{ _self.renderRelationSummary(value) }}
+    {%- elseif field is instance of('craft\\fields\\Money') -%}
+      <!--  Money fields  -->
+{{ value | money -}}
+    {%- elseif field is instance of('craft\\fields\\Date') -%}
+{{ value | datetime('full') -}}
+    {%- elseif value is instance of('craft\\fields\\data\\SingleOptionFieldData') -%}
+      <!--  Single option fields, e.g. dropdown, radio buttons  -->
+{{ value.label -}}
+    {%- elseif value is instance of('craft\\fields\\data\\MultiOptionsFieldData') -%}
+      <!--  Multi option fields, e.g. checkboxes, multi-select  -->
+{{ value|filter(v => v.selected)|map(v => v.label)|join(', ') -}}
+    {%- elseif field is instance of('craft\\fields\\Table') %}
+<!--  Table fields  -->
+      <table>
+        <thead>
+        {% for column in field.columns %}
+          <th>{{ column.heading }}</th>
+        {% endfor -%}
+        </thead>
+        <tbody>
+        {% for row in value %}
+          <tr>
+          {% for column in field.columns %}
+            <td>{{ row[column.handle] }}</td>
+          {% endfor %}
+          </tr>
+        {% endfor -%}
+        </tbody>
+      </table>
+    {%- else -%}
+      <!-- Everything else  -->
+      {%- set value = value is array ? (value | json_encode | raw) : value -%}
+      {{- value -}}
+{%- endif %}
+</dd>
+  </div>
+{%- endmacro %}
+
+<dl>
+{% for field in entry.getFieldLayout().getCustomFields() %}
+  {{ _self.renderField(field, entry.getFieldValue(field.handle)) }}
+{% endfor %}
+</dl>
