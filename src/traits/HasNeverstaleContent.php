@@ -85,7 +85,7 @@ trait HasNeverstaleContent
 
     public function getWebhookUrl()
     {
-        return UrlHelper::actionUrl("neverstale/submissions/webhook/");
+        return UrlHelper::actionUrl("neverstale/webhooks");
     }
 
     public function forApi(): array
