@@ -35,48 +35,29 @@ class Submission extends Component
         ]));
     }
 
-    public function forEntry(Entry $entry): ?NeverstaleSubmission
+    public function findOrCreate(Entry $entry): ?NeverstaleSubmission
     {
-        /** @var NeverstaleSubmissionQuery $query */
-        $query = NeverstaleSubmission::find();
+        $submission = $this->find($entry);
 
-        // @todo cleanup
-        /** @var Collection<NeverstaleSubmission> $existingSubmissions */
-        $existingSubmissions = $query
-            ->entryId($entry->canonicalId)
-            ->siteId($entry->siteId)
-            ->collect();
+        if (!$submission) {
+            $submission = $this->create($entry);
+            $this->save($submission);
 
-        $pendingSubmissions = $existingSubmissions->where(
-            fn(NeverstaleSubmission $submission) => $submission->status === AnalysisStatus::PendingInitialAnalysis->value ||
-                $submission->status === AnalysisStatus::PendingReanalysis->value
-        );
+            Plugin::log(Plugin::t("Created NeverstaleSubmission #{submissionId} for Entry #{entryId}", [
+                'entryId' => $entry->id,
+                'submissionId' => $submission->id,
+            ]));
 
-        if ($pendingSubmissions->count()) {
-            return $pendingSubmissions->first();
-        }
-
-        $processingSubmissions = $existingSubmissions->where(
-            fn(NeverstaleSubmission $submission) => $submission->status === AnalysisStatus::Processing->value
-        );
-
-        if ($processingSubmissions->count()) {
-            // @todo: what logic do we actually want here?
-            return $processingSubmissions->first();
-        }
-
-        $submission = $this->create($entry);
-
-        Plugin::log(Plugin::t("Created NeverstaleSubmission #{submissionId} for Entry #{entryId}", [
-            'entryId' => $entry->id,
-            'submissionId' => $submission->id,
-        ]));
-
-        if (!$this->save($submission)) {
-            throw new InvalidElementException($submission, 'Failed to save NeverstaleSubmission');
         }
 
         return $submission;
+    }
+    public function find(Entry $entry): ?NeverstaleSubmission
+    {
+        return NeverstaleSubmission::findOne([
+            'entryId' => $entry->canonicalId,
+            'siteId' => $entry->siteId,
+        ]);
     }
     public function create(Entry $entry): NeverstaleSubmission
     {

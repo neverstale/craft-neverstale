@@ -33,7 +33,7 @@ class CreateSubmissionJob extends BaseJob
             throw new ElementNotFoundException();
         }
         /** @var NeverstaleSubmission $submission */
-        $submission = Plugin::getInstance()->submission->forEntry($entry);
+        $submission = Plugin::getInstance()->submission->findOrCreate($entry);
 
         if (SubmissionJobHelper::hasInProgressJob($queue, $submission)) {
             Plugin::info("[CreateSubmissionJob] Skipping submission for {$submission->id} because there is already a job in progress");
