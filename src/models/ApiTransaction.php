@@ -55,7 +55,7 @@ class ApiTransaction extends Model
             'message' => $data['message'] ?? null,
             'transactionStatus' => $data['status'] ?? 'success',
             'createdAt' => new \DateTime(),
-            'data' => $data['data'],
+            'data' => $data['data']['content'],
         ]);
     }
 }
