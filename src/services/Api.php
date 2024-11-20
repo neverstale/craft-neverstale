@@ -38,9 +38,9 @@ class Api extends Component
                 ]
             );
 
-            $payload = $response->getBody()->getContents();
+            $responseBody = Json::decode($response->getBody()->getContents());
 
-            $transaction = ApiTransaction::fromNeverstaleData(Json::decode($payload));
+            $transaction = ApiTransaction::fromIngestResponse($responseBody);
             Plugin::info("Ingest for submission #{$submission->id}: status {$transaction->transactionStatus}");
 
             // update the submission element based on the response
@@ -59,6 +59,7 @@ class Api extends Component
             dd($e);
             return false;
         } catch (\Exception $e) {
+            dd($e);
 //            @todo handle other exceptions
             Plugin::error("Failed to ingest submission #{$submission->id}: {$e->getMessage()}");
             return false;
@@ -87,7 +88,6 @@ class Api extends Component
         $submission->neverstaleId = $transaction->neverstaleId;
         $submission->setAnalysisStatus($transaction->getAnalysisStatus());
         $submission->logTransaction($transaction);
-        $submission->logTransaction($transaction);
 
         return Plugin::getInstance()->submission->save($submission);
     }
@@ -97,12 +97,12 @@ class Api extends Component
         $submission->setAnalysisStatus($transaction->getAnalysisStatus());
         $submission->logTransaction($transaction);
         switch ($transaction->analysisStatus) {
-            case AnalysisStatus::PendingInitialAnalysis:
-            case AnalysisStatus::AnalyzedClean:
-            case AnalysisStatus::PendingReanalysis:
+            case AnalysisStatus::PENDING_INITIAL_ANALYSIS:
+            case AnalysisStatus::ANALYZED_CLEAN:
+            case AnalysisStatus::PENDING_REANALYSIS:
                 $submission->flagCount = 0;
                 break;
-            case AnalysisStatus::AnalyzedFlagged:
+            case AnalysisStatus::ANALYZED_FLAGGED:
 //                @todo: handle flag count + types
 //                $submission->flagCount = $transaction->data['flag_count'] ?? 0;
                 break;

@@ -50,7 +50,7 @@ trait HasNeverstaleContent
 
     public function getAnalysisStatus(): AnalysisStatus
     {
-        return AnalysisStatus::tryFrom($this->analysisStatus) ?? AnalysisStatus::Unknown;
+        return AnalysisStatus::tryFrom($this->analysisStatus) ?? AnalysisStatus::UNKNOWN;
     }
     public function updateNeverStaleRecord(bool $isNew = true): void
     {
@@ -70,10 +70,9 @@ trait HasNeverstaleContent
         $record->entryId = $this->entryId;
         $record->siteId = $this->siteId;
         $record->neverstaleId = $this->neverstaleId;
-        $record->analysisStatus = $this->analysisStatus ?? AnalysisStatus::Unsent->value;
+        $record->analysisStatus = $this->analysisStatus ?? AnalysisStatus::UNSENT->value;
         $record->flagCount = $this->flagCount;
         $record->flagTypes = $this->flagTypes;
-        $record->jobIds = $this->jobIds;
         $record->nextFlagDate = $this->nextFlagDate;
 
         $record->save(false);

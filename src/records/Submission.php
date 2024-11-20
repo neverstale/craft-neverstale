@@ -19,7 +19,6 @@ use zaengle\neverstale\models\ApiTransaction;
  * @property string|null $neverstaleId Neverstale ID
  * @property int|null $flagCount Flag count
  * @property string|null $flagTypes Flag types
- * @property string|null $jobIds Queue job IDs
  * @property string|null $nextFlagDate Next flag date
  * @property string $dateCreated Date created
  * @property string $dateUpdated Date updated
@@ -39,10 +38,6 @@ class Submission extends ActiveRecord
     {
         return Json::decode($this->flagTypes) ?? [];
     }
-    public function getJobIds()
-    {
-        return Json::decode($this->jobIds) ?? [];
-    }
     public function getTransactions(): ActiveQueryInterface
     {
         return self::hasMany(Transaction::class, ['submissionId' => 'id']);
@@ -51,7 +46,7 @@ class Submission extends ActiveRecord
     public function rules(): array
     {
         return [
-            [['flagTypes', 'jobIds'], 'safe'],
+            [['flagTypes'], 'safe'],
         ];
     }
 }

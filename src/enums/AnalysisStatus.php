@@ -16,29 +16,30 @@ use craft\enums\Color;
  */
 enum AnalysisStatus: string
 {
-    case Unsent = 'unsent';
-    case PendingInitialAnalysis = 'pending-initial-analysis';
-    case PendingReanalysis = 'pending-reanalysis';
-    case Processing = 'processing';
-    case AnalyzedClean = 'analyzed-clean';
-    case AnalyzedFlagged = 'analyzed-flagged';
-    case AnalyzedError = 'analyzed-error';
-    case Unknown = 'unknown';
-    case ApiError = 'api-error';
-    case Archived = 'archived';
+    case UNSENT = 'unsent';
+    case PENDING_INITIAL_ANALYSIS = 'pending-initial-analysis';
+    case PENDING_REANALYSIS = 'pending-reanalysis';
+    case PROCESSING_REANALYSIS = 'processing-reanalysis';
+    case PROCESSING_INITIAL_ANALYSIS = 'processing-initial-analysis';
+    case ANALYZED_CLEAN = 'analyzed-clean';
+    case ANALYZED_FLAGGED = 'analyzed-flagged';
+    case ANALYZED_ERROR = 'analyzed-error';
+    case UNKNOWN = 'unknown';
+    case API_ERROR = 'api-error';
+    case ARCHIVED = 'archived';
 
     public function label(): string
     {
         return match ($this) {
-            self::Unsent => Plugin::t('Pending'),
-            self::PendingInitialAnalysis => Plugin::t('Pending Initial Analysis'),
-            self::PendingReanalysis => Plugin::t('Pending Reanalysis'),
-            self::Processing => Plugin::t('Processing'),
-            self::AnalyzedClean => Plugin::t('Clean'),
-            self::AnalyzedFlagged => Plugin::t('Flagged'),
-            self::AnalyzedError => Plugin::t('Error'),
-            self::ApiError => Plugin::t('API Error'),
-            self::Archived => Plugin::t('Archived'),
+            self::UNSENT => Plugin::t('Pending'),
+            self::PENDING_INITIAL_ANALYSIS => Plugin::t('Pending Initial Analysis'),
+            self::PENDING_REANALYSIS => Plugin::t('Pending Reanalysis'),
+            self::PROCESSING_REANALYSIS, self::PROCESSING_INITIAL_ANALYSIS => Plugin::t('Processing'),
+            self::ANALYZED_CLEAN => Plugin::t('Clean'),
+            self::ANALYZED_FLAGGED => Plugin::t('Flagged'),
+            self::ANALYZED_ERROR => Plugin::t('Error'),
+            self::API_ERROR => Plugin::t('API Error'),
+            self::ARCHIVED => Plugin::t('Archived'),
             default => Plugin::t('Unknown'),
         };
     }
@@ -46,15 +47,14 @@ enum AnalysisStatus: string
     public function color(): Color
     {
         return match ($this) {
-            self::Unsent => Color::Orange,
-            self::Processing => Color::Purple,
-            self::PendingInitialAnalysis => Color::Purple,
-            self::PendingReanalysis => Color::Purple,
-            self::AnalyzedClean => Color::Teal,
-            self::AnalyzedFlagged => Color::Amber,
-            self::AnalyzedError => Color::Red,
-            self::ApiError => Color::Red,
-            self::Archived => Color::Gray,
+            self::UNSENT => Color::Orange,
+            self::PENDING_INITIAL_ANALYSIS, self::PENDING_REANALYSIS => Color::Pink,
+            self::PROCESSING_REANALYSIS, self::PROCESSING_INITIAL_ANALYSIS => Color::Purple,
+            self::ANALYZED_CLEAN => Color::Teal,
+            self::ANALYZED_FLAGGED => Color::Amber,
+            self::ANALYZED_ERROR => Color::Red,
+            self::API_ERROR => Color::Red,
+            self::ARCHIVED => Color::Gray,
             default => Color::Gray,
         };
     }
@@ -62,14 +62,14 @@ enum AnalysisStatus: string
     public function icon(): string
     {
         return match ($this) {
-            self::Unsent => 'envelope',
-            self::Processing => 'hammer',
-            self::PendingInitialAnalysis => 'clock',
-            self::PendingReanalysis => 'clock-rotate-left',
-            self::AnalyzedClean => 'check',
-            self::AnalyzedFlagged => 'flag',
-            self::AnalyzedError, self::ApiError => 'triangle-exclamation',
-            self::Archived => 'file',
+            self::UNSENT => 'envelope',
+            self::PROCESSING_REANALYSIS => 'hammer',
+            self::PENDING_INITIAL_ANALYSIS => 'clock',
+            self::PENDING_REANALYSIS => 'clock-rotate-left',
+            self::ANALYZED_CLEAN => 'check',
+            self::ANALYZED_FLAGGED => 'flag',
+            self::ANALYZED_ERROR, self::API_ERROR => 'triangle-exclamation',
+            self::ARCHIVED => 'file',
             default => 'question',
         };
     }

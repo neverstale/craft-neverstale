@@ -57,15 +57,15 @@ class NeverstaleSubmissionQuery extends ElementQuery
     protected function statusCondition(string $status): mixed
     {
         return match (AnalysisStatus::tryFrom($status) ?? $status) {
-            AnalysisStatus::Unsent,
-            AnalysisStatus::PendingInitialAnalysis,
-            AnalysisStatus::PendingReanalysis,
-            AnalysisStatus::Processing,
-            AnalysisStatus::AnalyzedClean,
-            AnalysisStatus::AnalyzedFlagged,
-            AnalysisStatus::AnalyzedError,
-            AnalysisStatus::Unknown,
-            AnalysisStatus::ApiError => [
+            AnalysisStatus::UNSENT,
+            AnalysisStatus::PENDING_INITIAL_ANALYSIS,
+            AnalysisStatus::PENDING_REANALYSIS,
+            AnalysisStatus::PROCESSING_REANALYSIS,
+            AnalysisStatus::ANALYZED_CLEAN,
+            AnalysisStatus::ANALYZED_FLAGGED,
+            AnalysisStatus::ANALYZED_ERROR,
+            AnalysisStatus::UNKNOWN,
+            AnalysisStatus::API_ERROR => [
                 'neverstale_submissions.analysisStatus' => $status,
             ],
             default => parent::statusCondition($status),

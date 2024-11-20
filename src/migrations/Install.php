@@ -34,6 +34,11 @@ class Install extends Migration
      */
     public function safeDown(): bool
     {
+        if ($this->db->tableExists('{{%neverstale_transactions}}')) {
+            Db::dropAllForeignKeysToTable('{{%neverstale_transactions}}');
+        }
+        $this->dropTableIfExists('{{%neverstale_transactions}}');
+
         if ($this->db->tableExists('{{%neverstale_submissions}}')) {
             Db::dropAllForeignKeysToTable('{{%neverstale_submissions}}');
         }
@@ -51,11 +56,10 @@ class Install extends Migration
             'siteId' => $this->integer(),
             'neverstaleId' => $this->string(),
             'uid' => $this->uid(),
-            'analysisStatus' => $this->string()->defaultValue(AnalysisStatus::Unsent->value),
+            'analysisStatus' => $this->string()->defaultValue(AnalysisStatus::UNSENT->value),
             'flagCount' => $this->integer()->defaultValue(0),
             'flagTypes' => $this->json(),
             'nextFlagDate' => $this->dateTime()->defaultValue(null),
-            'jobIds' => $this->json(),
             'dateCreated' => $this->dateTime()->notNull(),
             'dateUpdated' => $this->dateTime()->notNull(),
         ]);

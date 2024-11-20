@@ -42,7 +42,7 @@ use zaengle\neverstale\traits\HasTrackedJobs;
  */
 class NeverstaleSubmission extends Element
 {
-    use HasNeverstaleContent, HasTrackedJobs;
+    use HasNeverstaleContent;
 
     public static function displayName(): string
     {

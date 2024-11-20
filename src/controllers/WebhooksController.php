@@ -48,7 +48,7 @@ class WebhooksController extends BaseController
          }
          // Update the submission based on the webhook data
          try {
-             $transaction = ApiTransaction::fromNeverstaleData($data);
+             $transaction = ApiTransaction::fromWebhookPayload($data);
              // Look for our submission
              $submission = NeverstaleSubmission::findOne(['uid' => $transaction->customId]);
 

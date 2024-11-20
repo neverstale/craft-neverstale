@@ -5,14 +5,10 @@ namespace zaengle\neverstale\services;
 use Craft;
 use craft\elements\Entry;
 use craft\errors\ElementNotFoundException;
-use craft\errors\InvalidElementException;
 use craft\helpers\Queue;
-use Illuminate\Support\Collection;
 use yii\base\Component;
 use yii\base\Exception;
-use zaengle\neverstale\elements\db\NeverstaleSubmissionQuery;
 use zaengle\neverstale\elements\NeverstaleSubmission;
-use zaengle\neverstale\enums\AnalysisStatus;
 use zaengle\neverstale\jobs\CreateSubmissionJob;
 use zaengle\neverstale\Plugin;
 

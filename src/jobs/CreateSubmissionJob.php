@@ -5,6 +5,7 @@ namespace zaengle\neverstale\jobs;
 use Craft;
 use craft\errors\ElementNotFoundException;
 use craft\errors\InvalidElementException;
+use craft\helpers\Queue;
 use craft\queue\BaseJob;
 use zaengle\neverstale\elements\NeverstaleSubmission;
 use zaengle\neverstale\helpers\SubmissionJobHelper;
@@ -35,15 +36,8 @@ class CreateSubmissionJob extends BaseJob
         /** @var NeverstaleSubmission $submission */
         $submission = Plugin::getInstance()->submission->findOrCreate($entry);
 
-        if (SubmissionJobHelper::hasInProgressJob($queue, $submission)) {
-            Plugin::info("[CreateSubmissionJob] Skipping submission for {$submission->id} because there is already a job in progress");
-            return;
-        }
-
-        $submission->addJob(new IngestSubmissionJob([
+        Queue::push(new IngestSubmissionJob([
             'submissionId' => $submission->id,
-            'entryId' => $submission->entryId,
-            'createdAt' => new \DateTime(),
         ]));
 
     }
