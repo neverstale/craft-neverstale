@@ -4,7 +4,6 @@ namespace zaengle\neverstale\services;
 
 use Craft;
 use craft\elements\Entry;
-use craft\base\ElementInterface;
 use craft\errors\ElementNotFoundException;
 use craft\errors\InvalidElementException;
 use craft\helpers\Queue;
@@ -13,7 +12,7 @@ use yii\base\Component;
 use yii\base\Exception;
 use zaengle\neverstale\elements\db\NeverstaleSubmissionQuery;
 use zaengle\neverstale\elements\NeverstaleSubmission;
-use zaengle\neverstale\enums\SubmissionStatus;
+use zaengle\neverstale\enums\AnalysisStatus;
 use zaengle\neverstale\jobs\CreateSubmissionJob;
 use zaengle\neverstale\Plugin;
 
@@ -40,6 +39,8 @@ class Submission extends Component
     {
         /** @var NeverstaleSubmissionQuery $query */
         $query = NeverstaleSubmission::find();
+
+        // @todo cleanup
         /** @var Collection<NeverstaleSubmission> $existingSubmissions */
         $existingSubmissions = $query
             ->entryId($entry->canonicalId)
@@ -47,7 +48,8 @@ class Submission extends Component
             ->collect();
 
         $pendingSubmissions = $existingSubmissions->where(
-            fn(NeverstaleSubmission $submission) => $submission->status === SubmissionStatus::Pending->value
+            fn(NeverstaleSubmission $submission) => $submission->status === AnalysisStatus::PendingInitialAnalysis->value ||
+                $submission->status === AnalysisStatus::PendingReanalysis->value
         );
 
         if ($pendingSubmissions->count()) {
@@ -55,7 +57,7 @@ class Submission extends Component
         }
 
         $processingSubmissions = $existingSubmissions->where(
-            fn(NeverstaleSubmission $submission) => $submission->status === SubmissionStatus::Processing->value
+            fn(NeverstaleSubmission $submission) => $submission->status === AnalysisStatus::Processing->value
         );
 
         if ($processingSubmissions->count()) {
@@ -63,20 +65,20 @@ class Submission extends Component
             return $processingSubmissions->first();
         }
 
-        $submission = self::create($entry);
+        $submission = $this->create($entry);
 
         Plugin::log(Plugin::t("Created NeverstaleSubmission #{submissionId} for Entry #{entryId}", [
             'entryId' => $entry->id,
             'submissionId' => $submission->id,
         ]));
 
-        if (!self::save($submission)) {
+        if (!$this->save($submission)) {
             throw new InvalidElementException($submission, 'Failed to save NeverstaleSubmission');
         }
 
         return $submission;
     }
-    public static function create(Entry $entry): NeverstaleSubmission
+    public function create(Entry $entry): NeverstaleSubmission
     {
         return new NeverstaleSubmission([
             'entryId' => $entry->canonicalId,
@@ -88,7 +90,7 @@ class Submission extends Component
      * @throws Exception
      * @throws ElementNotFoundException
      */
-    public static function save(NeverstaleSubmission $submission): bool
+    public function save(NeverstaleSubmission $submission): bool
     {
         $saved = Craft::$app->getElements()->saveElement($submission);
 

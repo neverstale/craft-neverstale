@@ -5,6 +5,7 @@ namespace zaengle\neverstale\migrations;
 use Craft;
 use craft\db\Migration;
 use craft\helpers\Db;
+use zaengle\neverstale\enums\AnalysisStatus;
 
 /**
  * Neverstale Install Migration
@@ -49,17 +50,23 @@ class Install extends Migration
             'entryId' => $this->integer(),
             'siteId' => $this->integer(),
             'neverstaleId' => $this->string(),
+            'uid' => $this->uid(),
+            'analysisStatus' => $this->string()->defaultValue(AnalysisStatus::Unsent->value),
             'flagCount' => $this->integer()->defaultValue(0),
-            'flagTypes' => $this->json()->defaultValue('[]'),
-            'isFailed' => $this->boolean()->defaultValue(false),
-            'isProcessed' => $this->boolean()->defaultValue(false),
-            'isSent' => $this->boolean()->defaultValue(false),
-            'jobIds' => $this->json()->defaultValue('[]'),
+            'flagTypes' => $this->json(),
             'nextFlagDate' => $this->dateTime()->defaultValue(null),
-            'transactionLog' => $this->json()->defaultValue('[]'),
+            'jobIds' => $this->json(),
             'dateCreated' => $this->dateTime()->notNull(),
             'dateUpdated' => $this->dateTime()->notNull(),
-            'uid' => $this->uid(),
+        ]);
+
+        $this->createTable('{{%neverstale_transactions}}', [
+            'id' => $this->primaryKey(),
+            'submissionId' => $this->integer(),
+            'status' => $this->string(),
+            'message' => $this->text(),
+            'dateCreated' => $this->dateTime()->notNull(),
+            'dateUpdated' => $this->dateTime()->notNull(),
         ]);
     }
 
@@ -89,10 +96,24 @@ class Install extends Migration
             'id',
             'CASCADE',
         null);
+
+        $this->addForeignKey(
+            null,
+            '{{%neverstale_transactions}}',
+            'submissionId',
+            '{{%neverstale_submissions}}',
+            'id',
+            'CASCADE',
+            null);
     }
 
     public function createIndexes(): void
     {
-        $this->createIndex(null, '{{%neverstale_submissions}}', 'uid', false);
+        $this->createIndex(null, '{{%neverstale_submissions}}', 'id');
+        $this->createIndex(null, '{{%neverstale_submissions}}', 'entryId');
+        $this->createIndex(null, '{{%neverstale_submissions}}', 'siteId');
+        $this->createIndex(null, '{{%neverstale_submissions}}', 'neverstaleId');
+        $this->createIndex(null, '{{%neverstale_submissions}}', 'uid');
+        $this->createIndex(null, '{{%neverstale_transactions}}', 'submissionId');
     }
 }

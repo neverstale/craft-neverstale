@@ -32,8 +32,8 @@ use yii\base\Event;
 use yii\base\InvalidConfigException;
 use zaengle\neverstale\behaviors\PreviewNeverstaleSubmissionBehavior;
 use zaengle\neverstale\elements\NeverstaleSubmission;
+use zaengle\neverstale\enums\AnalysisStatus;
 use zaengle\neverstale\enums\Permission;
-use zaengle\neverstale\enums\SubmissionStatus;
 use zaengle\neverstale\fields\NeverstaleSubmissions;
 use zaengle\neverstale\models\Settings;
 use zaengle\neverstale\services\Api;
@@ -103,7 +103,6 @@ class Plugin extends BasePlugin
                     ]),
                 ],
             ]);
-
         });
     }
     /**
@@ -211,11 +210,11 @@ class Plugin extends BasePlugin
 
     private function registerEntryTableAttributes(): void
     {
-        Event::on(Entry::class, Entry::EVENT_REGISTER_TABLE_ATTRIBUTES, function(RegisterElementTableAttributesEvent $event) {
-            $event->tableAttributes[self::$neverstaleStatusAttribute] = [
-                'label' => Plugin::t('Neverstale Status'),
-            ];
-        });
+//        Event::on(Entry::class, Entry::EVENT_REGISTER_TABLE_ATTRIBUTES, function(RegisterElementTableAttributesEvent $event) {
+//            $event->tableAttributes[self::$neverstaleStatusAttribute] = [
+//                'label' => Plugin::t('Neverstale Status'),
+//            ];
+//        });
 
         Event::on(Entry::class, Entry::EVENT_PREP_QUERY_FOR_TABLE_ATTRIBUTE, function(ElementIndexTableAttributeEvent $event) {
             $attr = $event->attribute;
@@ -224,14 +223,6 @@ class Plugin extends BasePlugin
             }
             $query = $event->query;
             // @todo make this work
-
-//        dd($query);
-//
-//        $alias = 'neverstaleSubmissions';
-//        $table = "{{%neverstale_submissions}}";
-//
-//        $joinTable = [$alias => $table];
-//        $query->innerJoin($joinTable,"[[$alias.id]] = [[elements.id]]");
         });
         Event::on(Entry::class, Element::EVENT_DEFINE_ATTRIBUTE_HTML, [$this, 'entryTableAttributeHtml']);
         Event::on(Entry::class, Element::EVENT_DEFINE_INLINE_ATTRIBUTE_INPUT_HTML, [$this, 'entryTableAttributeHtml']);
@@ -245,7 +236,7 @@ class Plugin extends BasePlugin
         if (!$submission) {
             $event->html = '';
         } else {
-            $status = SubmissionStatus::from($submission->status);
+            $status = AnalysisStatus::from($submission->status);
 
             $event->html = CpHelper::statusLabelHtml([
                 'color' => $status->color(),

@@ -28,7 +28,7 @@ class SubmissionJobHelper
     {
         $completeStatuses = collect([CraftJobStatus::DONE->value, CraftJobStatus::FAILED->value]);
 
-        return collect($submission->getJobIds())
+        return collect($submission->jobIds)
             ->filter(function($jobId) use ($completeStatuses, $queue) {
                 try {
                     $job = $queue->getJobDetails($jobId);
@@ -43,7 +43,7 @@ class SubmissionJobHelper
     {
         $inProgressStatuses = collect([CraftJobStatus::WAITING->value, CraftJobStatus::RESERVED->value]);
 
-        return collect($submission->getJobIds())
+        return collect($submission->jobIds)
             ->contains(function($jobId) use ($inProgressStatuses, $queue, $currentJobId) {
                 if ($jobId === $currentJobId) {
                     return false;

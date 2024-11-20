@@ -24,7 +24,7 @@ use zaengle\neverstale\Plugin;
  * @property-read array<string,mixed> $apiData
  * @property-read NeverstaleSubmission $submission
  */
-class ApiData extends Model implements Arrayable
+class ApiSubmission extends Model implements Arrayable
 {
     public ?string $editUrl = null;
     public ?string $url = null;

@@ -1,18 +1,16 @@
 <?php
 
 namespace zaengle\neverstale\models;
-
-use Craft;
 use craft\base\Model;
-use zaengle\neverstale\enums\SubmissionStatus;
+use zaengle\neverstale\enums\AnalysisStatus;
 
 /**
- * Log Item model
+ * API Transaction model
  *
  * @property-read string|null $neverstaleId
  * @property-read string|null $customId
  * @property-read string|null $channelId
- * @property-read SubmissionStatus $submissionStatus
+ * @property-read AnalysisStatus $analysisStatus
  * @property-read string $transactionStatus
  */
 class ApiTransaction extends Model
@@ -31,10 +29,9 @@ class ApiTransaction extends Model
     {
         return $this->data['custom_id'] ?? null;
     }
-    public function getSubmissionStatus(): SubmissionStatus
+    public function getAnalysisStatus(): AnalysisStatus
     {
-//        @todo confirm this is the correct key
-        return SubmissionStatus::from($this->data['content_status'] ?? SubmissionStatus::Unknown->value);
+        return AnalysisStatus::from($this->data['analysis_status'] ?? AnalysisStatus::Unknown->value);
     }
     public function getChannelId(): ?string
     {
@@ -58,7 +55,7 @@ class ApiTransaction extends Model
             'message' => $data['message'] ?? null,
             'transactionStatus' => $data['status'] ?? 'success',
             'createdAt' => new \DateTime(),
-            'data' => (array) $data['data'],
+            'data' => $data['data'],
         ]);
     }
 }

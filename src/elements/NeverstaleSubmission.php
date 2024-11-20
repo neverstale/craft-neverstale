@@ -4,36 +4,30 @@ namespace zaengle\neverstale\elements;
 
 use Craft;
 use craft\base\Element;
-use craft\base\ElementInterface;
 use craft\db\Query;
 use craft\elements\conditions\ElementConditionInterface;
 use craft\elements\db\EagerLoadPlan;
 use craft\elements\db\ElementQueryInterface;
 use craft\elements\Entry;
 use craft\elements\User;
+use craft\errors\ElementNotFoundException;
 use craft\helpers\ArrayHelper;
-use craft\helpers\Queue as QueueHelper;
 use craft\helpers\Cp;
-use craft\helpers\Db;
-use craft\helpers\UrlHelper;
-use craft\queue\JobInterface;
 
-use craft\queue\QueueInterface;
+use craft\helpers\UrlHelper;
+
 use craft\web\CpScreenResponseBehavior;
-use DateTime;
+use yii\base\Exception;
 use yii\base\InvalidConfigException;
 use yii\web\Response;
 
+use zaengle\neverstale\enums\AnalysisStatus;
 use zaengle\neverstale\Plugin;
 use zaengle\neverstale\elements\conditions\NeverstaleSubmissionCondition;
 use zaengle\neverstale\elements\db\NeverstaleSubmissionQuery;
 use zaengle\neverstale\enums\Permission;
-use zaengle\neverstale\enums\SubmissionStatus;
-use zaengle\neverstale\helpers\SubmissionJobHelper;
-use zaengle\neverstale\models\ApiData;
-use zaengle\neverstale\models\ApiTransaction;
-use zaengle\neverstale\records\Submission as SubmissionRecord;
-use zaengle\neverstale\services\Submission as SubmissionService;
+use zaengle\neverstale\traits\HasNeverstaleContent;
+use zaengle\neverstale\traits\HasTrackedJobs;
 
 /**
  * Neverstale Submission Custom Element Type
@@ -42,41 +36,14 @@ use zaengle\neverstale\services\Submission as SubmissionService;
  * @package zaengle/craft-neverstale
  * @since 1.0.0
  * @see https://github.com/zaengle/craft-neverstale
- *
- * @property-read null|string $entryCpUrl
- * @property-read null|string $postEditUrl
- * @property-read string $webhookUrl
- * @property-read array $transactionLog
- * @property-read array $jobIds
+ * @property int $entryId
+ * @property int $siteId
+ * @property-read Entry|null $entry
  */
 class NeverstaleSubmission extends Element
 {
-    public int $entryId;
-    public int|null $siteId = null;
-    public ?string $neverstaleId = null;
-    public bool $isSent = false;
-    public bool $isProcessed = false;
-    public bool $isFailed = false;
-    public int $flagCount = 0;
-    protected array $transactionLog = [];
-    protected array $jobIds = [];
-    private ?Entry $entry = null;
-    /**
-     * @var array<string>
-     */
-    public array $flagTypes = [];
-    public ?DateTime $nextFlagDate = null;
-    public function logTransaction(ApiTransaction $item): void
-    {
-        $this->transactionLog[] = $item->toArray([
-            'transactionStatus',
-            'message',
-            'neverstaleId',
-            'channelId',
-            'customId',
-            'createdAt'
-        ]);
-    }
+    use HasNeverstaleContent, HasTrackedJobs;
+
     public static function displayName(): string
     {
         return Plugin::t('Neverstale Submission');
@@ -110,7 +77,7 @@ class NeverstaleSubmission extends Element
      */
     public static function statuses(): array
     {
-        return collect(SubmissionStatus::cases())
+        return collect(AnalysisStatus::cases())
             ->reduce(function($statuses, $status): array {
                 $statuses[$status->value] = [
                     'label' => $status->label(),
@@ -157,103 +124,15 @@ class NeverstaleSubmission extends Element
 
     public function afterSave(bool $isNew): void
     {
-        Plugin::log("Saving submission $this->id", 'info');
-        // Get the submission record
-        if (!$isNew) {
-            $record = $this->getRecord();
-
-            if (!$record) {
-                throw new \Exception('Invalid submission ID: ' . $this->id);
-            }
-        } else {
-            $record = new SubmissionRecord();
-            $record->id = $this->id;
-        }
-
-        $record->entryId = $this->entryId;
-        $record->siteId = $this->siteId;
-        $record->isSent = $this->isSent;
-        $record->isProcessed = $this->isProcessed;
-        $record->isFailed = $this->isFailed;
-        $record->neverstaleId = $this->neverstaleId;
-        $record->transactionLog = $this->transactionLog;
-        $record->flagCount = $this->flagCount;
-        $record->flagTypes = $this->flagTypes;
-        $record->jobIds = $this->jobIds;
-        $record->nextFlagDate = Db::prepareDateForDb($this->nextFlagDate);
-
-        $record->save(false);
-
+        $this->updateNeverstaleRecord($isNew);
         parent::afterSave($isNew);
     }
 
-    public function setProcessing(ApiTransaction $transaction): void
-    {
-        $this->isProcessed = false;
-        $this->logTransaction($transaction);
-    }
-    public function setFailed(ApiTransaction $transaction): void
-    {
-        $this->isSent = true;
-        $this->isFailed = true;
-        $this->isProcessed = false;
-        $this->logTransaction($transaction);
-    }
-
-    public function setFlagged(ApiTransaction $transaction): void
-    {
-        $this->logTransaction($transaction);
-    }
-    public function setClean(ApiTransaction $transaction): void
-    {
-        $this->logTransaction($transaction);
-    }
-
-    public function getWebhookUrl()
-    {
-        return UrlHelper::actionUrl("neverstale/submissions/webhook/");
-    }
-
-    public function addJob(JobInterface $job): void
-    {
-        $jobId = QueueHelper::push($job, SubmissionJobHelper::getPriority(), SubmissionJobHelper::getDelay());
-
-        Plugin::log('added Job ID: ' . $jobId . ' to submission ID: ' . $this->id);
-
-        $this->jobIds = array_merge($this->getJobIds(), [(int) $jobId]);
-
-        Craft::$app->getElements()->saveElement($this);
-    }
-    public function cleanOldJobs(QueueInterface $queue): void
-    {
-        $oldJobs = SubmissionJobHelper::getOldJobs($queue, $this);
-        collect($this->jobIds)
-            ->filter(fn(int $jobId) => $oldJobs->contains($jobId))
-            ->each(fn(int $jobId) => $this->removeJob($jobId));
-
-        Craft::$app->getElements()->saveElement($this);
-    }
-    public function removeJob(int $jobId): void
-    {
-        $this->jobIds = array_filter($this->jobIds, fn(int $id) => $id !== $jobId);
-    }
     public function getJobIds(): array
     {
         return $this->getRecord()?->getJobIds() ?? [];
     }
 
-    public function getTransactionLog(): array
-    {
-        return $this->getRecord()?->getTransactionLog() ?? [];
-    }
-
-    public function getRecord(): ?SubmissionRecord
-    {
-        if ($this->id === null) {
-            return null;
-        }
-        return SubmissionRecord::findOne($this->id);
-    }
 
     public function setEagerLoadedElements(string $handle, array $elements, EagerLoadPlan $plan): void
     {
@@ -268,44 +147,15 @@ class NeverstaleSubmission extends Element
 
     public function getStatus(): ?string
     {
-        if (!$this->isSent) {
-            return SubmissionStatus::Pending->value;
-        }
-
-        if (!$this->isProcessed) {
-            return SubmissionStatus::Processing->value;
-        }
-
-        if ($this->flagCount > 0) {
-            return SubmissionStatus::Flagged->value;
-        }
-
-        return SubmissionStatus::Clean->value;
+        return $this->getRecord()->analysisStatus;
     }
 
     public function getStatusColor(): string
     {
-        return SubmissionStatus::from($this->getStatus())->color()->value;
+        return AnalysisStatus::from($this->getStatus())->color()->value;
     }
 
-    public function setEntry(Entry|ElementInterface $entry): void
-    {
-        $this->entry = $entry;
-        $this->entryId = $entry->id;
-    }
 
-    public function getEntry(): ?Entry
-    {
-        if ($this->entry !== null) {
-            return $this->entry;
-        }
-
-        if (!$this->entryId) {
-            return null;
-        }
-
-        return $this->entry = Craft::$app->getEntries()->getEntryById($this->entryId, $this->siteId);
-    }
 
     public function getUiLabel(): string
     {
@@ -333,11 +183,6 @@ class NeverstaleSubmission extends Element
                 'label' => Plugin::t('All Neverstale Submissions'),
             ],
         ];
-    }
-
-    protected static function defineActions(string $source): array
-    {
-        return [];
     }
 
     protected static function includeSetStatusAction(): bool
@@ -396,30 +241,18 @@ class NeverstaleSubmission extends Element
 
     protected function attributeHtml(string $attribute): string
     {
-        return match ($attribute) {
-            'entry' => Cp::elementChipHtml($this->getEntry()),
-            default => parent::attributeHtml($attribute),
-        };
+        return '';
+        // @todo fix
+//        return match ($attribute) {
+//            'entry' => Cp::elementChipHtml($this->getEntry()),
+//            default => parent::attributeHtml($attribute),
+//        };
     }
 
     public function getUriFormat(): ?string
     {
-        // If submissions should have URLs, define their URI format here
         return null;
     }
-
-    protected function route(): array|string|null
-    {
-        // Define how submissions should be routed when their URLs are requested
-        return [
-            'templates/render',
-            [
-                'template' => 'site/template/path',
-                'variables' => ['submission' => $this],
-            ],
-        ];
-    }
-
     public function canView(User $user): bool
     {
         if (parent::canView($user)) {
@@ -433,12 +266,10 @@ class NeverstaleSubmission extends Element
     {
         return false;
     }
-
     public function canDuplicate(User $user): bool
     {
         return false;
     }
-
     public function canDelete(User $user): bool
     {
         if (parent::canSave($user)) {
@@ -447,22 +278,18 @@ class NeverstaleSubmission extends Element
 
         return $user->can(Permission::Delete->value);
     }
-
     public function canCreateDrafts(User $user): bool
     {
         return false;
     }
-
     protected function cpEditUrl(): ?string
     {
         return UrlHelper::cpUrl('neverstale/submissions/' . $this->getCanonicalId());
     }
-
     public function getPostEditUrl(): ?string
     {
         return UrlHelper::cpUrl('submissions');
     }
-
     public function prepareEditScreen(Response $response, string $containerId): void
     {
         /** @var Response|CpScreenResponseBehavior $response */
@@ -474,37 +301,6 @@ class NeverstaleSubmission extends Element
         ]);
     }
 
-    public function toApiData(): ApiData
-    {
-        return Plugin::getInstance()->format->forApi($this);
-    }
-
-    /**
-     * Get the front-end URL for the related entry
-     *
-     * Used when formatting data for submission to the API
-     */
-    public function getEntryUrl(): ?string
-    {
-        if ($entry = $this->getEntry()) {
-            return $entry->getUrl();
-        }
-
-        return null;
-    }
-    /**
-     * Get the URL to edit the related entry in the Craft CP
-     *
-     * Used when formatting data for submission to the API
-     */
-    public function getEntryCpUrl(): ?string
-    {
-        if ($entry = $this->getEntry()) {
-            return $entry->getCpEditUrl();
-        }
-
-        return null;
-    }
 
     protected static function defineSearchableAttributes(): array
     {
@@ -513,8 +309,13 @@ class NeverstaleSubmission extends Element
         ];
     }
 
+    /**
+     * @throws ElementNotFoundException
+     * @throws Exception
+     * @throws \Throwable
+     */
     public function save(): bool
     {
-        return SubmissionService::save($this);
+        return Plugin::getInstance()->submission->save($this);
     }
 }

@@ -5,7 +5,6 @@ namespace zaengle\neverstale\jobs;
 use Craft;
 use craft\errors\ElementNotFoundException;
 use craft\errors\InvalidElementException;
-use craft\helpers\Queue as QueueHelper;
 use craft\queue\BaseJob;
 use zaengle\neverstale\elements\NeverstaleSubmission;
 use zaengle\neverstale\helpers\SubmissionJobHelper;

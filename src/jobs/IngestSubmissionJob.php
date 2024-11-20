@@ -19,6 +19,7 @@ use zaengle\neverstale\elements\NeverstaleSubmission;
  */
 class IngestSubmissionJob extends BaseJob
 {
+    public ?string $description = 'Ingesting entry to Neverstale';
     public int $submissionId;
     public int $entryId;
     // The minimum number of seconds to wait since the last save before submitting the entry
@@ -77,6 +78,6 @@ class IngestSubmissionJob extends BaseJob
     protected function defaultDescription(): ?string
     {
         $suffix = $this->wasDelayed ? " (deferred by {$this->wait}s)" : '';
-        return "Submit Entry #{$this->entryId} to Neverstale{$suffix}";
+        return "Ingesting Entry #{$this->entryId} to Neverstale{$suffix}";
     }
 }
