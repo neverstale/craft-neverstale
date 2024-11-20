@@ -20,9 +20,9 @@ enum AnalysisStatus: string
     case PendingInitialAnalysis = 'pending-initial-analysis';
     case PendingReanalysis = 'pending-reanalysis';
     case Processing = 'processing';
-    case AnalysedClean = 'analysed-clean';
-    case AnalysedFlagged = 'analysed-flagged';
-    case AnalysedError = 'analysed-error';
+    case AnalyzedClean = 'analyzed-clean';
+    case AnalyzedFlagged = 'analyzed-flagged';
+    case AnalyzedError = 'analyzed-error';
     case Unknown = 'unknown';
     case ApiError = 'api-error';
     case Archived = 'archived';
@@ -34,9 +34,9 @@ enum AnalysisStatus: string
             self::PendingInitialAnalysis => Plugin::t('Pending Initial Analysis'),
             self::PendingReanalysis => Plugin::t('Pending Reanalysis'),
             self::Processing => Plugin::t('Processing'),
-            self::AnalysedClean => Plugin::t('Clean'),
-            self::AnalysedFlagged => Plugin::t('Flagged'),
-            self::AnalysedError => Plugin::t('Error'),
+            self::AnalyzedClean => Plugin::t('Clean'),
+            self::AnalyzedFlagged => Plugin::t('Flagged'),
+            self::AnalyzedError => Plugin::t('Error'),
             self::ApiError => Plugin::t('API Error'),
             self::Archived => Plugin::t('Archived'),
             default => Plugin::t('Unknown'),
@@ -50,9 +50,9 @@ enum AnalysisStatus: string
             self::Processing => Color::Purple,
             self::PendingInitialAnalysis => Color::Purple,
             self::PendingReanalysis => Color::Purple,
-            self::AnalysedClean => Color::Teal,
-            self::AnalysedFlagged => Color::Amber,
-            self::AnalysedError => Color::Red,
+            self::AnalyzedClean => Color::Teal,
+            self::AnalyzedFlagged => Color::Amber,
+            self::AnalyzedError => Color::Red,
             self::ApiError => Color::Red,
             self::Archived => Color::Gray,
             default => Color::Gray,
@@ -66,9 +66,9 @@ enum AnalysisStatus: string
             self::Processing => 'hammer',
             self::PendingInitialAnalysis => 'clock',
             self::PendingReanalysis => 'clock-rotate-left',
-            self::AnalysedClean => 'check',
-            self::AnalysedFlagged => 'flag',
-            self::AnalysedError, self::ApiError => 'triangle-exclamation',
+            self::AnalyzedClean => 'check',
+            self::AnalyzedFlagged => 'flag',
+            self::AnalyzedError, self::ApiError => 'triangle-exclamation',
             self::Archived => 'file',
             default => 'question',
         };

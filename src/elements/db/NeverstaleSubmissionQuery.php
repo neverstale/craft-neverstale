@@ -61,9 +61,9 @@ class NeverstaleSubmissionQuery extends ElementQuery
             AnalysisStatus::PendingInitialAnalysis,
             AnalysisStatus::PendingReanalysis,
             AnalysisStatus::Processing,
-            AnalysisStatus::AnalysedClean,
-            AnalysisStatus::AnalysedFlagged,
-            AnalysisStatus::AnalysedError,
+            AnalysisStatus::AnalyzedClean,
+            AnalysisStatus::AnalyzedFlagged,
+            AnalysisStatus::AnalyzedError,
             AnalysisStatus::Unknown,
             AnalysisStatus::ApiError => [
                 'neverstale_submissions.analysisStatus' => $status,

@@ -98,11 +98,11 @@ class Api extends Component
         $submission->logTransaction($transaction);
         switch ($transaction->analysisStatus) {
             case AnalysisStatus::PendingInitialAnalysis:
-            case AnalysisStatus::AnalysedClean:
+            case AnalysisStatus::AnalyzedClean:
             case AnalysisStatus::PendingReanalysis:
                 $submission->flagCount = 0;
                 break;
-            case AnalysisStatus::AnalysedFlagged:
+            case AnalysisStatus::AnalyzedFlagged:
 //                @todo: handle flag count + types
 //                $submission->flagCount = $transaction->data['flag_count'] ?? 0;
                 break;
