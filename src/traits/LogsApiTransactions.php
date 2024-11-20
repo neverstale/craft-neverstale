@@ -10,14 +10,14 @@ trait LogsApiTransactions
     protected array $transactionLog = [];
     public function logTransaction(ApiTransaction $item): void
     {
-        $this->transactionLog[] = $item->toArray([
-            'transactionStatus',
-            'message',
-            'neverstaleId',
-            'channelId',
-            'customId',
-            'createdAt'
-        ]);
+//        $this->transactionLog[] = $item->toArray([
+//            'transactionStatus',
+//            'message',
+//            'neverstaleId',
+//            'channelId',
+//            'customId',
+//            'createdAt'
+//        ]);
     }
 
     /**
@@ -25,7 +25,8 @@ trait LogsApiTransactions
      */
     public function getTransactionLog(): array
     {
-        return $this->getRecord()?->getTransactionLog() ?? [];
+        return [];
+//        return $this->getRecord()?->getTransactionLog() ?? [];
     }
 
     abstract public function getRecord(): ?Submission;

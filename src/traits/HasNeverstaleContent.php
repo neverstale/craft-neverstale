@@ -3,7 +3,6 @@
 namespace zaengle\neverstale\traits;
 
 
-use craft\helpers\Db;
 use craft\helpers\UrlHelper;
 
 use zaengle\neverstale\enums\AnalysisStatus;
@@ -71,9 +70,7 @@ trait HasNeverstaleContent
         $record->entryId = $this->entryId;
         $record->siteId = $this->siteId;
         $record->neverstaleId = $this->neverstaleId;
-
         $record->analysisStatus = $this->analysisStatus ?? AnalysisStatus::Unsent->value;
-        $record->transactionLog = $this->transactionLog;
         $record->flagCount = $this->flagCount;
         $record->flagTypes = $this->flagTypes;
         $record->jobIds = $this->jobIds;
