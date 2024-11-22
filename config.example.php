@@ -7,6 +7,9 @@
  *
  * neverstale.php
  */
+
+use zaengle\neverstale\models\ApiSubmission;
+
 return [
     '*' => [
         /**
@@ -48,5 +51,13 @@ return [
 //            'homepage',
 //            'pages',
 //        ],
+        /**
+         * $transformer callable
+         *
+         * Transform a submission before sending it to the Neverstale API
+         */
+//        'transformer' => static function (ApiSubmission $apiSubmission): ApiSubmission {
+//            return $apiSubmission;
+//        },
     ],
 ];
