@@ -13,6 +13,7 @@ use craft\elements\User;
 use craft\errors\ElementNotFoundException;
 use craft\helpers\ArrayHelper;
 
+use craft\helpers\Cp;
 use craft\helpers\UrlHelper;
 
 use craft\web\CpScreenResponseBehavior;
@@ -240,12 +241,10 @@ class NeverstaleSubmission extends Element
 
     protected function attributeHtml(string $attribute): string
     {
-        return '';
-        // @todo fix
-//        return match ($attribute) {
-//            'entry' => Cp::elementChipHtml($this->getEntry()),
-//            default => parent::attributeHtml($attribute),
-//        };
+        return match ($attribute) {
+            'entry' => Cp::elementChipHtml($this->getEntry()),
+            default => parent::attributeHtml($attribute),
+        };
     }
 
     public function getUriFormat(): ?string

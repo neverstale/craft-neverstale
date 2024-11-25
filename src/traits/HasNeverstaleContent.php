@@ -25,11 +25,11 @@ trait HasNeverstaleContent
 {
     use LogsApiTransactions, HasEntry;
     public ?string $neverstaleId = null;
-    public ?string $analysisStatus = null;
-    public int $flagCount = 0;
+    protected ?string $analysisStatus = null;
+
+    public ?int $flagCount = null;
     public ?\DateTime $dateAnalyzed = null;
     public ?\DateTime $dateExpired = null;
-
     public function getRecord(): ?SubmissionRecord
     {
         if ($this->id === null) {
@@ -38,9 +38,12 @@ trait HasNeverstaleContent
         return SubmissionRecord::findOne($this->id);
     }
 
-    public function setAnalysisStatus(AnalysisStatus $status): void
+    public function setAnalysisStatus(AnalysisStatus|string $status): void
     {
-        $this->analysisStatus = $status->value;
+        if ($status instanceof AnalysisStatus) {
+            $status = $status->value;
+        }
+        $this->analysisStatus = $status;
     }
 
     public function getAnalysisStatus(): AnalysisStatus

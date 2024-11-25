@@ -73,7 +73,10 @@ class Plugin extends BasePlugin
     public string $schemaVersion = '1.0.0';
     public bool $hasCpSettings = true;
 
-    public static string $neverstaleStatusAttribute = 'neverstaleStatus';
+    public const STATUS_ATTRIBUTE = 'neverstaleStatus';
+    public const DATE_ANALYZED_ATTRIBUTE = 'neverstaleDateAnalyzed';
+    public const DATE_EXPIRED_ATTRIBUTE = 'neverstaleDateExpired';
+    public const FLAG_COUNT_ATTRIBUTE = 'neverstaleFlagCount';
 
     /**
      * @inheritDoc
@@ -215,15 +218,24 @@ class Plugin extends BasePlugin
 
     private function registerEntryTableAttributes(): void
     {
-//        Event::on(Entry::class, Entry::EVENT_REGISTER_TABLE_ATTRIBUTES, function(RegisterElementTableAttributesEvent $event) {
-//            $event->tableAttributes[self::$neverstaleStatusAttribute] = [
-//                'label' => Plugin::t('Neverstale Status'),
-//            ];
-//        });
+        Event::on(Entry::class, Entry::EVENT_REGISTER_TABLE_ATTRIBUTES, function(RegisterElementTableAttributesEvent $event) {
+            $event->tableAttributes[self::STATUS_ATTRIBUTE] = [
+                'label' => Plugin::t('Neverstale Status'),
+            ];
+            $event->tableAttributes[self::DATE_ANALYZED_ATTRIBUTE] = [
+                'label' => Plugin::t('Content Analyzed Date'),
+            ];
+            $event->tableAttributes[self::DATE_EXPIRED_ATTRIBUTE] = [
+                'label' => Plugin::t('Content Expired Date'),
+            ];
+            $event->tableAttributes[self::FLAG_COUNT_ATTRIBUTE] = [
+                'label' => Plugin::t('Flag Count'),
+            ];
+        });
 
         Event::on(Entry::class, Entry::EVENT_PREP_QUERY_FOR_TABLE_ATTRIBUTE, function(ElementIndexTableAttributeEvent $event) {
             $attr = $event->attribute;
-            if ($attr !== self::$neverstaleStatusAttribute) {
+            if ($attr !== self::STATUS_ATTRIBUTE) {
                 return;
             }
             $query = $event->query;
@@ -234,21 +246,47 @@ class Plugin extends BasePlugin
     }
     public function entryTableAttributeHtml(DefineAttributeHtmlEvent $event): void
     {
-        if ($event->attribute !== self::$neverstaleStatusAttribute) {
-            return;
-        }
-        $submission = $event->sender->getNeverstaleSubmission();
-        if (!$submission) {
-            $event->html = '';
-        } else {
-            $status = AnalysisStatus::from($submission->status);
+        /** @var Entry $entry */
+        $entry = $event->sender;
+        $event->html = match ($event->attribute) {
+            self::STATUS_ATTRIBUTE => $this->getStatusAttributeHtml($entry),
+//            self::DATE_ANALYZED_ATTRIBUTE, self::DATE_EXPIRED_ATTRIBUTE => $this->getDateAttributeHtml($event->attribute, $entry),
+            self::FLAG_COUNT_ATTRIBUTE => $entry->getNeverstaleSubmission()?->flagCount ?? 0,
+            default => '',
+        };
+    }
 
-            $event->html = CpHelper::statusLabelHtml([
-                'color' => $status->color(),
-                'icon' => $status->icon(),
-                'label' => $status->label(),
-            ]);
+    private function getStatusAttributeHtml(Entry $entry): string
+    {
+        $submission = $entry->getNeverstaleSubmission();
+
+        if (!$submission) {
+            return '';
         }
+
+        $status = AnalysisStatus::from($submission->status);
+
+        return CpHelper::statusLabelHtml([
+            'color' => $status->color(),
+            'icon' => $status->icon(),
+            'label' => $status->label(),
+        ]);
+    }
+
+    private function getDateAttributeHtml(string $attribute, Entry $entry): string
+    {
+        $submission = $entry->getNeverstaleSubmission();
+
+        if (!$submission) {
+            return '';
+        }
+        $submissionAttr = match ($attribute) {
+            self::DATE_ANALYZED_ATTRIBUTE => 'dateAnalyzed',
+            self::DATE_EXPIRED_ATTRIBUTE => 'dateExpired',
+            default => '',
+        };
+
+        return $submission->{$submissionAttr} ? $submission->{$submissionAttr}->format('Y-m-d H:i:s') : '';
     }
 
     /**
@@ -360,4 +398,6 @@ class Plugin extends BasePlugin
             ),
         ]);
     }
+
+
 }
