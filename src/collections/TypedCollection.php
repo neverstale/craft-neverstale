@@ -5,6 +5,9 @@ namespace zaengle\neverstale\collections;
 use Illuminate\Support\Collection;
 use InvalidArgumentException;
 
+/**
+ * @phpstan-consistent-constructor
+ */
 class TypedCollection extends Collection
 {
     /**

@@ -17,7 +17,7 @@ class NeverstaleSubmissionCondition extends ElementCondition
 {
     protected function selectableConditionRules(): array
     {
-        return array_merge(parent::conditionRuleTypes(), [
+        return array_merge(parent::selectableConditionRules(), [
             // ...
         ]);
     }

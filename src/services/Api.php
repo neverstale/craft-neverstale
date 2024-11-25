@@ -57,13 +57,10 @@ class Api extends Component
         } catch (GuzzleException $e) {
             $transaction = ApiTransaction::fromGuzzleException($e, 'api.error');
             return $this->onIngestError($submission, $transaction);
-
-            return false;
         } catch (\Exception $e) {
-            dd($e);
 //            @todo handle other exceptions
             Plugin::error("Failed to ingest submission #{$submission->id}: {$e->getMessage()}");
-            return false;
+            dd($e);
         }
     }
 

@@ -57,11 +57,10 @@ class WebhooksController extends BaseController
                  return $this->asFailure('Submission not found');
              }
 
-             $this->module->api->onWebhook($submission, $transaction);
+             $this->plugin->api->onWebhook($submission, $transaction);
 
 
          } catch (\Exception $e) {
-             dd($e);
              Plugin::error('Could not process webhook: ' . $e->getMessage());
              return $this->asFailure('Could not process webhook');
          }

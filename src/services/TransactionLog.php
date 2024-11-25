@@ -34,6 +34,8 @@ class TransactionLog extends Component
     }
     public function deleteFor(NeverstaleSubmission $submission): bool
     {
-        return TransactionLogRecord::deleteAll(['submissionId' => $submission->id]);
+        TransactionLogRecord::deleteAll(['submissionId' => $submission->id]);
+
+        return true;
     }
 }

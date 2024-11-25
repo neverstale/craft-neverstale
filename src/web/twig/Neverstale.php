@@ -2,11 +2,8 @@
 
 namespace zaengle\neverstale\web\twig;
 
-use Craft;
 use Twig\Extension\AbstractExtension;
-use Twig\TwigFilter;
 use Twig\TwigFunction;
-use Twig\TwigTest;
 use zaengle\neverstale\enums\AnalysisStatus;
 
 /**

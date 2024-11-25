@@ -24,7 +24,7 @@ use zaengle\neverstale\Plugin;
  */
 class Submission extends Component
 {
-    public function queue(Entry $entry): int
+    public function queue(Entry $entry): ?string
     {
         return Queue::push(new CreateSubmissionJob([
             'entryId' => $entry->id,
