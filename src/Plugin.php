@@ -250,9 +250,9 @@ class Plugin extends BasePlugin
         $entry = $event->sender;
         $event->html = match ($event->attribute) {
             self::STATUS_ATTRIBUTE => $this->getStatusAttributeHtml($entry),
-//            self::DATE_ANALYZED_ATTRIBUTE, self::DATE_EXPIRED_ATTRIBUTE => $this->getDateAttributeHtml($event->attribute, $entry),
+            self::DATE_ANALYZED_ATTRIBUTE, self::DATE_EXPIRED_ATTRIBUTE => $this->getDateAttributeHtml($event->attribute, $entry),
             self::FLAG_COUNT_ATTRIBUTE => $entry->getNeverstaleSubmission()?->flagCount ?? 0,
-            default => '',
+            default => null,
         };
     }
 
@@ -286,7 +286,7 @@ class Plugin extends BasePlugin
             default => '',
         };
 
-        return $submission->{$submissionAttr} ? $submission->{$submissionAttr}->format('Y-m-d H:i:s') : '';
+        return $submission->{$submissionAttr} ? Craft::$app->formatter->asTimestamp($submission->{$submissionAttr}) : '--';
     }
 
     /**

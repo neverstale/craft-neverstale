@@ -23,7 +23,13 @@ class NeverstaleSubmissionQuery extends ElementQuery
     public mixed $neverstaleId = null;
     public mixed $flagCount = null;
     public mixed $analysisStatus = null;
-    public mixed $nextFlagDate = null;
+    public mixed $dateExpired = null;
+    public mixed $dateAnalyzed = null;
+
+    public mixed $hasFlags = null;
+    public mixed $isExpired = null;
+    public mixed $isAnalyzed = null;
+
 
     public function entryId(mixed $value): self
     {
@@ -47,11 +53,30 @@ class NeverstaleSubmissionQuery extends ElementQuery
         return $this;
     }
 
-    public function nextFlagDate(mixed $value): self
+    public function dateExpired(mixed $value): self
     {
-        $this->nextFlagDate = $value;
+        $this->dateExpired = $value;
 
         return $this;
+    }
+    public function dateAnalyzed(mixed $value): self
+    {
+        $this->dateAnalyzed = $value;
+
+        return $this;
+    }
+
+    public function hasFlags(mixed $value): self
+    {
+        $this->hasFlags = $value;
+    }
+    public function isExpired(mixed $value): self
+    {
+        $this->isExpired = $value;
+    }
+    public function isAnalyzed(mixed $value): self
+    {
+        $this->isAnalyzed = $value;
     }
 
     protected function statusCondition(string $status): mixed
@@ -78,6 +103,8 @@ class NeverstaleSubmissionQuery extends ElementQuery
 
         $this->query->select([
             'neverstale_submissions.analysisStatus',
+            'neverstale_submissions.dateAnalyzed',
+            'neverstale_submissions.dateExpired',
             'neverstale_submissions.flagCount',
             'neverstale_submissions.entryId',
             'neverstale_submissions.neverstaleId',
@@ -99,8 +126,20 @@ class NeverstaleSubmissionQuery extends ElementQuery
         if ($this->siteId) {
             $this->subQuery->andWhere(Db::parsenumericparam('neverstale_submissions.siteId', $this->siteId));
         }
-        if ($this->nextFlagDate) {
-            $this->subQuery->andWhere(Db::parseDateParam('neverstale_submissions.nextFlagDate', $this->nextFlagDate));
+        if ($this->dateExpired) {
+            $this->subQuery->andWhere(Db::parseDateParam('neverstale_submissions.dateExpired', $this->dateExpired));
+        }
+        if ($this->dateAnalyzed) {
+            $this->subQuery->andWhere(Db::parseDateParam('neverstale_submissions.dateAnalyzed', $this->dateAnalyzed));
+        }
+        if ($this->hasFlags) {
+            $this->subQuery->andFilterCompare('neverstale_submissions.flagCount', 0, '>');
+        }
+        if ($this->isAnalyzed) {
+            // @todo
+        }
+        if ($this->isExpired) {
+            // @todo
         }
 
         return parent::beforePrepare();

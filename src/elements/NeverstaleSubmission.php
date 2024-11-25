@@ -159,7 +159,7 @@ class NeverstaleSubmission extends Element
 
     public function getUiLabel(): string
     {
-        return "#{$this->id}: {$this->getEntry()?->title}";
+        return $this->id;
     }
 
     /**
@@ -182,6 +182,24 @@ class NeverstaleSubmission extends Element
                 'key' => '*',
                 'label' => Plugin::t('All Neverstale Submissions'),
             ],
+            [
+                'heading' => Plugin::t('Processed Submissions'),
+            ],
+            [
+                'key' => AnalysisStatus::ANALYZED_FLAGGED->value,
+                'label' => AnalysisStatus::ANALYZED_FLAGGED->label(),
+                'criteria' => [
+                    'analysisStatus' => AnalysisStatus::ANALYZED_FLAGGED->value
+                ],
+                'defaultSort' => ['flagCount', 'desc'],
+            ],
+            [
+                'key' => AnalysisStatus::ANALYZED_CLEAN->value,
+                'label' => AnalysisStatus::ANALYZED_CLEAN->label(),
+                'criteria' => [
+                    'analysisStatus' => AnalysisStatus::ANALYZED_CLEAN->value
+                ],
+            ],
         ];
     }
 
@@ -193,9 +211,24 @@ class NeverstaleSubmission extends Element
     protected static function defineSortOptions(): array
     {
         return [
-            'title' => Craft::t('app', 'Title'),
-            'slug' => Craft::t('app', 'Slug'),
-            'uri' => Craft::t('app', 'URI'),
+            [
+                'label' => Plugin::t('Flag Count'),
+                'orderBy' => 'neverstale_submissions.flagCount',
+                'attribute' => 'flagCount',
+                'defaultDir' => 'desc',
+            ],
+            [
+                'label' => Plugin::t('Date Analyzed'),
+                'orderBy' => 'neverstale_submissions.dateAnalyzed',
+                'attribute' => 'dateAnalyzed',
+                'defaultDir' => 'desc',
+            ],
+            [
+                'label' => Plugin::t('Date Expired'),
+                'orderBy' => 'neverstale_submissions.dateExpired',
+                'attribute' => 'dateExpired',
+                'defaultDir' => 'desc',
+            ],
             [
                 'label' => Craft::t('app', 'Date Created'),
                 'orderBy' => 'elements.dateCreated',
@@ -213,7 +246,6 @@ class NeverstaleSubmission extends Element
                 'orderBy' => 'elements.id',
                 'attribute' => 'id',
             ],
-            // ...
         ];
     }
 
@@ -224,6 +256,9 @@ class NeverstaleSubmission extends Element
             'status' => ['label' => Craft::t('app', 'Status')],
             'entry' => ['label' => Craft::t('app', 'Entry')],
             'uid' => ['label' => Craft::t('app', 'UID')],
+            'flagCount' => ['label' => Plugin::t('Flag Count')],
+            'dateAnalyzed' => ['label' => Plugin::t('Date Analyzed')],
+            'dateExpired' => ['label' => Plugin::t('Date Expired')],
             'dateCreated' => ['label' => Craft::t('app', 'Date Created')],
             'dateUpdated' => ['label' => Craft::t('app', 'Date Updated')],
         ];
@@ -234,8 +269,10 @@ class NeverstaleSubmission extends Element
         return [
             'entry',
             'status',
-            'dateCreated',
+            'flagCount',
+            'dateAnalyzed',
             'dateUpdated',
+            'dateExpired',
         ];
     }
 
