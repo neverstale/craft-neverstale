@@ -40,7 +40,7 @@ class Api extends Component
 
             $responseBody = Json::decode($response->getBody()->getContents());
 
-            $transaction = ApiTransaction::fromIngestResponse($responseBody);
+            $transaction = ApiTransaction::fromIngestResponse($responseBody, 'api.ingest');
             Plugin::info("Ingest for submission #{$submission->id}: status {$transaction->transactionStatus}");
 
             // update the submission element based on the response
@@ -55,8 +55,9 @@ class Api extends Component
                     return false;
             }
         } catch (GuzzleException $e) {
-//            @todo handle guzzle exceptions
-            dd($e);
+            $transaction = ApiTransaction::fromGuzzleException($e, 'api.error');
+            return $this->onIngestError($submission, $transaction);
+
             return false;
         } catch (\Exception $e) {
             dd($e);
@@ -95,18 +96,15 @@ class Api extends Component
     public function onWebhook(NeverstaleSubmission $submission, ApiTransaction $transaction): bool
     {
         $submission->setAnalysisStatus($transaction->getAnalysisStatus());
-        $submission->logTransaction($transaction);
-        switch ($transaction->analysisStatus) {
-            case AnalysisStatus::PENDING_INITIAL_ANALYSIS:
-            case AnalysisStatus::ANALYZED_CLEAN:
-            case AnalysisStatus::PENDING_REANALYSIS:
-                $submission->flagCount = 0;
-                break;
-            case AnalysisStatus::ANALYZED_FLAGGED:
-//                @todo: handle flag count + types
-//                $submission->flagCount = $transaction->data['flag_count'] ?? 0;
-                break;
+        $submission->flagCount = $transaction->getFlagCount();
+
+        if ($transaction->getDateAnalyzed()) {
+            $submission->dateAnalyzed = $transaction->getDateAnalyzed();
         }
+        if ($transaction->getDateExpired()) {
+            $submission->dateExpired = $transaction->getDateExpired();
+        }
+        $submission->logTransaction($transaction);
 
         return Plugin::getInstance()->submission->save($submission);
     }

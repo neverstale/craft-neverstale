@@ -30,6 +30,16 @@
   }) }}
   <form method="post">
     {{ hiddenInput('submissionId', submission.id) }}
+    {{ actionInput('neverstale/submissions/reset-logs') }}
+    {{ csrfInput() }}
+    {{ tag('button', {
+      type: 'submit',
+      class: 'btn',
+      text: 'Reset Transaction Logs'|t('neverstale'),
+    }) }}
+  </form>
+  <form method="post">
+    {{ hiddenInput('submissionId', submission.id) }}
     {{ actionInput('neverstale/submissions/ingest') }}
     {{ csrfInput() }}
     {{ tag('button', {
@@ -44,71 +54,81 @@
   <div id="content" class="content-pane">
     <h2>Submission Details</h2>
     <dl id="meta-details" class="meta ns-meta">
-      <div class="data">
-        <dt class="heading">{{ 'ID' | t('neverstale') }}</dt>
-        <dd class="value">{{ submission.id }}</dd>
-      </div>
-      <div class="data">
-        <dt class="heading">{{ 'UID' | t('neverstale') }}</dt>
-        <dd class="value"><code>{{ submission.uid }}</code></dd>
-      </div>
-      <div class="data">
-        <dt class="heading">{{ 'Neverstale ID' | t('neverstale') }}</dt>
-        <dd class="value"><code>{{ submission.neverstaleId }}</code></dd>
-      </div>
-      <div class="data">
+      <div class="data ns-data ns-data-2">
         <dt class="heading">{{ 'Entry' | t('app') }}</dt>
-
         <dd class="value">
           {% if submission.entry %}
-            {{ elementChip(submission.entry) }}
+            {{ elementChip(submission.entry) }} {{ craft.app.getIsMultiSite() ? "(#{submission.site})" }}
           {% else %}
             {{ '[Deleted element]' | t('neverstale') }}
           {% endif %}
         </dd>
       </div>
-      <div class="data">
-        <dt class="heading">{{ 'Status' | t('app') }}</dt>
+      <div class="data ns-data ns-data-2">
+        <dt class="heading">{{ 'Content Status' | t('app') }}</dt>
         <dd class="value">
           <span class="status {{ submission.statusColor }}"></span>
-          <span>{{ submission.status | title | t('neverstale') }}</span>
+          <span>{{ submission.statusAsEnum.label | t('neverstale') }}</span>
         </dd>
       </div>
 
-      {% if craft.app.getIsMultiSite() %}
-        <div class="data">
-          <dt class="heading">{{ 'Site' | t('neverstale') }}</dt>
-          <dd class="value">{{ submission.site }}</dd>
-        </div>
-      {% endif %}
+      <div class="data ns-data ns-data-2">
+        <dt class="heading">{{ 'Flag Count' | t('app') }}</dt>
+        <dd class="value">
+          <span>{{ submission.flagCount }}</span>
+        </dd>
+      </div>
 
-      <div class="data">
+      <div class="data ns-data ns-data-2">
+        <dt class="heading">{{ 'Last updated at' | t('app') }}</dt>
+        <dd id="date-updated-value" class="value">{{ submission.dateUpdated | datetime('short') }}</dd>
+      </div>
+      <div class="data ns-data ns-data-2">
         <dt class="heading">{{ 'Created at' | t('app') }}</dt>
         <dd id="date-created-value" class="value">{{ submission.dateCreated | datetime('short') }}</dd>
       </div>
-
-      <div class="data">
-        <dt class="heading">{{ 'Updated at' | t('app') }}</dt>
-        <dd id="date-updated-value" class="value">{{ submission.dateUpdated | datetime('short') }}</dd>
+      <div class="data ns-data ns-data-2">
+        <dt class="heading">{{ 'Last analyzed at' | t('app') }}</dt>
+        <dd id="date-updated-value" class="value">{{ submission.dateAnalyzed | datetime('short') }}</dd>
+      </div>
+      <div class="data ns-data ns-data-2">
+        <dt class="heading">{{ 'Content expired at' | t('app') }}</dt>
+        <dd id="date-created-value" class="value">{{ submission.dateExpired | datetime('short') }}</dd>
+      </div>
+      <div class="data ns-data ns-data-2">
+        <dt class="heading">{{ 'Submission ID' | t('neverstale') }}</dt>
+        <dd class="value"><code>{{ submission.id }}</code></dd>
+      </div>
+      <div class="data ns-data ns-data-2">
+        <dt class="heading">{{ 'Submission UID' | t('neverstale') }}</dt>
+        <dd class="value"><code>{{ submission.uid }}</code></dd>
       </div>
     </dl>
     <hr>
     <h2>Transaction Log</h2>
     <div class="table-responsive">
-      <table class="table table-condensed table-bordered table-striped">
+      <table class="ns-table table data table-condensed table-bordered table-striped fullwidth">
         <thead>
         <tr>
-          <th>When</th>
-{#          <th>Result</th>#}
-          <th>Message</th>
+          <th scope="col">When</th>
+          <th scope="col">Analysis Status</th>
+          <th scope="col">Message</th>
         </tr>
         </thead>
         <tbody>
-        {% for log in submission.transactionLog %}
+        {% for transaction in submission.transactionLogs.orderBy('dateCreated DESC').collect() %}
+          {% set status = neverstaleToAnalysisStatus(transaction.status) %}
           <tr>
-            <td>{{ log.createdAt | datetime('short') }}</td>
-{#            <td>{{ log.status | title }}</td>#}
-            <td>{{ log.message }}</td>
+            <td class="ns-td-fixed-200">{{ transaction.dateCreated | datetime('short') }}</td>
+            <td class="ns-td-fixed-200">
+              {%- if status -%}
+                <span class="status {{ status.color.value }}" aria-hidden="true"></span>
+                {{ status.label }}
+              {%- else %}
+                {{ transaction.status | title }}
+              {%- endif -%}
+            </td>
+            <td>{{ transaction.message }}</td>
           </tr>
         {% else %}
           <tr>
@@ -124,6 +144,27 @@
 .ns-meta {
   border: 1px solid #e5e7eb;
   border-radius: 4px;
+  @media (min-width: 1024px) {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: stretch;
+  }
 }
-
+.ns-table thead th {
+  border-bottom: 1px solid #e5e7eb;
+}
+.ns-data {
+  @media (min-width: 1024px) {
+    flex-grow: 1;
+    flex-shrink: 0;
+  }
+}
+.ns-data-2 {
+  @media (min-width: 1024px) {
+    width: 50%;
+  }
+}
+.ns-td-fixed-200 {
+  width: 200px;
+}
 {% endcss %}

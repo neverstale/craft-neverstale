@@ -2,31 +2,28 @@
 
 namespace zaengle\neverstale\traits;
 
+use yii\db\ActiveQueryInterface;
 use zaengle\neverstale\models\ApiTransaction;
+use zaengle\neverstale\Plugin;
 use zaengle\neverstale\records\Submission;
 
 trait LogsApiTransactions
 {
-    protected array $transactionLog = [];
-    public function logTransaction(ApiTransaction $item): void
+    public function logTransaction(ApiTransaction $transaction): bool
     {
-//        $this->transactionLog[] = $item->toArray([
-//            'transactionStatus',
-//            'message',
-//            'neverstaleId',
-//            'channelId',
-//            'customId',
-//            'createdAt'
-//        ]);
+        return Plugin::getInstance()->transactionLog->logTo($this, $transaction);
+    }
+    public function clearTransactionLog(): bool
+    {
+        return Plugin::getInstance()->transactionLog->deleteFor($this);
     }
 
     /**
-     * @return array<ApiTransaction>
+     * @return ActiveQueryInterface
      */
-    public function getTransactionLog(): array
+    public function getTransactionLogs(): ActiveQueryInterface
     {
-        return [];
-//        return $this->getRecord()?->getTransactionLog() ?? [];
+        return $this->getRecord()?->getTransactionLogs();
     }
 
     abstract public function getRecord(): ?Submission;

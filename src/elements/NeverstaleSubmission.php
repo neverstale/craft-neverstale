@@ -12,7 +12,6 @@ use craft\elements\Entry;
 use craft\elements\User;
 use craft\errors\ElementNotFoundException;
 use craft\helpers\ArrayHelper;
-use craft\helpers\Cp;
 
 use craft\helpers\UrlHelper;
 
@@ -27,7 +26,6 @@ use zaengle\neverstale\elements\conditions\NeverstaleSubmissionCondition;
 use zaengle\neverstale\elements\db\NeverstaleSubmissionQuery;
 use zaengle\neverstale\enums\Permission;
 use zaengle\neverstale\traits\HasNeverstaleContent;
-use zaengle\neverstale\traits\HasTrackedJobs;
 
 /**
  * Neverstale Submission Custom Element Type
@@ -38,6 +36,9 @@ use zaengle\neverstale\traits\HasTrackedJobs;
  * @see https://github.com/zaengle/craft-neverstale
  * @property int $entryId
  * @property int $siteId
+ * @property-read null|string $postEditUrl
+ * @property-read string $statusColor
+ * @property-read string $uiLabel
  * @property-read Entry|null $entry
  */
 class NeverstaleSubmission extends Element
@@ -128,12 +129,6 @@ class NeverstaleSubmission extends Element
         parent::afterSave($isNew);
     }
 
-    public function getJobIds(): array
-    {
-        return $this->getRecord()?->getJobIds() ?? [];
-    }
-
-
     public function setEagerLoadedElements(string $handle, array $elements, EagerLoadPlan $plan): void
     {
         // The handle can be anything, so long as it matches what is used in `eagerLoadingMap()`:
@@ -147,14 +142,18 @@ class NeverstaleSubmission extends Element
 
     public function getStatus(): ?string
     {
-        return $this->getRecord()->analysisStatus;
+        return $this->getRecord()?->analysisStatus;
     }
 
     public function getStatusColor(): string
     {
-        return AnalysisStatus::from($this->getStatus())->color()->value;
+        return $this->getStatusAsEnum()->color()->value;
     }
 
+        public function getStatusAsEnum(): AnalysisStatus
+    {
+        return AnalysisStatus::from($this->getStatus());
+    }
 
 
     public function getUiLabel(): string
@@ -304,9 +303,7 @@ class NeverstaleSubmission extends Element
 
     protected static function defineSearchableAttributes(): array
     {
-        return [
-            'flagTypes',
-        ];
+        return [];
     }
 
     /**

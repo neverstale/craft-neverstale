@@ -103,5 +103,31 @@ class SubmissionsController extends BaseController
 
         return $this->redirectToPostedUrl();
     }
+    public function actionResetLogs()
+    {
+        $this->requireCpRequest();
+        $this->requirePostRequest();
+        $this->requirePermission(Permission::Ingest->value);
+        $session = Craft::$app->getSession();
 
+        $submissionId = $this->request->getParam('submissionId');
+        $submission = NeverstaleSubmission::findOne(['id' => $submissionId]);
+
+        if(!$submission) {
+            $session->setError(Plugin::t("Submission #{id} not found", ['id' => $submissionId]));
+
+            return null;
+        }
+
+        if (!Plugin::getInstance()->transactionLog->deleteFor($submission)) {
+            $session->setError(Plugin::t("Could reset transaction logs for submission #{id}", ['id' => $submissionId]));
+
+            return null;
+        }
+
+        $session->setNotice(Plugin::t("Reset transaction logs for Submission #{id}", ['id' => $submissionId]));
+
+
+        return $this->redirectToPostedUrl();
+    }
 }

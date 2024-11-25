@@ -2,6 +2,8 @@
 
 namespace zaengle\neverstale\models;
 use craft\base\Model;
+use GuzzleHttp\Exception\GuzzleException;
+use Illuminate\Support\Arr;
 use zaengle\neverstale\enums\AnalysisStatus;
 
 /**
@@ -11,36 +13,52 @@ use zaengle\neverstale\enums\AnalysisStatus;
  * @property-read string|null $customId
  * @property-read string|null $channelId
  * @property-read AnalysisStatus $analysisStatus
+ * @property-read null|\DateTime $dateAnalyzed
+ * @property-read null|\DateTime $dateExpired
+ * @property-read int $flagCount
  * @property-read string $transactionStatus
  */
 class ApiTransaction extends Model
 {
-    public ?string $message;
-    public ?string $event;
-    public string $transactionStatus;
+    public ?string $message = null;
+    public ?string $event = null;
+    public ?string $transactionStatus = null;
     public array $content = [];
-    public \DateTime $createdAt;
 
     public function getNeverstaleId(): ?string
     {
-        return $this->content['id'] ?? null;
+        return Arr::get($this->content, 'id');
     }
     public function getCustomId(): ?string
     {
-        return $this->content['custom_id'] ?? null;
+        return Arr::get($this->content, 'custom_id');
     }
     public function getAnalysisStatus(): AnalysisStatus
     {
-        return AnalysisStatus::from($this->content['analysis_status'] ?? AnalysisStatus::UNKNOWN->value);
+        $status = Arr::get($this->content, 'analysis_status');
+        return AnalysisStatus::from($status ??  $this->transactionStatus ?? AnalysisStatus::UNKNOWN->value);
     }
-    public function getChannelId(): ?string
+    public function getDateExpired(): ?\DateTime
     {
-        return $this->content['channel_id'] ?? null;
+        return Arr::has($this->content, 'expired_at')
+            ? new \DateTime(Arr::get($this->content, 'expired_at'))
+            : null;
+    }
+    public function getDateAnalyzed(): ?\DateTime
+    {
+        return Arr::has($this->content, 'analyzed_at')
+            ? new \DateTime(Arr::get($this->content, 'analyzed_at'))
+            : null;
     }
 
-    public function getMessage(): ?string
+    public function getFlagCount(): int
     {
-        return  $this->event ?? $this->message;
+        return count(Arr::get($this->content, 'flags') ?? []);
+    }
+
+    public function getChannelId(): ?string
+    {
+        return Arr::get($this->content, 'channel_id');
     }
     /**
      * Create a new ApiTransaction from a Neverstale response
@@ -48,13 +66,23 @@ class ApiTransaction extends Model
      * @param array $data
      * @return ApiTransaction
      */
-    public static function fromIngestResponse(array $data): self
+    public static function fromIngestResponse(array $data, ?string $event = null): self
     {
         return new self([
+            'event' => $event,
             'message' => $data['message'] ?? null,
             'transactionStatus' => $data['status'] ?? 'success',
-            'createdAt' => new \DateTime(),
             'content' => $data['data'],
+        ]);
+    }
+
+    public static function fromGuzzleException(GuzzleException $e, ?string $event = null): self
+    {
+        return new self([
+            'event' => $event,
+            'message' => $e->getMessage(),
+            'transactionStatus' => 'error',
+            'content' => [],
         ]);
     }
     /**
@@ -63,12 +91,12 @@ class ApiTransaction extends Model
      * @param array $data
      * @return ApiTransaction
      */
-    public static function fromWebhookPayload(array $data): self
+    public static function fromWebhookPayload(array $data, ?string $message = 'Webhook received'): self
     {
         return new self([
             'event' => $data['event'] ?? null,
             'transactionStatus' => $data['status'] ?? 'success',
-            'createdAt' => new \DateTime(),
+            'message' => $message,
             'content' => $data['data']['content'],
         ]);
     }

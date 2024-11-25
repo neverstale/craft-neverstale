@@ -27,13 +27,8 @@ trait HasNeverstaleContent
     public ?string $neverstaleId = null;
     public ?string $analysisStatus = null;
     public int $flagCount = 0;
-
-    /**
-     * @var array<string>
-     */
-    public array $flagTypes = [];
-    public ?\DateTime $nextFlagDate = null;
-
+    public ?\DateTime $dateAnalyzed = null;
+    public ?\DateTime $dateExpired = null;
 
     public function getRecord(): ?SubmissionRecord
     {
@@ -72,8 +67,8 @@ trait HasNeverstaleContent
         $record->neverstaleId = $this->neverstaleId;
         $record->analysisStatus = $this->analysisStatus ?? AnalysisStatus::UNSENT->value;
         $record->flagCount = $this->flagCount;
-        $record->flagTypes = $this->flagTypes;
-        $record->nextFlagDate = $this->nextFlagDate;
+        $record->dateAnalyzed = $this->dateAnalyzed;
+        $record->dateExpired = $this->dateExpired;
 
         $record->save(false);
         $record->validate();

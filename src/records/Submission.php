@@ -15,14 +15,15 @@ use zaengle\neverstale\models\ApiTransaction;
  * @property int $id ID
  * @property int|null $entryId Entry ID
  * @property int|null $siteId Site ID
- * @property string $analysisStatus Analysis status
  * @property string|null $neverstaleId Neverstale ID
- * @property int|null $flagCount Flag count
- * @property string|null $flagTypes Flag types
- * @property string|null $nextFlagDate Next flag date
- * @property string $dateCreated Date created
- * @property string $dateUpdated Date updated
  * @property string $uid Uid
+ * @property string $analysisStatus Analysis status
+ * @property int|null $flagCount Flag count
+ * @property \DateTime|null $dateAnalyzed Last analyzed at
+ * @property \DateTime|null $dateExpired Content expired at date
+ * @property \DateTime $dateCreated Date created
+ * @property \DateTime $dateUpdated Date updated
+ * @property-read \yii\db\ActiveQueryInterface $transactions
  */
 class Submission extends ActiveRecord
 {
@@ -34,19 +35,13 @@ class Submission extends ActiveRecord
     {
         parent::init();
     }
-    public function getFlagTypes()
+    public function getTransactionLogs(): ActiveQueryInterface
     {
-        return Json::decode($this->flagTypes) ?? [];
-    }
-    public function getTransactions(): ActiveQueryInterface
-    {
-        return self::hasMany(Transaction::class, ['submissionId' => 'id']);
+        return self::hasMany(TransactionLog::class, ['submissionId' => 'id']);
     }
 
     public function rules(): array
     {
-        return [
-            [['flagTypes'], 'safe'],
-        ];
+        return [];
     }
 }

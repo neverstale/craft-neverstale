@@ -37,11 +37,11 @@ class Install extends Migration
         if ($this->db->tableExists('{{%neverstale_transactions}}')) {
             Db::dropAllForeignKeysToTable('{{%neverstale_transactions}}');
         }
-        $this->dropTableIfExists('{{%neverstale_transactions}}');
 
         if ($this->db->tableExists('{{%neverstale_submissions}}')) {
             Db::dropAllForeignKeysToTable('{{%neverstale_submissions}}');
         }
+        $this->dropTableIfExists('{{%neverstale_transactions}}');
         $this->dropTableIfExists('{{%neverstale_submissions}}');
 
         return true;
@@ -58,8 +58,8 @@ class Install extends Migration
             'uid' => $this->uid(),
             'analysisStatus' => $this->string()->defaultValue(AnalysisStatus::UNSENT->value),
             'flagCount' => $this->integer()->defaultValue(0),
-            'flagTypes' => $this->json(),
-            'nextFlagDate' => $this->dateTime()->defaultValue(null),
+            'dateAnalyzed' => $this->dateTime()->defaultValue(null),
+            'dateExpired' => $this->dateTime()->defaultValue(null),
             'dateCreated' => $this->dateTime()->notNull(),
             'dateUpdated' => $this->dateTime()->notNull(),
         ]);
@@ -69,6 +69,8 @@ class Install extends Migration
             'submissionId' => $this->integer(),
             'status' => $this->string(),
             'message' => $this->text(),
+            'event' => $this->text(),
+            'debugTransaction' => $this->json(),
             'dateCreated' => $this->dateTime()->notNull(),
             'dateUpdated' => $this->dateTime()->notNull(),
         ]);

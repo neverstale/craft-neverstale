@@ -3,7 +3,6 @@
 namespace zaengle\neverstale;
 
 use Craft;
-use craft\helpers\App;
 use Monolog\Formatter\LineFormatter;
 use Psr\Log\LogLevel;
 use craft\base\Element;
@@ -19,6 +18,7 @@ use craft\events\RegisterCpNavItemsEvent;
 use craft\events\RegisterElementTableAttributesEvent;
 use craft\events\RegisterUrlRulesEvent;
 use craft\events\RegisterUserPermissionsEvent;
+use craft\helpers\App;
 use craft\helpers\Cp as CpHelper;
 use craft\log\MonologTarget;
 use craft\services\Elements;
@@ -41,9 +41,11 @@ use zaengle\neverstale\services\Config;
 use zaengle\neverstale\services\Entry as EntryService;
 use zaengle\neverstale\services\Format as FormatService;
 use zaengle\neverstale\services\Submission as SubmissionService;
+use zaengle\neverstale\services\TransactionLog;
 use zaengle\neverstale\support\ApiClient;
 use zaengle\neverstale\utilities\PreviewSubmission;
 use zaengle\neverstale\utilities\ScanUtility;
+use zaengle\neverstale\web\twig\Neverstale;
 
 /**
  * Neverstale Craft Plugin
@@ -64,6 +66,7 @@ use zaengle\neverstale\utilities\ScanUtility;
  * @property-read SubmissionService $submission
  * @property-read Config $config
  * @property-read Api $api
+ * @property-read TransactionLog $transactionLog
  */
 class Plugin extends BasePlugin
 {
@@ -83,6 +86,7 @@ class Plugin extends BasePlugin
                 'format' => FormatService::class,
                 'submission' => SubmissionService::class,
                 'config' => Config::class,
+                'transactionLog' => TransactionLog::class,
             ],
         ];
     }
@@ -104,6 +108,7 @@ class Plugin extends BasePlugin
                 ],
             ]);
         });
+        Craft::$app->view->registerTwigExtension(new Neverstale());
     }
     /**
      * Logs an informational message to our custom log target.
