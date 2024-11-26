@@ -5,7 +5,7 @@ namespace zaengle\neverstale\models;
 use craft\base\Model;
 use craft\elements\Entry;
 use Illuminate\Contracts\Support\Arrayable;
-use zaengle\neverstale\elements\NeverstaleSubmission;
+use zaengle\neverstale\elements\NeverstaleContent;
 use zaengle\neverstale\Plugin;
 
 /**
@@ -22,9 +22,9 @@ use zaengle\neverstale\Plugin;
  * @property-read string $apiId
  * @property-read string $customId
  * @property-read array<string,mixed> $apiData
- * @property-read NeverstaleSubmission $submission
+ * @property-read NeverstaleContent $content
  */
-class ContentSubmission extends Model implements Arrayable
+class IngestContent extends Model implements Arrayable
 {
     public ?string $editUrl = null;
     public ?string $url = null;
@@ -33,7 +33,7 @@ class ContentSubmission extends Model implements Arrayable
     public ?string $author = null;
     public string $data = '';
     private string $customId;
-    private NeverstaleSubmission $submission;
+    private NeverstaleContent $content;
 
     /**
      * @inheritDoc
@@ -41,7 +41,7 @@ class ContentSubmission extends Model implements Arrayable
     public function defineRules(): array
     {
         return [
-            [['submission'], 'required'],
+            [['content'], 'required'],
             [['url', 'editUrl'], 'url'],
         ];
     }
@@ -83,7 +83,7 @@ class ContentSubmission extends Model implements Arrayable
     }
     public function getEntry(): ?Entry
     {
-        return $this->submission->getEntry();
+        return $this->content->getEntry();
     }
     public function setTitle(string $title): self
     {
@@ -95,13 +95,13 @@ class ContentSubmission extends Model implements Arrayable
         $this->url = $url;
         return $this;
     }
-    public function getSubmission(): NeverstaleSubmission
+    public function getContent(): NeverstaleContent
     {
-        return $this->submission;
+        return $this->content;
     }
-    protected function setSubmission(NeverstaleSubmission $submission): void
+    protected function setContent(NeverstaleContent $content): void
     {
-        $this->submission = $submission;
+        $this->content = $content;
     }
     /**
      * @param array $fields
@@ -123,14 +123,14 @@ class ContentSubmission extends Model implements Arrayable
 
         return $result->filter(fn ($value) => $value !== null)->toArray();
     }
-    public static function fromSubmission(NeverstaleSubmission $submission): self
+    public static function fromContent(NeverstaleContent $content): self
     {
         /** @var Entry $entry  */
-        $entry = $submission->getEntry();
+        $entry = $content->getEntry();
         return new self(array_merge(
             self::metaFromEntry($entry),
             [
-                'submission' => $submission,
+                'content' => $content,
                 'customId' => $entry->uid,
                 'data'  => Plugin::getInstance()->format->entryContent($entry),
             ]));

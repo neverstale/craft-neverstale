@@ -8,14 +8,14 @@ use craft\helpers\Db;
 use zaengle\neverstale\enums\AnalysisStatus;
 
 /**
- * Neverstale Submission Query
+ * Neverstale Content Query
  *
  * @author Zaengle
  * @package zaengle/craft-neverstale
  * @since 1.0.0
  * @see https://github.com/zaengle/craft-neverstale
  */
-class NeverstaleSubmissionQuery extends ElementQuery
+class NeverstaleContentQuery extends ElementQuery
 {
     public mixed $entryId = null;
     public mixed $siteId = null;
@@ -91,7 +91,7 @@ class NeverstaleSubmissionQuery extends ElementQuery
             AnalysisStatus::ANALYZED_ERROR,
             AnalysisStatus::UNKNOWN,
             AnalysisStatus::API_ERROR => [
-                'neverstale_submissions.analysisStatus' => $status,
+                'neverstale_content.analysisStatus' => $status,
             ],
             default => parent::statusCondition($status),
         };
@@ -99,41 +99,41 @@ class NeverstaleSubmissionQuery extends ElementQuery
 
     protected function beforePrepare(): bool
     {
-        $this->joinElementTable('neverstale_submissions');
+        $this->joinElementTable('neverstale_content');
 
         $this->query->select([
-            'neverstale_submissions.analysisStatus',
-            'neverstale_submissions.dateAnalyzed',
-            'neverstale_submissions.dateExpired',
-            'neverstale_submissions.flagCount',
-            'neverstale_submissions.entryId',
-            'neverstale_submissions.neverstaleId',
-            'neverstale_submissions.siteId',
+            'neverstale_content.analysisStatus',
+            'neverstale_content.dateAnalyzed',
+            'neverstale_content.dateExpired',
+            'neverstale_content.flagCount',
+            'neverstale_content.entryId',
+            'neverstale_content.neverstaleId',
+            'neverstale_content.siteId',
         ]);
 
         if ($this->analysisStatus) {
-            $this->subQuery->andWhere(Db::parsebooleanparam('neverstale_submissions.analysisStatus', $this->analysisStatus));
+            $this->subQuery->andWhere(Db::parsebooleanparam('neverstale_content.analysisStatus', $this->analysisStatus));
         }
         if ($this->flagCount) {
-            $this->subQuery->andWhere(Db::parsenumericparam('neverstale_submissions.flagCount', $this->flagCount));
+            $this->subQuery->andWhere(Db::parsenumericparam('neverstale_content.flagCount', $this->flagCount));
         }
         if ($this->entryId) {
-            $this->subQuery->andWhere(Db::parsenumericparam('neverstale_submissions.entryId', $this->entryId));
+            $this->subQuery->andWhere(Db::parsenumericparam('neverstale_content.entryId', $this->entryId));
         }
         if ($this->neverstaleId) {
-            $this->subQuery->andWhere(Db::parseParam('neverstale_submissions.neverstaleId', $this->neverstaleId));
+            $this->subQuery->andWhere(Db::parseParam('neverstale_content.neverstaleId', $this->neverstaleId));
         }
         if ($this->siteId) {
-            $this->subQuery->andWhere(Db::parsenumericparam('neverstale_submissions.siteId', $this->siteId));
+            $this->subQuery->andWhere(Db::parsenumericparam('neverstale_content.siteId', $this->siteId));
         }
         if ($this->dateExpired) {
-            $this->subQuery->andWhere(Db::parseDateParam('neverstale_submissions.dateExpired', $this->dateExpired));
+            $this->subQuery->andWhere(Db::parseDateParam('neverstale_content.dateExpired', $this->dateExpired));
         }
         if ($this->dateAnalyzed) {
-            $this->subQuery->andWhere(Db::parseDateParam('neverstale_submissions.dateAnalyzed', $this->dateAnalyzed));
+            $this->subQuery->andWhere(Db::parseDateParam('neverstale_content.dateAnalyzed', $this->dateAnalyzed));
         }
         if ($this->hasFlags) {
-            $this->subQuery->andFilterCompare('neverstale_submissions.flagCount', 0, '>');
+            $this->subQuery->andFilterCompare('neverstale_content.flagCount', 0, '>');
         }
         if ($this->isAnalyzed) {
             // @todo

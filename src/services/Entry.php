@@ -22,7 +22,7 @@ class Entry extends Component
     /**
      * Should an Entry be submitted?
      */
-    public function isSubmittable(EntryElement $entry): bool
+    public function shouldIngest(EntryElement $entry): bool
     {
         if ($this->entryIsNonCanonical($entry)) {
             return false;
@@ -45,14 +45,14 @@ class Entry extends Component
 
     public function hasUserEnabledSubmissionForEntry(EntryElement $entry): bool
     {
-        $submissionEnabled = Plugin::getInstance()->getSettings()->enable;
+        $contentEnabled = Plugin::getInstance()->getSettings()->enable;
 
-        if (is_callable($submissionEnabled)) {
+        if (is_callable($contentEnabled)) {
             Plugin::log(Plugin::t("enable setting is a callable"));
-            return $submissionEnabled($entry);
+            return $contentEnabled($entry);
         }
         Plugin::log(Plugin::t("enable setting is a bool"));
-        if ($submissionEnabled) {
+        if ($contentEnabled) {
             return $this->isEntryInEnabledSection($entry);
         }
         return false;

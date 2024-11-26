@@ -5,21 +5,21 @@
     <div class="data">
       <dt class="heading">{{ 'Content Status' | t('neverstale') }}</dt>
       <dd class="">
-        <span class="status {{ submission.statusColor }}"></span>
-        <span>{{ submission.statusAsEnum.label | t('neverstale') }}</span>
+        <span class="status {{ content.statusColor }}"></span>
+        <span>{{ content.statusAsEnum.label | t('neverstale') }}</span>
       </dd>
     </div>
-    {%- if submission.isAnalyzed %}
+    {%- if content.isAnalyzed %}
     <div class="data">
       <dt class="heading">{{ 'Analyzed At' | t('neverstale') }}</dt>
       <dd class="">
-        <span>{{ submission.dateAnalyzed | timestamp }}</span>
+        <span>{{ content.dateAnalyzed | timestamp }}</span>
       </dd>
     </div>
     {%- endif  %}
   </dl>
-  {% if submission.isFlagged and flagData.data.flags is not empty %}
-  <h3>{{ submission.flagCount }} Content Flags</h3>
+  {% if content.isFlagged and flagData.data.flags is not empty %}
+  <h3>{{ content.flagCount }} Content Flags</h3>
     <dl class="table data table-condensed table-bordered table-striped fullwidth">
       {% for item in flagData.data.flags %}
         {{ d(item) }}

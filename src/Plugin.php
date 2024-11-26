@@ -31,21 +31,19 @@ use craft\web\twig\variables\Cp as CpVariable;
 use craft\web\twig\variables\CraftVariable;
 use yii\base\Event;
 use yii\base\InvalidConfigException;
-use zaengle\neverstale\behaviors\PreviewNeverstaleSubmissionBehavior;
-use zaengle\neverstale\elements\NeverstaleSubmission;
+use zaengle\neverstale\behaviors\HasNeverstaleContentBehavior;
+use zaengle\neverstale\elements\NeverstaleContent;
 use zaengle\neverstale\enums\AnalysisStatus;
 use zaengle\neverstale\enums\Permission;
-use zaengle\neverstale\fields\NeverstaleSubmissions;
 use zaengle\neverstale\models\Settings;
 use zaengle\neverstale\services\Config;
 use zaengle\neverstale\services\Content;
 use zaengle\neverstale\services\Entry as EntryService;
 use zaengle\neverstale\services\Flag;
 use zaengle\neverstale\services\Format as FormatService;
-use zaengle\neverstale\services\Submission as SubmissionService;
 use zaengle\neverstale\services\TransactionLog;
 use zaengle\neverstale\support\ApiClient;
-use zaengle\neverstale\utilities\PreviewSubmission;
+use zaengle\neverstale\utilities\PreviewContent;
 use zaengle\neverstale\utilities\ScanUtility;
 use zaengle\neverstale\web\twig\Neverstale;
 
@@ -65,7 +63,7 @@ use zaengle\neverstale\web\twig\Neverstale;
  * @property-read EntryService $entry
  * @property-read FormatService $format
  * @property-read Settings $settings
- * @property-read SubmissionService $submission
+
  * @property-read Config $config
  * @property-read Content $api
  * @property-read TransactionLog $transactionLog
@@ -112,7 +110,6 @@ class Plugin extends BasePlugin
                     'class' => Flag::class,
                     'client' => $this->client,
                 ],
-                'submission' => SubmissionService::class,
                 'transactionLog' => TransactionLog::class,
             ]);
         });
@@ -186,10 +183,6 @@ class Plugin extends BasePlugin
         $this->registerEntryTableAttributes();
         $this->registerEntrySidebarHtml();
 
-        Event::on(Fields::class, Fields::EVENT_REGISTER_FIELD_TYPES, function(RegisterComponentTypesEvent $event) {
-            $event->types[] = NeverstaleSubmissions::class;
-        });
-
         /**
          * Expose the plugin on the craft variable
          */
@@ -204,17 +197,15 @@ class Plugin extends BasePlugin
         );
 
         /**
-         * Attach the NeverstaleSubmission behavior to the Entry element, adding a neverstaleSubmission property that points
-         * to the most recent submission for the entry
+         * Attach the HasNeverstaleContentBehavior behavior to the Entry element, adding a neverstaleContent property that points
+         * to the element that represents the content in the Neverstale API.
          */
         Event::on(Entry::class, Model::EVENT_DEFINE_BEHAVIORS, function(DefineBehaviorsEvent $event) {
-            /** @var Entry $entry */
-            $entry = $event->sender;
-
-            $event->behaviors['previewNeverstaleSubmission'] = PreviewNeverstaleSubmissionBehavior::class;
+            $event->behaviors['previewNeverstaleContent'] = HasNeverstaleContentBehavior::class;
         });
+
         Event::on(Utilities::class, Utilities::EVENT_REGISTER_UTILITIES, function (RegisterComponentTypesEvent $event) {
-            $event->types[] = PreviewSubmission::class;
+            $event->types[] = PreviewContent::class;
         });
     }
     private function registerEntrySidebarHtml(): void
@@ -224,17 +215,17 @@ class Plugin extends BasePlugin
             Element::EVENT_DEFINE_SIDEBAR_HTML,
             static function(DefineHtmlEvent $event) {
                 $entry = $event->sender;
-                $submission = $entry->getNeverstaleSubmission();
+                $content = $entry->getNeverstaleContent();
 
-                if (!$submission) {
+                if (!$content) {
                     return;
                 }
 
                 // @todo register asset bundle
 
                 $event->html .= Craft::$app->view->renderTemplate('neverstale/entry/_sidebar', [
-                    'submission' => $submission,
-                    'customId' => Plugin::getInstance()->format->forApi($submission)->customId,
+                    'content' => $content,
+                    'customId' => Plugin::getInstance()->format->forIngest($content)->customId,
                 ]);
             });
     }
@@ -273,19 +264,19 @@ class Plugin extends BasePlugin
         $event->html = match ($event->attribute) {
             self::STATUS_ATTRIBUTE => $this->getStatusAttributeHtml($entry),
             self::DATE_ANALYZED_ATTRIBUTE, self::DATE_EXPIRED_ATTRIBUTE => $this->getDateAttributeHtml($event->attribute, $entry),
-            self::FLAG_COUNT_ATTRIBUTE => $entry->getNeverstaleSubmission()?->flagCount ?? 0,
+            self::FLAG_COUNT_ATTRIBUTE => $entry->getNeverstaleContent()?->flagCount ?? 0,
             default => null,
         };
     }
     private function getStatusAttributeHtml(Entry $entry): string
     {
-        $submission = $entry->getNeverstaleSubmission();
+        $content = $entry->getNeverstaleContent();
 
-        if (!$submission) {
+        if (!$content) {
             return '';
         }
 
-        $status = AnalysisStatus::from($submission->status);
+        $status = AnalysisStatus::from($content->status);
 
         return CpHelper::statusLabelHtml([
             'color' => $status->color(),
@@ -296,18 +287,18 @@ class Plugin extends BasePlugin
 
     private function getDateAttributeHtml(string $attribute, Entry $entry): string
     {
-        $submission = $entry->getNeverstaleSubmission();
+        $content = $entry->getNeverstaleContent();
 
-        if (!$submission) {
+        if (!$content) {
             return '';
         }
-        $submissionAttr = match ($attribute) {
+        $contentAttr = match ($attribute) {
             self::DATE_ANALYZED_ATTRIBUTE => 'dateAnalyzed',
             self::DATE_EXPIRED_ATTRIBUTE => 'dateExpired',
             default => '',
         };
 
-        return $submission->{$submissionAttr} ? Craft::$app->formatter->asTimestamp($submission->{$submissionAttr}) : '--';
+        return $content->{$contentAttr} ? Craft::$app->formatter->asTimestamp($content->{$contentAttr}) : '--';
     }
     /**
      * @see \zaengle\neverstale\services\Entry
@@ -322,8 +313,8 @@ class Plugin extends BasePlugin
                  * @var Entry $entry
                  */
                 $entry = $event->sender;
-                if ($this->entry->isSubmittable($entry)) {
-                    $this->submission->queue($entry);
+                if ($this->entry->shouldIngest($entry)) {
+                    $this->content->queue($entry);
                 }
             }
         );
@@ -341,10 +332,10 @@ class Plugin extends BasePlugin
                             'label' => self::t('Scan site content for stale entries'),
                         ],
                         Permission::View->value => [
-                            'label' => self::t('View Neverstale submissions'),
+                            'label' => self::t('View Neverstale Content'),
                         ],
                         Permission::Delete->value => [
-                            'label' => self::t('Delete Neverstale submissions'),
+                            'label' => self::t('Delete Neverstale Content'),
                         ],
                     ],
                 ];
@@ -360,16 +351,16 @@ class Plugin extends BasePlugin
     private function registerElementTypes(): void
     {
         Event::on(Elements::class, Elements::EVENT_REGISTER_ELEMENT_TYPES, function(RegisterComponentTypesEvent $event) {
-            $event->types[] = NeverstaleSubmission::class;
+            $event->types[] = NeverstaleContent::class;
         });
     }
     private function registerCpRoutes(): void
     {
         Event::on(UrlManager::class, UrlManager::EVENT_REGISTER_CP_URL_RULES, function(RegisterUrlRulesEvent $event) {
             $event->rules = array_merge($event->rules, [
-                'neverstale' => ['template' => 'neverstale/submissions/_index.twig'],
-                'neverstale/submissions' => ['template' => 'neverstale/submissions/_index.twig'],
-                'neverstale/submissions/<submissionId:\\d+>' => 'neverstale/submissions/show',
+                'neverstale' => ['template' => 'neverstale/content/_index.twig'],
+                'neverstale/content' => ['template' => 'neverstale/content/_index.twig'],
+                'neverstale/content/<contentId:\\d+>' => 'neverstale/content/show',
             ]);
         });
     }
@@ -384,9 +375,9 @@ class Plugin extends BasePlugin
                     'label' => self::t('Neverstale'),
                     'icon' => '@neverstale/resources/icon.svg',
                     'subnav' => [
-                        'submissions' => [
-                            'label' => self::t('Submissions'),
-                            'url' => 'neverstale/submissions',
+                        'content' => [
+                            'label' => self::t('Content'),
+                            'url' => 'neverstale/content',
                         ],
                         'settings' => [
                             'label' => self::t('Settings'),

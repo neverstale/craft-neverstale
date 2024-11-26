@@ -7,19 +7,19 @@ use craft\errors\ElementNotFoundException;
 use craft\errors\InvalidElementException;
 use craft\helpers\Queue;
 use craft\queue\BaseJob;
-use zaengle\neverstale\elements\NeverstaleSubmission;
-use zaengle\neverstale\helpers\SubmissionJobHelper;
+use zaengle\neverstale\elements\NeverstaleContent;
 use zaengle\neverstale\Plugin;
 
 /**
- * Create Submission Job
+ * Create NeverstaleContent Job
  *
  * @author Zaengle
  * @package zaengle/craft-neverstale
  * @since 1.0.0
  * @see https://github.com/zaengle/craft-neverstale
  */
-class CreateSubmissionJob extends BaseJob
+
+class CreateNeverstaleContentJob extends BaseJob
 {
     public int $entryId;
     /**
@@ -33,11 +33,11 @@ class CreateSubmissionJob extends BaseJob
         if (!$entry) {
             throw new ElementNotFoundException();
         }
-        /** @var NeverstaleSubmission $submission */
-        $submission = Plugin::getInstance()->submission->findOrCreate($entry);
+        /** @var NeverstaleContent $content */
+        $content = Plugin::getInstance()->content->findOrCreate($entry);
 
-        Queue::push(new IngestSubmissionJob([
-            'submissionId' => $submission->id,
+        Queue::push(new IngestContentJob([
+            'contentId' => $content->id,
         ]));
 
     }

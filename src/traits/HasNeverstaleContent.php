@@ -7,7 +7,7 @@ use craft\helpers\UrlHelper;
 
 use zaengle\neverstale\enums\AnalysisStatus;
 use zaengle\neverstale\Plugin;
-use zaengle\neverstale\records\Submission as SubmissionRecord;
+use zaengle\neverstale\records\Content as ContentRecord;
 
 /**
  * Has Neverstale Content Trait
@@ -19,7 +19,7 @@ use zaengle\neverstale\records\Submission as SubmissionRecord;
  *
  *
  * @property-read string $webhookUrl
- * @property-read SubmissionRecord|null $record
+ * @property-read ContentRecord|null $record
  */
 trait HasNeverstaleContent
 {
@@ -30,12 +30,12 @@ trait HasNeverstaleContent
     public ?int $flagCount = null;
     public ?\DateTime $dateAnalyzed = null;
     public ?\DateTime $dateExpired = null;
-    public function getRecord(): ?SubmissionRecord
+    public function getRecord(): ?ContentRecord
     {
         if ($this->id === null) {
             return null;
         }
-        return SubmissionRecord::findOne($this->id);
+        return ContentRecord::findOne($this->id);
     }
 
     public function setAnalysisStatus(AnalysisStatus|string $status): void
@@ -52,16 +52,16 @@ trait HasNeverstaleContent
     }
     public function updateNeverStaleRecord(bool $isNew = true): void
     {
-        Plugin::log("Saving submission $this->id", 'info');
-        // Get the submission record
+        Plugin::log("Saving content $this->id", 'info');
+        // Get the content record
         if (!$isNew) {
             $record = $this->getRecord();
 
             if (!$record) {
-                throw new \Exception('Invalid submission ID: ' . $this->id);
+                throw new \Exception('Invalid content ID: ' . $this->id);
             }
         } else {
-            $record = new SubmissionRecord();
+            $record = new ContentRecord();
             $record->id = $this->id;
         }
 
@@ -99,6 +99,6 @@ trait HasNeverstaleContent
 
     public function forApi(): array
     {
-        return Plugin::getInstance()->format->forApi($this)->toArray();
+        return Plugin::getInstance()->format->forIngest($this)->toArray();
     }
 }

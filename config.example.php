@@ -8,7 +8,7 @@
  * neverstale.php
  */
 
-use zaengle\neverstale\models\ContentSubmission;
+use zaengle\neverstale\models\IngestContent;
 
 return [
     '*' => [
@@ -22,7 +22,7 @@ return [
         /**
          * $enable bool|callable
          *
-         * Enable or disable submission to Neverstale
+         * Enable or disable ingest to Neverstale
          *
          * This can be a boolean or a callable that receives the current Entry as its
          * only parameter and returns a boolean
@@ -54,10 +54,10 @@ return [
         /**
          * $transformer callable
          *
-         * Transform a submission before sending it to the Neverstale API
+         * Transform a content before ingesting it to the Neverstale API
          */
-//        'transformer' => static function (ContentSubmission $contentSubmission): ContentSubmission {
-//            return $contentSubmission;
+//        'transformer' => static function (ContentSubmission $ingestContent): ContentSubmission {
+//            return $ingestContent;
 //        },
     ],
 ];

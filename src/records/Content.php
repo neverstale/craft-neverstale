@@ -10,7 +10,7 @@ use zaengle\neverstale\enums\AnalysisStatus;
 use zaengle\neverstale\models\ApiTransaction;
 
 /**
- * Submission record
+ * Neverstale Content record
  *
  * @property int $id ID
  * @property int|null $entryId Entry ID
@@ -25,11 +25,11 @@ use zaengle\neverstale\models\ApiTransaction;
  * @property \DateTime $dateUpdated Date updated
  * @property-read \yii\db\ActiveQueryInterface $transactions
  */
-class Submission extends ActiveRecord
+class Content extends ActiveRecord
 {
     public static function tableName()
     {
-        return '{{%neverstale_submissions}}';
+        return '{{%neverstale_content}}';
     }
     public function init(): void
     {
@@ -37,7 +37,7 @@ class Submission extends ActiveRecord
     }
     public function getTransactionLogs(): ActiveQueryInterface
     {
-        return self::hasMany(TransactionLog::class, ['submissionId' => 'id']);
+        return self::hasMany(TransactionLog::class, ['contentId' => 'id']);
     }
 
     public function rules(): array

@@ -1,11 +1,11 @@
 {#
-  Neverstale Submission Show/Edit Template
+  Neverstale Content Show/Edit Template
 
   @author Zaengle
   @package zaengle/craft-neverstale
   @since 1.0.0
   @see https://github.com/zaengle/craft-neverstale
-  @var submission \zaengle\neverstale\elements\NeverstaleSubmission
+  @var content \zaengle\neverstale\elements\NeverstaleContent
 #}
 
 
@@ -14,23 +14,23 @@
 
 {%- set crumbs = [
   { label: 'Neverstale' | t('neverstale'), url: url('neverstale') },
-  { label: 'Submissions' | t('neverstale'), url: url('neverstale') },
-  { label: "##{submission.id}", url: submission.cpEditUrl },
+  { label: 'Content' | t('neverstale'), url: url('neverstale') },
+  { label: "##{content.id}", url: content.cpEditUrl },
 ] %}
 
-{%- set title = "Neverstale: #{submission.entry.title}" %}
+{%- set title = "Neverstale: #{content.entry.title}" %}
 
 {%- block actionButton %}
   {{ tag('a', {
     class: 'btn',
-    href: url('utilities/preview-neverstale-submission', {
-      entryId: submission.entry.id,
+    href: url('utilities/preview-neverstale-content', {
+      entryId: content.entry.id,
     }),
     text: 'Preview Entry Data'|t('neverstale'),
   }) }}
   <form method="post">
-    {{ hiddenInput('submissionId', submission.id) }}
-    {{ actionInput('neverstale/submissions/reset-logs') }}
+    {{ hiddenInput('contentId', content.id) }}
+    {{ actionInput('neverstale/content/reset-logs') }}
     {{ csrfInput() }}
     {{ tag('button', {
       type: 'submit',
@@ -39,8 +39,8 @@
     }) }}
   </form>
   <form method="post">
-    {{ hiddenInput('submissionId', submission.id) }}
-    {{ actionInput('neverstale/submissions/ingest') }}
+    {{ hiddenInput('contentId', content.id) }}
+    {{ actionInput('neverstale/content/ingest') }}
     {{ csrfInput() }}
     {{ tag('button', {
       type: 'submit',
@@ -57,8 +57,8 @@
       <div class="data ns-data ns-data-2">
         <dt class="heading">{{ 'Entry' | t('app') }}</dt>
         <dd class="value">
-          {% if submission.entry %}
-            {{ elementChip(submission.entry) }} {{ craft.app.getIsMultiSite() ? "(#{submission.site})" }}
+          {% if content.entry %}
+            {{ elementChip(content.entry) }} {{ craft.app.getIsMultiSite() ? "(#{content.site})" }}
           {% else %}
             {{ '[Deleted element]' | t('neverstale') }}
           {% endif %}
@@ -67,41 +67,41 @@
       <div class="data ns-data ns-data-2">
         <dt class="heading">{{ 'Content Status' | t('app') }}</dt>
         <dd class="value">
-          <span class="status {{ submission.statusColor }}"></span>
-          <span>{{ submission.statusAsEnum.label | t('neverstale') }}</span>
+          <span class="status {{ content.statusColor }}"></span>
+          <span>{{ content.statusAsEnum.label | t('neverstale') }}</span>
         </dd>
       </div>
 
       <div class="data ns-data ns-data-2">
         <dt class="heading">{{ 'Flag Count' | t('app') }}</dt>
         <dd class="value">
-          <span>{{ submission.flagCount }}</span>
+          <span>{{ content.flagCount }}</span>
         </dd>
       </div>
 
       <div class="data ns-data ns-data-2">
         <dt class="heading">{{ 'Last updated at' | t('app') }}</dt>
-        <dd id="date-updated-value" class="value">{{ submission.dateUpdated | timestamp }}</dd>
+        <dd id="date-updated-value" class="value">{{ content.dateUpdated | timestamp }}</dd>
       </div>
       <div class="data ns-data ns-data-2">
         <dt class="heading">{{ 'Created at' | t('app') }}</dt>
-        <dd id="date-created-value" class="value">{{ submission.dateCreated | timestamp }}</dd>
+        <dd id="date-created-value" class="value">{{ content.dateCreated | timestamp }}</dd>
       </div>
       <div class="data ns-data ns-data-2">
         <dt class="heading">{{ 'Last analyzed at' | t('app') }}</dt>
-        <dd id="date-updated-value" class="value">{{ submission.dateAnalyzed | timestamp }}</dd>
+        <dd id="date-updated-value" class="value">{{ content.dateAnalyzed | timestamp }}</dd>
       </div>
       <div class="data ns-data ns-data-2">
         <dt class="heading">{{ 'Content expired at' | t('app') }}</dt>
-        <dd id="date-created-value" class="value">{{ submission.dateExpired | timestamp }}</dd>
+        <dd id="date-created-value" class="value">{{ content.dateExpired | timestamp }}</dd>
       </div>
       <div class="data ns-data ns-data-2">
         <dt class="heading">{{ 'Submission ID' | t('neverstale') }}</dt>
-        <dd class="value"><code>{{ submission.id }}</code></dd>
+        <dd class="value"><code>{{ content.id }}</code></dd>
       </div>
       <div class="data ns-data ns-data-2">
         <dt class="heading">{{ 'Submission UID' | t('neverstale') }}</dt>
-        <dd class="value"><code>{{ submission.uid }}</code></dd>
+        <dd class="value"><code>{{ content.uid }}</code></dd>
       </div>
     </dl>
     <hr>
@@ -116,7 +116,7 @@
           </tr>
         </thead>
         <tbody>
-        {% for transaction in submission.transactionLogs.orderBy('dateCreated DESC').collect() %}
+        {% for transaction in content.transactionLogs.orderBy('dateCreated DESC').collect() %}
           {% set status = neverstaleToAnalysisStatus(transaction.status) %}
           <tr>
             <td class="ns-td-fixed-200">{{ transaction.dateCreated | datetime('short') }}</td>

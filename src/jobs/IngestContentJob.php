@@ -7,38 +7,38 @@ use craft\errors\InvalidElementException;
 use craft\helpers\Queue as QueueHelper;
 use craft\queue\BaseJob;
 use zaengle\neverstale\Plugin;
-use zaengle\neverstale\elements\NeverstaleSubmission;
+use zaengle\neverstale\elements\NeverstaleContent;
 
 /**
- *  Neverstale Send Submission Job
+ *  Neverstale Ingest Content Job
  *
  * @author Zaengle
  * @package zaengle/craft-neverstale
  * @since 1.0.0
  * @see https://github.com/zaengle/craft-neverstale
  */
-class IngestSubmissionJob extends BaseJob
+class IngestContentJob extends BaseJob
 {
     public ?string $description = 'Ingesting entry to Neverstale';
-    public int $submissionId;
+    public int $contentId;
 
     /**
      * @throws ElementNotFoundException
      */
     public function execute($queue): void
     {
-        $submission = NeverstaleSubmission::findOne($this->submissionId);
+        $content = NeverstaleContent::findOne($this->contentId);
 
-        if (!$submission) {
-            Plugin::error("Submission not found: {$this->submissionId}");
+        if (!$content) {
+            Plugin::error("Content not found: {$this->contentId}");
             throw new ElementNotFoundException();
         }
 
-        Plugin::getInstance()->content->ingest($submission);
+        Plugin::getInstance()->content->ingest($content);
     }
 
     protected function defaultDescription(): ?string
     {
-        return "Ingesting Submission #{$this->submissionId} to Neverstale";
+        return "Ingesting Content #{$this->contentId} to Neverstale";
     }
 }

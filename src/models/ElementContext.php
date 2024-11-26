@@ -57,7 +57,7 @@ class ElementContext extends Model
             'author' => $this->element->author?->email ?? 'Unknown',
             'channel_id' => $this->element?->type->handle ?? 'Content',
             'url' => $this->element->getCpEditUrl(),
-            'data' => Plugin::getInstance()->format->forApi($this->element),
+            'data' => Plugin::getInstance()->format->forIngest($this->element),
         ];
     }
 }

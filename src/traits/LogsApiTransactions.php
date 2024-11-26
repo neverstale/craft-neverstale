@@ -5,7 +5,7 @@ namespace zaengle\neverstale\traits;
 use yii\db\ActiveQueryInterface;
 use zaengle\neverstale\models\ApiTransaction;
 use zaengle\neverstale\Plugin;
-use zaengle\neverstale\records\Submission;
+use zaengle\neverstale\records\Content;
 
 trait LogsApiTransactions
 {
@@ -26,5 +26,5 @@ trait LogsApiTransactions
         return $this->getRecord()?->getTransactionLogs();
     }
 
-    abstract public function getRecord(): ?Submission;
+    abstract public function getRecord(): ?Content;
 }

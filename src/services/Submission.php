@@ -8,14 +8,14 @@ use craft\errors\ElementNotFoundException;
 use craft\helpers\Queue;
 use yii\base\Component;
 use yii\base\Exception;
-use zaengle\neverstale\elements\NeverstaleSubmission;
-use zaengle\neverstale\jobs\CreateSubmissionJob;
+use zaengle\neverstale\elements\NeverstaleContent;
+use zaengle\neverstale\jobs\CreateNeverstaleContentJob;
 use zaengle\neverstale\Plugin;
 
 /**
- * Neverstale Submission service
+ * Neverstale Content service
  *
- * Handles the management of NeverstaleSubmissions Elements
+ * Handles the management of NeverstaleContents Elements
  *
  * @author Zaengle
  * @package zaengle/craft-neverstale
@@ -26,36 +26,36 @@ class Submission extends Component
 {
     public function queue(Entry $entry): ?string
     {
-        return Queue::push(new CreateSubmissionJob([
+        return Queue::push(new CreateNeverstaleContentJob([
             'entryId' => $entry->id,
         ]));
     }
-    public function findOrCreate(Entry $entry): ?NeverstaleSubmission
+    public function findOrCreate(Entry $entry): ?NeverstaleContent
     {
-        $submission = $this->find($entry);
+        $content = $this->find($entry);
 
-        if (!$submission) {
-            $submission = $this->create($entry);
-            $this->save($submission);
+        if (!$content) {
+            $content = $this->create($entry);
+            $this->save($content);
 
-            Plugin::log(Plugin::t("Created NeverstaleSubmission #{submissionId} for Entry #{entryId}", [
+            Plugin::log(Plugin::t("Created NeverstaleContent #{contentId} for Entry #{entryId}", [
                 'entryId' => $entry->id,
-                'submissionId' => $submission->id,
+                'contentId' => $content->id,
             ]));
         }
 
-        return $submission;
+        return $content;
     }
-    public function find(Entry $entry): ?NeverstaleSubmission
+    public function find(Entry $entry): ?NeverstaleContent
     {
-        return NeverstaleSubmission::findOne([
+        return NeverstaleContent::findOne([
             'entryId' => $entry->canonicalId,
             'siteId' => $entry->siteId,
         ]);
     }
-    public function create(Entry $entry): NeverstaleSubmission
+    public function create(Entry $entry): NeverstaleContent
     {
-        return new NeverstaleSubmission([
+        return new NeverstaleContent([
             'entryId' => $entry->canonicalId,
             'siteId' => $entry->siteId,
         ]);
@@ -65,12 +65,12 @@ class Submission extends Component
      * @throws Exception
      * @throws ElementNotFoundException
      */
-    public function save(NeverstaleSubmission $submission): bool
+    public function save(NeverstaleContent $content): bool
     {
-        $saved = Craft::$app->getElements()->saveElement($submission);
+        $saved = Craft::$app->getElements()->saveElement($content);
 
         if (!$saved) {
-            Plugin::error("Failed to save submission #{$submission->id}" . print_r($submission->getErrors(), true));
+            Plugin::error("Failed to save content #{$content->id}" . print_r($content->getErrors(), true));
         }
 
         return $saved;

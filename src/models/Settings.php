@@ -23,7 +23,7 @@ class Settings extends Model
 {
     public const SECTION_CONFIG_KEY = 'sections';
     /**
-     * To enable / disable submission per-entry, use a callable that returns a boolean
+     * To enable / disable ingest per-entry, use a callable that returns a boolean
      * in the config file.
      * @var bool|callable
      */

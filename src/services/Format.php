@@ -4,14 +4,14 @@ namespace zaengle\neverstale\services;
 
 use Craft;
 use yii\base\Component;
-use zaengle\neverstale\elements\NeverstaleSubmission;
-use zaengle\neverstale\models\ContentSubmission;
+use zaengle\neverstale\elements\NeverstaleContent;
+use zaengle\neverstale\models\IngestContent;
 use zaengle\neverstale\Plugin;
 
 /**
  * Neverstale Format service
  *
- * Handles the formatting of Entry data for submission to the Neverstale API
+ * Handles the formatting of Entry data for ingest to the Neverstale API
  *
  * @author Zaengle
  * @package zaengle/craft-neverstale
@@ -21,16 +21,16 @@ use zaengle\neverstale\Plugin;
 class Format extends Component
 {
     /**
-     * Format a Submission for sending to the Neverstale API
+     * Format Content for ingest to the Neverstale API
      *
-     * @param NeverstaleSubmission $submission
-     * @return ContentSubmission
+     * @param NeverstaleContent $content
+     * @return IngestContent
      */
-    public function forApi(NeverstaleSubmission $submission): ContentSubmission
+    public function forIngest(NeverstaleContent $content): IngestContent
     {
-        $apiData = ContentSubmission::fromSubmission($submission);
+        $apiData = IngestContent::fromContent($content);
 
-        // Apply any user supplied transformations to the data before submission
+        // Apply any user supplied transformations to the data before ingest
         if ($transformer = $this->getCustomTransformer()) {
             return $transformer($apiData);
         }
@@ -52,7 +52,7 @@ class Format extends Component
     }
     public function entryContent(\craft\elements\Entry $entry): string
     {
-        return trim(Craft::$app->view->renderTemplate('neverstale/format/_submission', [
+        return trim(Craft::$app->view->renderTemplate('neverstale/format/_entry', [
             'entry' => $entry,
         ]));
     }

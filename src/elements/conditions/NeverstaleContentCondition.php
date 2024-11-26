@@ -6,14 +6,14 @@ use Craft;
 use craft\elements\conditions\ElementCondition;
 
 /**
- * Neverstale Submission Condition
+ * Neverstale Content Condition
  *
  * @author Zaengle
  * @package zaengle/craft-neverstale
  * @since 1.0.0
  * @see https://github.com/zaengle/craft-neverstale
  */
-class NeverstaleSubmissionCondition extends ElementCondition
+class NeverstaleContentCondition extends ElementCondition
 {
     protected function selectableConditionRules(): array
     {

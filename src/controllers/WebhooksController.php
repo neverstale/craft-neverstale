@@ -6,7 +6,7 @@ use Craft;
 use craft\helpers\Json;
 use craft\web\Controller;
 use yii\web\Response;
-use zaengle\neverstale\elements\NeverstaleSubmission;
+use zaengle\neverstale\elements\NeverstaleContent;
 use zaengle\neverstale\models\ApiTransaction;
 use zaengle\neverstale\Plugin;
 
@@ -46,18 +46,18 @@ class WebhooksController extends BaseController
              Plugin::error('Could not decode webhook data: ' . $e->getMessage());
              return $this->asFailure('Could not decode webhook body');
          }
-         // Update the submission based on the webhook data
+         // Update the content item based on the webhook data
          try {
              $transaction = ApiTransaction::fromWebhookPayload($data);
-             // Look for our submission
-             $submission = NeverstaleSubmission::findOne(['uid' => $transaction->customId]);
+             // Look for our content item
+             $content = NeverstaleContent::findOne(['uid' => $transaction->customId]);
 
-             if (!$submission) {
-                 Plugin::error('Submission not found for webhook');
-                 return $this->asFailure('Submission not found');
+             if (!$content) {
+                 Plugin::error('Content item not found for webhook');
+                 return $this->asFailure('Content item not found');
              }
 
-             $this->plugin->content->onWebhook($submission, $transaction);
+             $this->plugin->content->onWebhook($content, $transaction);
 
 
          } catch (\Exception $e) {

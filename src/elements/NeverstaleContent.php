@@ -23,13 +23,13 @@ use yii\web\Response;
 
 use zaengle\neverstale\enums\AnalysisStatus;
 use zaengle\neverstale\Plugin;
-use zaengle\neverstale\elements\conditions\NeverstaleSubmissionCondition;
-use zaengle\neverstale\elements\db\NeverstaleSubmissionQuery;
+use zaengle\neverstale\elements\conditions\NeverstaleContentCondition;
+use zaengle\neverstale\elements\db\NeverstaleContentQuery;
 use zaengle\neverstale\enums\Permission;
 use zaengle\neverstale\traits\HasNeverstaleContent;
 
 /**
- * Neverstale Submission Custom Element Type
+ * Neverstale Content Custom Element Type
  *
  * @author Zaengle
  * @package zaengle/craft-neverstale
@@ -42,29 +42,29 @@ use zaengle\neverstale\traits\HasNeverstaleContent;
  * @property-read string $uiLabel
  * @property-read Entry|null $entry
  */
-class NeverstaleSubmission extends Element
+class NeverstaleContent extends Element
 {
     use HasNeverstaleContent;
 
     public static function displayName(): string
     {
-        return Plugin::t('Neverstale Submission');
+        return Plugin::t('Neverstale Content');
     }
     public static function lowerDisplayName(): string
     {
-        return Plugin::t('Neverstale submission');
+        return Plugin::t('Neverstale Content');
     }
     public static function pluralDisplayName(): string
     {
-        return Plugin::t('Neverstale Submissions');
+        return Plugin::t('Neverstale Content');
     }
     public static function pluralLowerDisplayName(): string
     {
-        return Plugin::t('Neverstale submissions');
+        return Plugin::t('Neverstale Content');
     }
     public static function refHandle(): ?string
     {
-        return 'neverstale-submission';
+        return 'neverstale-content';
     }
     public static function trackChanges(): bool
     {
@@ -100,13 +100,13 @@ class NeverstaleSubmission extends Element
 
         // The “handle” is the key that users will specify
         // when eager-loading this relationship:
-        if ($handle === 'neverstaleSubmission') {
-            // Do a fresh selection from the submissions table
-            // to create a map of submission IDs to entry IDs,
-            // excluding submissions with no entry ID:
+        if ($handle === 'neverstaleContent') {
+            // Do a fresh selection from the content table
+            // to create a map of content IDs to entry IDs,
+            // excluding content with no entry ID:
             $map = (new Query())
                 ->select(['id as source', 'entryId as target'])
-                ->from(['{{%neverstale_submissions}}'])
+                ->from(['{{%neverstale_content}}'])
                 ->where([
                     'and',
                     ['id' => $sourceElementIds],
@@ -167,12 +167,12 @@ class NeverstaleSubmission extends Element
      */
     public static function find(): ElementQueryInterface
     {
-        return Craft::createObject(NeverstaleSubmissionQuery::class, [static::class]);
+        return Craft::createObject(NeverstaleContentQuery::class, [static::class]);
     }
 
     public static function createCondition(): ElementConditionInterface
     {
-        return Craft::createObject(NeverstaleSubmissionCondition::class, [static::class]);
+        return Craft::createObject(NeverstaleContentCondition::class, [static::class]);
     }
 
     protected static function defineSources(string $context): array
@@ -180,10 +180,10 @@ class NeverstaleSubmission extends Element
         return [
             [
                 'key' => '*',
-                'label' => Plugin::t('All Neverstale Submissions'),
+                'label' => Plugin::t('All Neverstale Content'),
             ],
             [
-                'heading' => Plugin::t('Processed Submissions'),
+                'heading' => Plugin::t('Processed'),
             ],
             [
                 'key' => AnalysisStatus::ANALYZED_FLAGGED->value,
@@ -213,19 +213,19 @@ class NeverstaleSubmission extends Element
         return [
             [
                 'label' => Plugin::t('Flag Count'),
-                'orderBy' => 'neverstale_submissions.flagCount',
+                'orderBy' => 'neverstale_content.flagCount',
                 'attribute' => 'flagCount',
                 'defaultDir' => 'desc',
             ],
             [
                 'label' => Plugin::t('Date Analyzed'),
-                'orderBy' => 'neverstale_submissions.dateAnalyzed',
+                'orderBy' => 'neverstale_content.dateAnalyzed',
                 'attribute' => 'dateAnalyzed',
                 'defaultDir' => 'desc',
             ],
             [
                 'label' => Plugin::t('Date Expired'),
-                'orderBy' => 'neverstale_submissions.dateExpired',
+                'orderBy' => 'neverstale_content.dateExpired',
                 'attribute' => 'dateExpired',
                 'defaultDir' => 'desc',
             ],
@@ -319,11 +319,11 @@ class NeverstaleSubmission extends Element
     }
     protected function cpEditUrl(): ?string
     {
-        return UrlHelper::cpUrl('neverstale/submissions/' . $this->getCanonicalId());
+        return UrlHelper::cpUrl('neverstale/content/' . $this->getCanonicalId());
     }
     public function getPostEditUrl(): ?string
     {
-        return UrlHelper::cpUrl('submissions');
+        return UrlHelper::cpUrl('neverstale/content');
     }
     public function prepareEditScreen(Response $response, string $containerId): void
     {
@@ -331,7 +331,7 @@ class NeverstaleSubmission extends Element
         $response->crumbs([
             [
                 'label' => self::pluralDisplayName(),
-                'url' => UrlHelper::cpUrl('submissions'),
+                'url' => UrlHelper::cpUrl('neverstale/content'),
             ],
         ]);
     }
@@ -349,6 +349,6 @@ class NeverstaleSubmission extends Element
      */
     public function save(): bool
     {
-        return Plugin::getInstance()->submission->save($this);
+        return Plugin::getInstance()->content->save($this);
     }
 }

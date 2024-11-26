@@ -2,14 +2,17 @@
 
 namespace zaengle\neverstale\services;
 
+use Craft;
+use craft\elements\Entry;
 use craft\helpers\Json;
+use craft\helpers\Queue;
 use GuzzleHttp\Exception\GuzzleException;
 use yii\base\Component;
-use zaengle\neverstale\elements\NeverstaleSubmission;
+use zaengle\neverstale\elements\NeverstaleContent;
+use zaengle\neverstale\jobs\CreateNeverstaleContentJob;
 use zaengle\neverstale\models\ApiTransaction;
 use zaengle\neverstale\Plugin;
 use zaengle\neverstale\support\ApiClient;
-
 /**
  * Neverstale API Service
  *
@@ -23,15 +26,15 @@ class Content extends Component
     public ApiClient $client;
     public string $hashAlgorithm = 'sha256';
 
-    public function ingest(NeverstaleSubmission $submission): bool
+    public function ingest(NeverstaleContent $content): bool
     {
         try {
-            /** @var NeverstaleSubmission $submission */
+            /** @var NeverstaleContent $content */
             $response = $this->client->ingest(
-                $submission->forApi(),
+                $content->forApi(),
                 [
                     'webhook' => [
-                        'endpoint' => $submission->webhookUrl,
+                        'endpoint' => $content->webhookUrl,
                     ],
                 ]
             );
@@ -39,25 +42,25 @@ class Content extends Component
             $responseBody = Json::decode($response->getBody()->getContents());
 
             $transaction = ApiTransaction::fromContentResponse($responseBody, 'api.ingest');
-            Plugin::info("Ingest for submission #{$submission->id}: status {$transaction->transactionStatus}");
+            Plugin::info("Ingest for content #{$content->id}: status {$transaction->transactionStatus}");
 
-            // update the submission element based on the response
+            // update the content element based on the response
             switch ($transaction->transactionStatus) {
                 // @todo handle rate limiting here
                 case ApiClient::STATUS_SUCCESS:
-                    return $this->onIngestSuccess($submission, $transaction);
+                    return $this->onIngestSuccess($content, $transaction);
                 case ApiClient::STATUS_ERROR:
-                    return $this->onIngestError($submission, $transaction);
+                    return $this->onIngestError($content, $transaction);
                 default:
                     Plugin::error("Unknown transaction status: {$transaction->transactionStatus}");
                     return false;
             }
         } catch (GuzzleException $e) {
             $transaction = ApiTransaction::fromGuzzleException($e, 'api.error');
-            return $this->onIngestError($submission, $transaction);
+            return $this->onIngestError($content, $transaction);
         } catch (\Exception $e) {
 //            @todo handle other exceptions
-            Plugin::error("Failed to ingest submission #{$submission->id}: {$e->getMessage()}");
+            Plugin::error("Failed to ingest content #{$content->id}: {$e->getMessage()}");
             dd($e);
         }
     }
@@ -84,35 +87,87 @@ class Content extends Component
 
         return hash_hmac($this->hashAlgorithm, $payload, $secret);
     }
-    public function onIngestError(NeverstaleSubmission $submission, ApiTransaction $transaction): bool
+    public function onIngestError(NeverstaleContent $content, ApiTransaction $transaction): bool
     {
-        $submission->setAnalysisStatus($transaction->getAnalysisStatus());
-        $submission->logTransaction($transaction);
+        $content->setAnalysisStatus($transaction->getAnalysisStatus());
+        $content->logTransaction($transaction);
 
-        return Plugin::getInstance()->submission->save($submission);
+        return Plugin::getInstance()->content->save($content);
     }
-    public function onIngestSuccess(NeverstaleSubmission $submission, ApiTransaction $transaction): bool
+    public function onIngestSuccess(NeverstaleContent $content, ApiTransaction $transaction): bool
     {
-        $submission->neverstaleId = $transaction->neverstaleId;
-        $submission->setAnalysisStatus($transaction->getAnalysisStatus());
-        $submission->logTransaction($transaction);
+        $content->neverstaleId = $transaction->neverstaleId;
+        $content->setAnalysisStatus($transaction->getAnalysisStatus());
+        $content->logTransaction($transaction);
 
-        return Plugin::getInstance()->submission->save($submission);
+        return Plugin::getInstance()->content->save($content);
     }
 
-    public function onWebhook(NeverstaleSubmission $submission, ApiTransaction $transaction): bool
+    public function onWebhook(NeverstaleContent $content, ApiTransaction $transaction): bool
     {
-        $submission->setAnalysisStatus($transaction->getAnalysisStatus());
-        $submission->flagCount = $transaction->getFlagCount();
+        $content->setAnalysisStatus($transaction->getAnalysisStatus());
+        $content->flagCount = $transaction->getFlagCount();
 
         if ($transaction->getDateAnalyzed()) {
-            $submission->dateAnalyzed = $transaction->getDateAnalyzed();
+            $content->dateAnalyzed = $transaction->getDateAnalyzed();
         }
         if ($transaction->getDateExpired()) {
-            $submission->dateExpired = $transaction->getDateExpired();
+            $content->dateExpired = $transaction->getDateExpired();
         }
-        $submission->logTransaction($transaction);
+        $content->logTransaction($transaction);
 
-        return Plugin::getInstance()->submission->save($submission);
+        return Plugin::getInstance()->content->save($content);
+    }
+
+    public function queue(Entry $entry): ?string
+    {
+        return Queue::push(new CreateNeverstaleContentJob([
+            'entryId' => $entry->id,
+        ]));
+    }
+    public function findOrCreate(Entry $entry): ?NeverstaleContent
+    {
+        $content = $this->find($entry);
+
+        if (!$content) {
+            $content = $this->create($entry);
+            $this->save($content);
+
+            Plugin::log(Plugin::t("Created NeverstaleContent #{contentId} for Entry #{entryId}", [
+                'entryId' => $entry->id,
+                'contentId' => $content->id,
+            ]));
+        }
+
+        return $content;
+    }
+    public function find(Entry $entry): ?NeverstaleContent
+    {
+        return NeverstaleContent::findOne([
+            'entryId' => $entry->canonicalId,
+            'siteId' => $entry->siteId,
+        ]);
+    }
+    public function create(Entry $entry): NeverstaleContent
+    {
+        return new NeverstaleContent([
+            'entryId' => $entry->canonicalId,
+            'siteId' => $entry->siteId,
+        ]);
+    }
+    /**
+     * @throws \Throwable
+     * @throws Exception
+     * @throws ElementNotFoundException
+     */
+    public function save(NeverstaleContent $content): bool
+    {
+        $saved = Craft::$app->getElements()->saveElement($content);
+
+        if (!$saved) {
+            Plugin::error("Failed to save content #{$content->id}" . print_r($content->getErrors(), true));
+        }
+
+        return $saved;
     }
 }

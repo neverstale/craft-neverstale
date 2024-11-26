@@ -4,7 +4,7 @@ namespace zaengle\neverstale\helpers;
 
 use zaengle\neverstale\Plugin;
 
-class SubmissionJobHelper
+class IngestJobHelper
 {
     public const DEFAULT_PRIORITY = 512;
     public const DEFAULT_DELAY = 15;

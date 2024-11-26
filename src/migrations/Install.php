@@ -38,19 +38,19 @@ class Install extends Migration
             Db::dropAllForeignKeysToTable('{{%neverstale_transactions}}');
         }
 
-        if ($this->db->tableExists('{{%neverstale_submissions}}')) {
-            Db::dropAllForeignKeysToTable('{{%neverstale_submissions}}');
+        if ($this->db->tableExists('{{%neverstale_content}}')) {
+            Db::dropAllForeignKeysToTable('{{%neverstale_content}}');
         }
         $this->dropTableIfExists('{{%neverstale_transactions}}');
-        $this->dropTableIfExists('{{%neverstale_submissions}}');
+        $this->dropTableIfExists('{{%neverstale_content}}');
 
         return true;
     }
 
     public function createTables(): void
     {
-        $this->archiveTableIfExists('{{%neverstale_submissions}}');
-        $this->createTable('{{%neverstale_submissions}}', [
+        $this->archiveTableIfExists('{{%neverstale_content}}');
+        $this->createTable('{{%neverstale_content}}', [
             'id' => $this->primaryKey(),
             'entryId' => $this->integer(),
             'siteId' => $this->integer(),
@@ -66,7 +66,7 @@ class Install extends Migration
 
         $this->createTable('{{%neverstale_transactions}}', [
             'id' => $this->primaryKey(),
-            'submissionId' => $this->integer(),
+            'contentId' => $this->integer(),
             'status' => $this->string(),
             'message' => $this->text(),
             'event' => $this->text(),
@@ -80,7 +80,7 @@ class Install extends Migration
     {
         $this->addForeignKey(
             null,
-            '{{%neverstale_submissions}}',
+            '{{%neverstale_content}}',
             'id',
             '{{%elements}}',
             'id',
@@ -88,7 +88,7 @@ class Install extends Migration
         null);
         $this->addForeignKey(
             null,
-            '{{%neverstale_submissions}}',
+            '{{%neverstale_content}}',
             'entryId',
             '{{%elements}}',
             'id',
@@ -96,7 +96,7 @@ class Install extends Migration
         null);
         $this->addForeignKey(
             null,
-            '{{%neverstale_submissions}}',
+            '{{%neverstale_content}}',
             'siteId',
             '{{%sites}}',
             'id',
@@ -106,8 +106,8 @@ class Install extends Migration
         $this->addForeignKey(
             null,
             '{{%neverstale_transactions}}',
-            'submissionId',
-            '{{%neverstale_submissions}}',
+            'contentId',
+            '{{%neverstale_content}}',
             'id',
             'CASCADE',
             null);
@@ -115,11 +115,11 @@ class Install extends Migration
 
     public function createIndexes(): void
     {
-        $this->createIndex(null, '{{%neverstale_submissions}}', 'id');
-        $this->createIndex(null, '{{%neverstale_submissions}}', 'entryId');
-        $this->createIndex(null, '{{%neverstale_submissions}}', 'siteId');
-        $this->createIndex(null, '{{%neverstale_submissions}}', 'neverstaleId');
-        $this->createIndex(null, '{{%neverstale_submissions}}', 'uid');
-        $this->createIndex(null, '{{%neverstale_transactions}}', 'submissionId');
+        $this->createIndex(null, '{{%neverstale_content}}', 'id');
+        $this->createIndex(null, '{{%neverstale_content}}', 'entryId');
+        $this->createIndex(null, '{{%neverstale_content}}', 'siteId');
+        $this->createIndex(null, '{{%neverstale_content}}', 'neverstaleId');
+        $this->createIndex(null, '{{%neverstale_content}}', 'uid');
+        $this->createIndex(null, '{{%neverstale_transactions}}', 'contentId');
     }
 }
