@@ -25,8 +25,6 @@ use zaengle\neverstale\Plugin;
  */
 class SubmissionsController extends BaseController
 {
-    public $defaultAction = 'index';
-
     /**
      * @throws BadRequestHttpException
      * @throws NotFoundHttpException
@@ -92,7 +90,7 @@ class SubmissionsController extends BaseController
             return null;
         }
 
-        if (!Plugin::getInstance()->api->ingest($submission)) {
+        if (!Plugin::getInstance()->content->ingest($submission)) {
             $session->setError(Plugin::t("Could not ingest submission #{id}", ['id' => $submissionId]));
 
             return null;

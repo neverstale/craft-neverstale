@@ -36,7 +36,6 @@ class ApiClient
             ],
         ]);
     }
-
     /**
      * @param array<string,mixed> $data
      * @throws \GuzzleHttp\Exception\GuzzleException
@@ -46,5 +45,19 @@ class ApiClient
         return $this->client->post('api/ingest', [
             'json' =>  array_merge($data, $callbackConfig),
         ]);
+    }
+    public function getByCustomId(string $customId): ResponseInterface
+    {
+        return $this->client->get("api/content/$customId");
+    }
+
+    public function ignoreFlag(string $flagId): ResponseInterface
+    {
+        return $this->client->get("api/flags/$flagId/ignore");
+    }
+
+    public function rescheduleFlag(string $flagId): ResponseInterface
+    {
+        return $this->client->get("api/flags/$flagId/reschedule");
     }
 }

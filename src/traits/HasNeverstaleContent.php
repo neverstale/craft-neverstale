@@ -77,6 +77,21 @@ trait HasNeverstaleContent
         $record->validate();
     }
 
+    public function isAnalyzed(): bool
+    {
+        return match ($this->getAnalysisStatus()) {
+            AnalysisStatus::ANALYZED_FLAGGED, AnalysisStatus::ANALYZED_CLEAN => true,
+            default => false,
+        };
+    }
+    public function isFlagged(): bool
+    {
+        return match ($this->getAnalysisStatus()) {
+            AnalysisStatus::ANALYZED_FLAGGED => true,
+            default => false,
+        };
+    }
+
     public function getWebhookUrl()
     {
         return UrlHelper::actionUrl("neverstale/webhooks");

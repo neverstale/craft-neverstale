@@ -1,0 +1,40 @@
+{% set flagData = craft.neverstale.content.getByCustomId(customId) %}
+<div id="neverstale-flags" class="content ">
+  <h2>Neverstale</h2>
+  <dl id="meta-details" class="meta ns-meta">
+    <div class="data">
+      <dt class="heading">{{ 'Content Status' | t('neverstale') }}</dt>
+      <dd class="">
+        <span class="status {{ submission.statusColor }}"></span>
+        <span>{{ submission.statusAsEnum.label | t('neverstale') }}</span>
+      </dd>
+    </div>
+    {%- if submission.isAnalyzed %}
+    <div class="data">
+      <dt class="heading">{{ 'Analyzed At' | t('neverstale') }}</dt>
+      <dd class="">
+        <span>{{ submission.dateAnalyzed | timestamp }}</span>
+      </dd>
+    </div>
+    {%- endif  %}
+  </dl>
+  {% if submission.isFlagged and flagData.data.flags is not empty %}
+  <h3>{{ submission.flagCount }} Content Flags</h3>
+    <dl class="table data table-condensed table-bordered table-striped fullwidth">
+      {% for item in flagData.data.flags %}
+        {{ d(item) }}
+        <div>
+          <dt><strong>{{ item.flag |title }}</strong></dt>
+          <dd>
+            <p>{{ item.reason }}</p>
+            <div class="flex flex-nowrap">
+              <button type="button" class="btn btn-primary">{{ "Ignore"|t('neverstale') }}</button>
+              <button type="button" class="btn">{{ "Reschedule"|t('neverstale') }}</button>
+            </div>
+            <hr>
+          </dd>
+        </div>
+      {% endfor %}
+    </dl>
+  {% endif %}
+</div>

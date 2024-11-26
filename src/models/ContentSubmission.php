@@ -24,7 +24,7 @@ use zaengle\neverstale\Plugin;
  * @property-read array<string,mixed> $apiData
  * @property-read NeverstaleSubmission $submission
  */
-class ApiSubmission extends Model implements Arrayable
+class ContentSubmission extends Model implements Arrayable
 {
     public ?string $editUrl = null;
     public ?string $url = null;
@@ -61,6 +61,10 @@ class ApiSubmission extends Model implements Arrayable
     protected function setCustomId(string|int $customId): void
     {
         $this->customId = (string) $customId;
+    }
+    public function getCustomId(): string
+    {
+        return $this->customId;
     }
     public function setData(string $data): self
     {
@@ -127,7 +131,7 @@ class ApiSubmission extends Model implements Arrayable
             self::metaFromEntry($entry),
             [
                 'submission' => $submission,
-                'customId' => $submission->uid,
+                'customId' => $entry->uid,
                 'data'  => Plugin::getInstance()->format->entryContent($entry),
             ]));
     }

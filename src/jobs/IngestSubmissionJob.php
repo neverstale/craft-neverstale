@@ -30,10 +30,11 @@ class IngestSubmissionJob extends BaseJob
         $submission = NeverstaleSubmission::findOne($this->submissionId);
 
         if (!$submission) {
-            throw new ElementNotFoundException("NeverstaleSubmission with ID {$this->submissionId} not found");
+            Plugin::error("Submission not found: {$this->submissionId}");
+            throw new ElementNotFoundException();
         }
 
-        Plugin::getInstance()->api->ingest($submission);
+        Plugin::getInstance()->content->ingest($submission);
     }
 
     protected function defaultDescription(): ?string

@@ -81,19 +81,19 @@
 
       <div class="data ns-data ns-data-2">
         <dt class="heading">{{ 'Last updated at' | t('app') }}</dt>
-        <dd id="date-updated-value" class="value">{{ submission.dateUpdated | datetime('short') }}</dd>
+        <dd id="date-updated-value" class="value">{{ submission.dateUpdated | timestamp }}</dd>
       </div>
       <div class="data ns-data ns-data-2">
         <dt class="heading">{{ 'Created at' | t('app') }}</dt>
-        <dd id="date-created-value" class="value">{{ submission.dateCreated | datetime('short') }}</dd>
+        <dd id="date-created-value" class="value">{{ submission.dateCreated | timestamp }}</dd>
       </div>
       <div class="data ns-data ns-data-2">
         <dt class="heading">{{ 'Last analyzed at' | t('app') }}</dt>
-        <dd id="date-updated-value" class="value">{{ submission.dateAnalyzed | datetime('short') }}</dd>
+        <dd id="date-updated-value" class="value">{{ submission.dateAnalyzed | timestamp }}</dd>
       </div>
       <div class="data ns-data ns-data-2">
         <dt class="heading">{{ 'Content expired at' | t('app') }}</dt>
-        <dd id="date-created-value" class="value">{{ submission.dateExpired | datetime('short') }}</dd>
+        <dd id="date-created-value" class="value">{{ submission.dateExpired | timestamp }}</dd>
       </div>
       <div class="data ns-data ns-data-2">
         <dt class="heading">{{ 'Submission ID' | t('neverstale') }}</dt>
@@ -109,11 +109,11 @@
     <div class="table-responsive">
       <table class="ns-table table data table-condensed table-bordered table-striped fullwidth">
         <thead>
-        <tr>
-          <th scope="col">When</th>
-          <th scope="col">Analysis Status</th>
-          <th scope="col">Message</th>
-        </tr>
+          <tr>
+            <th scope="col">When</th>
+            <th scope="col">Analysis Status</th>
+            <th scope="col">Message</th>
+          </tr>
         </thead>
         <tbody>
         {% for transaction in submission.transactionLogs.orderBy('dateCreated DESC').collect() %}

@@ -6,8 +6,6 @@ use craft\helpers\Json;
 use GuzzleHttp\Exception\GuzzleException;
 use yii\base\Component;
 use zaengle\neverstale\elements\NeverstaleSubmission;
-use zaengle\neverstale\enums\SubmissionStatus;
-use zaengle\neverstale\enums\AnalysisStatus;
 use zaengle\neverstale\models\ApiTransaction;
 use zaengle\neverstale\Plugin;
 use zaengle\neverstale\support\ApiClient;
@@ -20,7 +18,7 @@ use zaengle\neverstale\support\ApiClient;
  * @since 1.0.0
  * @see https://github.com/zaengle/craft-neverstale
  */
-class Api extends Component
+class Content extends Component
 {
     public ApiClient $client;
     public string $hashAlgorithm = 'sha256';
@@ -40,7 +38,7 @@ class Api extends Component
 
             $responseBody = Json::decode($response->getBody()->getContents());
 
-            $transaction = ApiTransaction::fromIngestResponse($responseBody, 'api.ingest');
+            $transaction = ApiTransaction::fromContentResponse($responseBody, 'api.ingest');
             Plugin::info("Ingest for submission #{$submission->id}: status {$transaction->transactionStatus}");
 
             // update the submission element based on the response
@@ -62,6 +60,18 @@ class Api extends Component
             Plugin::error("Failed to ingest submission #{$submission->id}: {$e->getMessage()}");
             dd($e);
         }
+    }
+
+    public function getByCustomId(string $customId): mixed
+    {
+        $response = $this->client->getByCustomId($customId);
+
+        $responseBody = Json::decode($response->getBody()->getContents());
+
+        $transaction = ApiTransaction::fromContentResponse($responseBody, 'api.getByCustomId');
+
+//        @todo return an object, handle errors
+        return $responseBody;
     }
 
     public function validateSignature(string $payload, string $userSignature): bool

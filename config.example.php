@@ -8,7 +8,7 @@
  * neverstale.php
  */
 
-use zaengle\neverstale\models\ApiSubmission;
+use zaengle\neverstale\models\ContentSubmission;
 
 return [
     '*' => [
@@ -45,7 +45,7 @@ return [
          *
          * - Ignored if the `enable` setting is a callable
          * - Will override the `sections` setting from the Neverstale settings in the
-         * Control Panel
+         * Control Panel`
          */
 //        'sections' => [
 //            'homepage',
@@ -56,8 +56,8 @@ return [
          *
          * Transform a submission before sending it to the Neverstale API
          */
-//        'transformer' => static function (ApiSubmission $apiSubmission): ApiSubmission {
-//            return $apiSubmission;
+//        'transformer' => static function (ContentSubmission $contentSubmission): ContentSubmission {
+//            return $contentSubmission;
 //        },
     ],
 ];

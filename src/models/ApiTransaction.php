@@ -51,22 +51,22 @@ class ApiTransaction extends Model
             : null;
     }
 
+    public function getFlags(): array
+    {
+        return Arr::get($this->content, 'flags') ?? [];
+    }
+
     public function getFlagCount(): int
     {
-        return count(Arr::get($this->content, 'flags') ?? []);
+        return count($this->getFlags());
     }
 
     public function getChannelId(): ?string
     {
         return Arr::get($this->content, 'channel_id');
     }
-    /**
-     * Create a new ApiTransaction from a Neverstale response
-     *
-     * @param array $data
-     * @return ApiTransaction
-     */
-    public static function fromIngestResponse(array $data, ?string $event = null): self
+
+    public static function fromContentResponse(array $data, ?string $event = null): self
     {
         return new self([
             'event' => $event,

@@ -35,7 +35,7 @@ class WebhooksController extends BaseController
          }
 
 
-         if (!$this->getPlugin()->api->validateSignature($payload, $requestSignature)) {
+         if (!$this->getPlugin()->content->validateSignature($payload, $requestSignature)) {
              Plugin::error('Invalid webhook signature');
              return $this->asFailure('Invalid webhook signature');
          }
@@ -57,7 +57,7 @@ class WebhooksController extends BaseController
                  return $this->asFailure('Submission not found');
              }
 
-             $this->plugin->api->onWebhook($submission, $transaction);
+             $this->plugin->content->onWebhook($submission, $transaction);
 
 
          } catch (\Exception $e) {

@@ -11,6 +11,7 @@ use craft\base\Plugin as BasePlugin;
 use craft\elements\Entry;
 use craft\events\DefineAttributeHtmlEvent;
 use craft\events\DefineBehaviorsEvent;
+use craft\events\DefineHtmlEvent;
 use craft\events\ElementIndexTableAttributeEvent;
 use craft\events\ModelEvent;
 use craft\events\RegisterComponentTypesEvent;
@@ -36,9 +37,10 @@ use zaengle\neverstale\enums\AnalysisStatus;
 use zaengle\neverstale\enums\Permission;
 use zaengle\neverstale\fields\NeverstaleSubmissions;
 use zaengle\neverstale\models\Settings;
-use zaengle\neverstale\services\Api;
 use zaengle\neverstale\services\Config;
+use zaengle\neverstale\services\Content;
 use zaengle\neverstale\services\Entry as EntryService;
+use zaengle\neverstale\services\Flag;
 use zaengle\neverstale\services\Format as FormatService;
 use zaengle\neverstale\services\Submission as SubmissionService;
 use zaengle\neverstale\services\TransactionLog;
@@ -65,52 +67,56 @@ use zaengle\neverstale\web\twig\Neverstale;
  * @property-read Settings $settings
  * @property-read SubmissionService $submission
  * @property-read Config $config
- * @property-read Api $api
+ * @property-read Content $api
  * @property-read TransactionLog $transactionLog
+ * @property-read Flag $flag
  */
 class Plugin extends BasePlugin
 {
     public string $schemaVersion = '1.0.0';
     public bool $hasCpSettings = true;
-
+    public ApiClient $client;
     public const STATUS_ATTRIBUTE = 'neverstaleStatus';
     public const DATE_ANALYZED_ATTRIBUTE = 'neverstaleDateAnalyzed';
     public const DATE_EXPIRED_ATTRIBUTE = 'neverstaleDateExpired';
     public const FLAG_COUNT_ATTRIBUTE = 'neverstaleFlagCount';
-
     /**
      * @inheritDoc
      */
     public static function config(): array
     {
-        return [
-            'components' => [
-                'entry' => EntryService::class,
-                'format' => FormatService::class,
-                'submission' => SubmissionService::class,
-                'config' => Config::class,
-                'transactionLog' => TransactionLog::class,
-            ],
-        ];
+        return [];
     }
-
     public function init(): void
     {
         parent::init();
+
         $this->registerLogTarget();
         $this->attachEventHandlers();
 
+        $this->client = new ApiClient([
+            'baseUri' => App::env('NEVERSTALE_API_BASE_URI'),
+            'apiKey' => $this->getSettings()->apiKey,
+        ]);
+
         Craft::$app->onInit(function() {
             $this->setComponents([
-                'api' => [
-                    'class' => Api::class,
-                    'client' => new ApiClient([
-                        'baseUri' => App::env('NEVERSTALE_API_BASE_URI'),
-                        'apiKey' => $this->getSettings()->apiKey,
-                    ]),
+                'config' => Config::class,
+                'content' => [
+                    'class' => Content::class,
+                    'client' => $this->client,
                 ],
+                'entry' => EntryService::class,
+                'format' => FormatService::class,
+                'flag' => [
+                    'class' => Flag::class,
+                    'client' => $this->client,
+                ],
+                'submission' => SubmissionService::class,
+                'transactionLog' => TransactionLog::class,
             ]);
         });
+
         Craft::$app->view->registerTwigExtension(new Neverstale());
     }
     /**
@@ -127,7 +133,6 @@ class Plugin extends BasePlugin
     {
         self::log($message);
     }
-
     /**
      * Logs a message to our custom log target.
      *
@@ -144,7 +149,6 @@ class Plugin extends BasePlugin
     {
         return Craft::t('neverstale', ...func_get_args());
     }
-
     /**
      * @throws InvalidConfigException
      */
@@ -152,7 +156,6 @@ class Plugin extends BasePlugin
     {
         return Craft::createObject(Settings::class);
     }
-
     protected function settingsHtml(): ?string
     {
         return Craft::$app->view->renderTemplate('neverstale/_settings.twig', [
@@ -160,7 +163,6 @@ class Plugin extends BasePlugin
             'settings' => $this->getSettings(),
         ]);
     }
-
     /**
      * Copy example config to project's config folder
      */
@@ -173,7 +175,6 @@ class Plugin extends BasePlugin
             copy($configSource, $configTarget);
         }
     }
-
     private function attachEventHandlers(): void
     {
         $this->registerOnElementSaveHandler();
@@ -183,6 +184,7 @@ class Plugin extends BasePlugin
         $this->registerCpRoutes();
         $this->registerCpNavItems();
         $this->registerEntryTableAttributes();
+        $this->registerEntrySidebarHtml();
 
         Event::on(Fields::class, Fields::EVENT_REGISTER_FIELD_TYPES, function(RegisterComponentTypesEvent $event) {
             $event->types[] = NeverstaleSubmissions::class;
@@ -215,7 +217,27 @@ class Plugin extends BasePlugin
             $event->types[] = PreviewSubmission::class;
         });
     }
+    private function registerEntrySidebarHtml(): void
+    {
+        Event::on(
+            Entry::class,
+            Element::EVENT_DEFINE_SIDEBAR_HTML,
+            static function(DefineHtmlEvent $event) {
+                $entry = $event->sender;
+                $submission = $entry->getNeverstaleSubmission();
 
+                if (!$submission) {
+                    return;
+                }
+
+                // @todo register asset bundle
+
+                $event->html .= Craft::$app->view->renderTemplate('neverstale/entry/_sidebar', [
+                    'submission' => $submission,
+                    'customId' => Plugin::getInstance()->format->forApi($submission)->customId,
+                ]);
+            });
+    }
     private function registerEntryTableAttributes(): void
     {
         Event::on(Entry::class, Entry::EVENT_REGISTER_TABLE_ATTRIBUTES, function(RegisterElementTableAttributesEvent $event) {
@@ -255,7 +277,6 @@ class Plugin extends BasePlugin
             default => null,
         };
     }
-
     private function getStatusAttributeHtml(Entry $entry): string
     {
         $submission = $entry->getNeverstaleSubmission();
@@ -288,7 +309,6 @@ class Plugin extends BasePlugin
 
         return $submission->{$submissionAttr} ? Craft::$app->formatter->asTimestamp($submission->{$submissionAttr}) : '--';
     }
-
     /**
      * @see \zaengle\neverstale\services\Entry
      */
@@ -337,14 +357,12 @@ class Plugin extends BasePlugin
             $event->types[] = ScanUtility::class;
         });
     }
-
     private function registerElementTypes(): void
     {
         Event::on(Elements::class, Elements::EVENT_REGISTER_ELEMENT_TYPES, function(RegisterComponentTypesEvent $event) {
             $event->types[] = NeverstaleSubmission::class;
         });
     }
-
     private function registerCpRoutes(): void
     {
         Event::on(UrlManager::class, UrlManager::EVENT_REGISTER_CP_URL_RULES, function(RegisterUrlRulesEvent $event) {
@@ -355,7 +373,6 @@ class Plugin extends BasePlugin
             ]);
         });
     }
-
     private function registerCpNavItems(): void
     {
         Event::on(
@@ -380,7 +397,6 @@ class Plugin extends BasePlugin
             }
         );
     }
-
     /**
      * Write log messages to a custom log target
      */
@@ -398,6 +414,4 @@ class Plugin extends BasePlugin
             ),
         ]);
     }
-
-
 }

@@ -30,7 +30,6 @@ class Submission extends Component
             'entryId' => $entry->id,
         ]));
     }
-
     public function findOrCreate(Entry $entry): ?NeverstaleSubmission
     {
         $submission = $this->find($entry);
@@ -43,7 +42,6 @@ class Submission extends Component
                 'entryId' => $entry->id,
                 'submissionId' => $submission->id,
             ]));
-
         }
 
         return $submission;

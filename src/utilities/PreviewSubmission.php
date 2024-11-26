@@ -5,7 +5,7 @@ namespace zaengle\neverstale\utilities;
 use Craft;
 use craft\base\Utility;
 use craft\elements\Entry;
-use zaengle\neverstale\models\ApiSubmission;
+use zaengle\neverstale\models\ContentSubmission;
 
 /**
  * Preview Submission utility
@@ -37,7 +37,7 @@ class PreviewSubmission extends Utility
 
         return Craft::$app->getView()->renderTemplate('neverstale/utilities/_previewSubmission', [
             'previewEntry' => $previewEntry,
-            'entryMeta' => $previewEntry ? ApiSubmission::metaFromEntry($previewEntry) : null,
+            'entryMeta' => $previewEntry ? ContentSubmission::metaFromEntry($previewEntry) : null,
         ]);
     }
 }
