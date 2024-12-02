@@ -14,6 +14,7 @@ use zaengle\neverstale\models\ApiTransaction;
  *
  * @property int $id ID
  * @property int|null $entryId Entry ID
+ * @property string|null $entryUid Entry UID
  * @property int|null $siteId Site ID
  * @property string|null $neverstaleId Neverstale ID
  * @property string $uid Uid

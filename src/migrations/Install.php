@@ -52,10 +52,11 @@ class Install extends Migration
         $this->archiveTableIfExists('{{%neverstale_content}}');
         $this->createTable('{{%neverstale_content}}', [
             'id' => $this->primaryKey(),
+            'uid' => $this->uid(),
             'entryId' => $this->integer(),
+            'entryUid' => $this->uid(),
             'siteId' => $this->integer(),
             'neverstaleId' => $this->string(),
-            'uid' => $this->uid(),
             'analysisStatus' => $this->string()->defaultValue(AnalysisStatus::UNSENT->value),
             'flagCount' => $this->integer()->defaultValue(0),
             'dateAnalyzed' => $this->dateTime()->defaultValue(null),
@@ -85,7 +86,7 @@ class Install extends Migration
             '{{%elements}}',
             'id',
             'CASCADE',
-        null);
+        );
         $this->addForeignKey(
             null,
             '{{%neverstale_content}}',
@@ -93,7 +94,7 @@ class Install extends Migration
             '{{%elements}}',
             'id',
             'CASCADE',
-        null);
+        );
         $this->addForeignKey(
             null,
             '{{%neverstale_content}}',
@@ -101,7 +102,7 @@ class Install extends Migration
             '{{%sites}}',
             'id',
             'CASCADE',
-        null);
+        );
 
         $this->addForeignKey(
             null,
@@ -110,13 +111,14 @@ class Install extends Migration
             '{{%neverstale_content}}',
             'id',
             'CASCADE',
-            null);
+        );
     }
 
     public function createIndexes(): void
     {
         $this->createIndex(null, '{{%neverstale_content}}', 'id');
         $this->createIndex(null, '{{%neverstale_content}}', 'entryId');
+        $this->createIndex(null, '{{%neverstale_content}}', 'entryUid');
         $this->createIndex(null, '{{%neverstale_content}}', 'siteId');
         $this->createIndex(null, '{{%neverstale_content}}', 'neverstaleId');
         $this->createIndex(null, '{{%neverstale_content}}', 'uid');

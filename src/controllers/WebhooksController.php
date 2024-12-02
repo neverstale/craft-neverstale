@@ -50,7 +50,7 @@ class WebhooksController extends BaseController
          try {
              $transaction = ApiTransaction::fromWebhookPayload($data);
              // Look for our content item
-             $content = NeverstaleContent::findOne(['uid' => $transaction->customId]);
+             $content = NeverstaleContent::findOne(['entryUid' => $transaction->customId]);
 
              if (!$content) {
                  Plugin::error('Content item not found for webhook');
@@ -61,6 +61,7 @@ class WebhooksController extends BaseController
 
 
          } catch (\Exception $e) {
+
              Plugin::error('Could not process webhook: ' . $e->getMessage());
              return $this->asFailure('Could not process webhook');
          }

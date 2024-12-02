@@ -65,7 +65,7 @@ use zaengle\neverstale\web\twig\Neverstale;
  * @property-read Settings $settings
 
  * @property-read Config $config
- * @property-read Content $api
+ * @property-read Content $content
  * @property-read TransactionLog $transactionLog
  * @property-read Flag $flag
  */

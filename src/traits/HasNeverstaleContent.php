@@ -2,9 +2,7 @@
 
 namespace zaengle\neverstale\traits;
 
-
 use craft\helpers\UrlHelper;
-
 use zaengle\neverstale\enums\AnalysisStatus;
 use zaengle\neverstale\Plugin;
 use zaengle\neverstale\records\Content as ContentRecord;
@@ -66,6 +64,7 @@ trait HasNeverstaleContent
         }
 
         $record->entryId = $this->entryId;
+        $record->entryUid = $this->entryUid;
         $record->siteId = $this->siteId;
         $record->neverstaleId = $this->neverstaleId;
         $record->analysisStatus = $this->analysisStatus ?? AnalysisStatus::UNSENT->value;

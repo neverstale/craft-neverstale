@@ -18,6 +18,7 @@ use zaengle\neverstale\enums\AnalysisStatus;
 class NeverstaleContentQuery extends ElementQuery
 {
     public mixed $entryId = null;
+    public mixed $entryUid = null;
     public mixed $siteId = null;
     public mixed $uid = null;
     public mixed $neverstaleId = null;
@@ -34,6 +35,13 @@ class NeverstaleContentQuery extends ElementQuery
     public function entryId(mixed $value): self
     {
         $this->entryId = (int) $value;
+
+        return $this;
+    }
+
+    public function entryUid(mixed $value): self
+    {
+        $this->entryUid = (string) $value;
 
         return $this;
     }
@@ -107,6 +115,7 @@ class NeverstaleContentQuery extends ElementQuery
             'neverstale_content.dateExpired',
             'neverstale_content.flagCount',
             'neverstale_content.entryId',
+            'neverstale_content.entryUid',
             'neverstale_content.neverstaleId',
             'neverstale_content.siteId',
         ]);
@@ -119,6 +128,9 @@ class NeverstaleContentQuery extends ElementQuery
         }
         if ($this->entryId) {
             $this->subQuery->andWhere(Db::parsenumericparam('neverstale_content.entryId', $this->entryId));
+        }
+        if ($this->entryUid) {
+            $this->subQuery->andWhere(Db::parseParam('neverstale_content.entryUid', $this->entryUid));
         }
         if ($this->neverstaleId) {
             $this->subQuery->andWhere(Db::parseParam('neverstale_content.neverstaleId', $this->neverstaleId));
