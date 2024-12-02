@@ -23,9 +23,9 @@
           <span>{{ content.statusAsEnum.label | t('neverstale') }}</span>
         </dd>
       </div>
-      {%- if content.isAnalyzed %}
+      {%- if content.dateAnalyzed %}
       <div class="data">
-        <dt class="heading">{{ 'Analyzed At' | t('neverstale') }}</dt>
+        <dt class="heading">{{ 'Last analyzed At' | t('neverstale') }}</dt>
         <dd class="">
           <span>{{ content.dateAnalyzed | timestamp }}</span>
         </dd>
@@ -40,7 +40,7 @@
         {%- endif %}
       {%- endif %}
     </dl>
-    {% if content.isFlagged and flagData.data.flags is not empty %}
+    {% if flagData.data.flags is not empty %}
     <h3 class="h4">{{ content.flagCount }} Content Flag{{ content.flagCount > 1 ? 's' }}</h3>
       <ul class="data">
         {% for item in flagData.data.flags %}
