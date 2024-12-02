@@ -20,7 +20,7 @@ use zaengle\neverstale\Plugin;
  */
 class BaseController extends Controller
 {
-
+    protected array|int|bool $allowAnonymous = self::ALLOW_ANONYMOUS_NEVER;
     public function getPlugin(): Plugin
     {
         return Plugin::getInstance();

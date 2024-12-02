@@ -53,11 +53,15 @@ class ApiClient
 
     public function ignoreFlag(string $flagId): ResponseInterface
     {
-        return $this->client->get("api/flags/$flagId/ignore");
+        return $this->client->post("api/flags/$flagId/ignore");
     }
 
-    public function rescheduleFlag(string $flagId): ResponseInterface
+    public function rescheduleFlag(string $flagId, \DateTime $expiredAt): ResponseInterface
     {
-        return $this->client->get("api/flags/$flagId/reschedule");
+        return $this->client->post("api/flags/$flagId/reschedule",[
+            'json' => [
+                'expired_at' => $expiredAt->format('Y-m-d H:i:s'),
+            ],
+        ]);
     }
 }

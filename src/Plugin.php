@@ -71,6 +71,10 @@ use zaengle\neverstale\web\twig\Neverstale;
  */
 class Plugin extends BasePlugin
 {
+    /**
+     * @var mixed|object|null
+     */
+    public mixed $flags;
     public string $schemaVersion = '1.0.0';
     public bool $hasCpSettings = true;
     public ApiClient $client;

@@ -1,40 +1,135 @@
 {% set flagData = craft.neverstale.content.getByCustomId(customId) %}
-<div id="neverstale-flags" class="content ">
-  <h2>Neverstale</h2>
-  <dl id="meta-details" class="meta ns-meta">
-    <div class="data">
-      <dt class="heading">{{ 'Content Status' | t('neverstale') }}</dt>
-      <dd class="">
-        <span class="status {{ content.statusColor }}"></span>
-        <span>{{ content.statusAsEnum.label | t('neverstale') }}</span>
-      </dd>
-    </div>
-    {%- if content.isAnalyzed %}
-    <div class="data">
-      <dt class="heading">{{ 'Analyzed At' | t('neverstale') }}</dt>
-      <dd class="">
-        <span>{{ content.dateAnalyzed | timestamp }}</span>
-      </dd>
-    </div>
-    {%- endif  %}
-  </dl>
-  {% if content.isFlagged and flagData.data.flags is not empty %}
-  <h3>{{ content.flagCount }} Content Flags</h3>
-    <dl class="table data table-condensed table-bordered table-striped fullwidth">
-      {% for item in flagData.data.flags %}
-        {{ d(item) }}
-        <div>
-          <dt><strong>{{ item.flag |title }}</strong></dt>
-          <dd>
-            <p>{{ item.reason }}</p>
-            <div class="flex flex-nowrap">
-              <button type="button" class="btn btn-primary">{{ "Ignore"|t('neverstale') }}</button>
-              <button type="button" class="btn">{{ "Reschedule"|t('neverstale') }}</button>
-            </div>
-            <hr>
-          </dd>
-        </div>
-      {% endfor %}
+<div id="neverstale-flags" class="content" style="margin-bottom: 1rem">
+  <div class="meta ns-sidebar">
+    <header class="ns-sidebar-header">
+      <h2 class="h2">NEVERSTALE</h2>
+      <form method="post">
+        {{ hiddenInput('contentId', content.id) }}
+        {{ actionInput('neverstale/content/ingest') }}
+        {{ redirectInput(craft.app.request.url) }}
+        {{ csrfInput() }}
+        {{ tag('button', {
+          type: 'submit',
+          class: 'btn submit' ~ (not content.isAnalyzed ? 'btn-primary'),
+          text: 'Resubmit content'|t('neverstale'),
+        }) }}
+      </form>
+    </header>
+    <dl class="meta ns-sidebar-meta">
+      <div class="data">
+        <dt class="heading">{{ 'Content Status' | t('neverstale') }}</dt>
+        <dd class="">
+          <span class="status {{ content.statusColor }}"></span>
+          <span>{{ content.statusAsEnum.label | t('neverstale') }}</span>
+        </dd>
+      </div>
+      {%- if content.isAnalyzed %}
+      <div class="data">
+        <dt class="heading">{{ 'Analyzed At' | t('neverstale') }}</dt>
+        <dd class="">
+          <span>{{ content.dateAnalyzed | timestamp }}</span>
+        </dd>
+      </div>
+        {%- if content.dateExpired %}
+          <div class="data">
+            <dt class="heading">{{ 'Content Expired At' | t('neverstale') }}</dt>
+            <dd class="">
+              <span>{{ content.dateExpired | timestamp }}</span>
+            </dd>
+          </div>
+        {%- endif %}
+      {%- endif %}
     </dl>
-  {% endif %}
+    {% if content.isFlagged and flagData.data.flags is not empty %}
+    <h3 class="h4">{{ content.flagCount }} Content Flag{{ content.flagCount > 1 ? 's' }}</h3>
+      <ul class="data">
+        {% for item in flagData.data.flags %}
+          <li class="ns-flag-list-item">
+            <details>
+              <summary class="h4">{{ item.flag | title }} ({{ item.expired_at | timestamp  }})</summary>
+              <div>
+                <dl>
+                  <dt class="h6">Expired at:</dt>
+                  <dd>{{ item.expired_at | timestamp }}</dd>
+                  <dt class="h6">Reason:</dt>
+                  <dd>{{ item.reason }}</dd>
+                  <dt class="h6">Snippet:</dt>
+                  <dd><code>{{ item.snippet }}</code></dd>
+                </dl>
+
+                <hr>
+                <div class="flex flex-nowrap" style="padding-bottom: 1.25rem; font-size: 12px">
+                  <form {{ attr({
+                    id: 'neverstale-flag-ignore-' ~ item.id,
+                    method: 'POST',
+                  }) }}
+                    onsubmit="return confirm('Are you sure you want to ignore this flag? There is no undo')">
+                    {{ csrfInput() }}
+                    {{ actionInput("neverstale/flag/ignore") }}
+                    {{ redirectInput(craft.app.request.url) }}
+                    {{ hiddenInput("flagId", item.id) }}
+                    {{ hiddenInput("contentId", content.id) }}
+                    <button type="submit" class="btn btn-primary">{{ "Ignore"|t('neverstale') }}</button>
+                  </form>
+                  <form {{ attr({
+                    id: 'neverstale-flag-reschedule-' ~ item.id,
+                    method: 'POST',
+                  }) }}>
+                    {{ csrfInput() }}
+                    {{ actionInput("neverstale/flag/reschedule") }}
+                    {{ redirectInput(craft.app.request.url) }}
+                    {{ hiddenInput("flagId", item.id) }}
+                    {{ hiddenInput("contentId", content.id) }}
+                    <button type="submit" class="btn">{{ "Reschedule"|t('neverstale') }}</button>
+                    {{ tag('label', {
+                      for: 'ns-expired-at-' ~ item.id,
+                      class: 'sr-only',
+                    }) }}
+                    {{ input('datetime-local', 'expiredAt', null, {
+                      id: 'ns-expired-at-' ~ item.id,
+                    }) }}
+                  </form>
+                </div>
+              </div>
+            </details>
+          </li>
+        {% endfor %}
+      </ul>
+    {% endif %}
+  </div>
 </div>
+{% css %}
+  .ns-sidebar {
+    padding-top: 1rem;
+    padding-bottom: 1rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+    margin-bottom: 1rem;
+  }
+  .ns-sidebar-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 0.5rem;
+  }
+  .ns-sidebar-header h2 {
+    margin: 0 !important;
+  }
+
+  .ns-sidebar-meta {
+    box-shadow: none !important;
+    border-width: 1px 0 1px 0;
+    border-style: solid;
+    border-color: var(--hairline-color);
+    margin-bottom: 0 !important;
+  }
+  .ns-flag-list-item {
+    margin-top: 0.25rem;
+    margin-bottom: 0.25rem;
+    border-bottom: 1px solid var(--hairline-color);
+  }
+  .ns-flag-list-item:last-child {
+    border-bottom: none;
+  }
+{% endcss %}
