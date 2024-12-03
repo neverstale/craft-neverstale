@@ -9,12 +9,11 @@ use craft\elements\Entry;
 /**
  * Trait HasEntry
  *
- * @property ?Entry entry
+ * @property Entry|null entry
  */
 trait HasEntry
 {
-    public int $entryId;
-    public string $entryUid;
+    public ?int $entryId = null;
     public ?int $siteId = null;
     private ?Entry $entry = null;
 
@@ -23,7 +22,6 @@ trait HasEntry
         $this->entry = $entry;
         $this->siteId = $entry->siteId;
         $this->entryId = $entry->canonicalId;
-        $this->entryUid = $entry->canonicalUid;
     }
 
     public function getEntry(): ?Entry

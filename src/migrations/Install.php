@@ -54,7 +54,6 @@ class Install extends Migration
             'id' => $this->primaryKey(),
             'uid' => $this->uid(),
             'entryId' => $this->integer(),
-            'entryUid' => $this->uid(),
             'siteId' => $this->integer(),
             'neverstaleId' => $this->string(),
             'analysisStatus' => $this->string()->defaultValue(AnalysisStatus::UNSENT->value),
@@ -118,7 +117,6 @@ class Install extends Migration
     {
         $this->createIndex(null, '{{%neverstale_content}}', 'id');
         $this->createIndex(null, '{{%neverstale_content}}', 'entryId');
-        $this->createIndex(null, '{{%neverstale_content}}', 'entryUid');
         $this->createIndex(null, '{{%neverstale_content}}', 'siteId');
         $this->createIndex(null, '{{%neverstale_content}}', 'neverstaleId');
         $this->createIndex(null, '{{%neverstale_content}}', 'uid');

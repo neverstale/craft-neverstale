@@ -50,12 +50,7 @@ class WebhooksController extends BaseController
          try {
              $transaction = ApiTransaction::fromWebhookPayload($data);
              // Look for our content item
-             $content = NeverstaleContent::findOne(['entryUid' => $transaction->customId]);
-
-             if (!$content) {
-                 Plugin::error('Content item not found for webhook');
-                 return $this->asFailure('Content item not found');
-             }
+             $content = Plugin::getInstance()->content->findOrCreateByCustomId($transaction->customId);
 
              $this->plugin->content->onWebhook($content, $transaction);
 

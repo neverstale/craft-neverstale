@@ -3,7 +3,9 @@
 namespace zaengle\neverstale\traits;
 
 use craft\helpers\UrlHelper;
+use Illuminate\Support\Collection;
 use zaengle\neverstale\enums\AnalysisStatus;
+use zaengle\neverstale\models\CustomId;
 use zaengle\neverstale\Plugin;
 use zaengle\neverstale\records\Content as ContentRecord;
 
@@ -17,17 +19,22 @@ use zaengle\neverstale\records\Content as ContentRecord;
  *
  *
  * @property-read string $webhookUrl
+ * @property-read string|null $customId
  * @property-read ContentRecord|null $record
  */
 trait HasNeverstaleContent
 {
     use LogsApiTransactions, HasEntry;
+
     public ?string $neverstaleId = null;
     protected ?string $analysisStatus = null;
 
     public ?int $flagCount = null;
     public ?\DateTime $dateAnalyzed = null;
     public ?\DateTime $dateExpired = null;
+
+    protected ?CustomId $customId = null;
+
     public function getRecord(): ?ContentRecord
     {
         if ($this->id === null) {
@@ -64,7 +71,6 @@ trait HasNeverstaleContent
         }
 
         $record->entryId = $this->entryId;
-        $record->entryUid = $this->entryUid;
         $record->siteId = $this->siteId;
         $record->neverstaleId = $this->neverstaleId;
         $record->analysisStatus = $this->analysisStatus ?? AnalysisStatus::UNSENT->value;
@@ -99,5 +105,13 @@ trait HasNeverstaleContent
     public function forApi(): array
     {
         return Plugin::getInstance()->format->forIngest($this)->toArray();
+    }
+
+    public function getCustomId(): string
+    {
+        if ($this->customId === null) {
+            $this->customId = CustomId::fromContent($this);
+        }
+        return $this->customId->toString();
     }
 }

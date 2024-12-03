@@ -23,7 +23,6 @@ use craft\helpers\App;
 use craft\helpers\Cp as CpHelper;
 use craft\log\MonologTarget;
 use craft\services\Elements;
-use craft\services\Fields;
 use craft\services\UserPermissions;
 use craft\services\Utilities;
 use craft\web\UrlManager;
@@ -63,11 +62,11 @@ use zaengle\neverstale\web\twig\Neverstale;
  * @property-read EntryService $entry
  * @property-read FormatService $format
  * @property-read Settings $settings
-
  * @property-read Config $config
  * @property-read Content $content
  * @property-read TransactionLog $transactionLog
  * @property-read Flag $flag
+
  */
 class Plugin extends BasePlugin
 {
@@ -82,13 +81,7 @@ class Plugin extends BasePlugin
     public const DATE_ANALYZED_ATTRIBUTE = 'neverstaleDateAnalyzed';
     public const DATE_EXPIRED_ATTRIBUTE = 'neverstaleDateExpired';
     public const FLAG_COUNT_ATTRIBUTE = 'neverstaleFlagCount';
-    /**
-     * @inheritDoc
-     */
-    public static function config(): array
-    {
-        return [];
-    }
+
     public function init(): void
     {
         parent::init();
@@ -116,6 +109,7 @@ class Plugin extends BasePlugin
                 ],
                 'transactionLog' => TransactionLog::class,
             ]);
+
         });
 
         Craft::$app->view->registerTwigExtension(new Neverstale());
@@ -226,10 +220,13 @@ class Plugin extends BasePlugin
                 }
 
                 // @todo register asset bundle
+                $plugin = Plugin::getInstance();
+                $customId = $plugin->format->forIngest($content)->customId;
 
                 $event->html .= Craft::$app->view->renderTemplate('neverstale/entry/_sidebar', [
                     'content' => $content,
-                    'customId' => Plugin::getInstance()->format->forIngest($content)->customId,
+                    'flagData' => $plugin->content->fetchByCustomId($customId),
+                    'customId' => $customId,
                 ]);
             });
     }

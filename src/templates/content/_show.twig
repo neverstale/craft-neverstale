@@ -128,7 +128,7 @@
                 {{ transaction.status | title }}
               {%- endif -%}
             </td>
-            <td>{{ transaction.message }}</td>
+            <td>{{ transaction.message }} {{ d(transaction.debugTransaction | json_decode) }}</td>
           </tr>
         {% else %}
           <tr>

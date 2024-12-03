@@ -131,7 +131,7 @@ class IngestContent extends Model implements Arrayable
             self::metaFromEntry($entry),
             [
                 'content' => $content,
-                'customId' => $entry->uid,
+                'customId' => $content->getCustomId(),
                 'data'  => Plugin::getInstance()->format->entryContent($entry),
             ]));
     }

@@ -1,4 +1,4 @@
-{% set flagData = craft.neverstale.content.getByCustomId(customId) %}
+{# @var flagData #}
 <div id="neverstale-flags" class="content" style="margin-bottom: 1rem">
   <div class="meta ns-sidebar">
     <header class="ns-sidebar-header">
@@ -46,7 +46,7 @@
         {% for item in flagData.data.flags %}
           <li class="ns-flag-list-item">
             <details>
-              <summary class="h4">{{ item.flag | title }} ({{ item.expired_at | timestamp  }})</summary>
+              <summary class="h4">{{ item.flag | title }} ({{ item.expired_at | timestamp }})</summary>
               <div>
                 <dl>
                   <dt class="h6">Expired at:</dt>
@@ -85,7 +85,7 @@
                       for: 'ns-expired-at-' ~ item.id,
                       class: 'sr-only',
                     }) }}
-                    {{ input('datetime-local', 'expiredAt', null, {
+                    {{ input('date', 'expiredAt', null, {
                       id: 'ns-expired-at-' ~ item.id,
                     }) }}
                   </form>

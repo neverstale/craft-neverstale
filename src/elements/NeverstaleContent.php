@@ -36,7 +36,6 @@ use zaengle\neverstale\traits\HasNeverstaleContent;
  * @since 1.0.0
  * @see https://github.com/zaengle/craft-neverstale
  * @property int $entryId
- * @property string $entryUid
  * @property int $siteId
  * @property-read null|string $postEditUrl
  * @property-read string $statusColor
@@ -280,7 +279,7 @@ class NeverstaleContent extends Element
     protected function attributeHtml(string $attribute): string
     {
         return match ($attribute) {
-            'entry' => Cp::elementChipHtml($this->getEntry()) ?? '',
+            'entry' => Cp::elementChipHtml($this->getEntry()),
             default => parent::attributeHtml($attribute),
         };
     }

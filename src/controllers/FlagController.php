@@ -53,8 +53,12 @@ class FlagController extends BaseController
         }
 
         try {
+            $expiredAt = $expiredAt->setTimezone(new \DateTimeZone('UTC'));
             $this->plugin->flag->reschedule($content, $flagId, $expiredAt);
-            return $this->respondWithSuccess(Plugin::t("Flag rescheduled to {expiredAt}", ['expiredAt' => $expiredAt->format('Y-m-d H:i:s')]));
+
+            return $this->respondWithSuccess(Plugin::t("Flag rescheduled to {expiredAt}", [
+                'expiredAt' => $expiredAt->format('Y-m-d')
+            ]));
         } catch (\Exception $e) {
             return $this->respondWithError(Plugin::t('Could not reschedule flag, check the logs for details'));
         }

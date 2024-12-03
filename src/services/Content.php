@@ -11,6 +11,7 @@ use yii\base\Component;
 use zaengle\neverstale\elements\NeverstaleContent;
 use zaengle\neverstale\jobs\CreateNeverstaleContentJob;
 use zaengle\neverstale\models\ApiTransaction;
+use zaengle\neverstale\models\CustomId;
 use zaengle\neverstale\Plugin;
 use zaengle\neverstale\support\ApiClient;
 /**
@@ -65,7 +66,7 @@ class Content extends Component
         }
     }
 
-    public function getByCustomId(string $customId): mixed
+    public function fetchByCustomId(string $customId): mixed
     {
         $response = $this->client->getByCustomId($customId);
 
@@ -141,6 +142,29 @@ class Content extends Component
 
         return $content;
     }
+
+
+    public function findOrCreateByCustomId(?string $strId): ?NeverstaleContent
+    {
+        $customId = CustomId::parse($strId);
+
+        if ($content = NeverstaleContent::findOne($customId->id)) {
+            return $content;
+        }
+
+        $entry = Entry::findOne([
+            'id' => $customId->entryId,
+            'siteId' => $customId->siteId,
+        ]);
+
+        if (!$entry) {
+            Plugin::error("Entry {$customId->entryId} not found for custom ID: {$strId}");
+            return null;
+        }
+
+        return $this->create($entry);
+    }
+
     public function find(Entry $entry): ?NeverstaleContent
     {
         return NeverstaleContent::findOne([
@@ -155,11 +179,6 @@ class Content extends Component
             'siteId' => $entry->siteId,
         ]);
     }
-    /**
-     * @throws \Throwable
-     * @throws Exception
-     * @throws ElementNotFoundException
-     */
     public function save(NeverstaleContent $content): bool
     {
         $saved = Craft::$app->getElements()->saveElement($content);
