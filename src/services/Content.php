@@ -70,12 +70,8 @@ class Content extends Component
     {
         $response = $this->client->getByCustomId($customId);
 
-        $responseBody = Json::decode($response->getBody()->getContents());
-
-        $transaction = ApiTransaction::fromContentResponse($responseBody, 'api.getByCustomId');
-
-//        @todo return an object, handle errors
-        return $responseBody;
+        //        @todo return an object, handle errors
+        return Json::decode($response->getBody()->getContents());
     }
 
     public function validateSignature(string $payload, string $userSignature): bool
@@ -188,5 +184,20 @@ class Content extends Component
         }
 
         return $saved;
+    }
+
+    public function refresh(NeverstaleContent $content)
+    {
+        Plugin::info("Refreshing content #{$content->id} from Neverstale");
+
+        $data = $this->fetchByCustomId($content->customId);
+
+        $data['message'] = 'Content refreshed from Neverstale';
+        $transaction = ApiTransaction::fromContentResponse($data, 'api.refreshContent');
+
+        $content->setAnalysisStatus($transaction->analysisStatus);
+        $content->logTransaction($transaction);
+
+        return Plugin::getInstance()->content->save($content);
     }
 }

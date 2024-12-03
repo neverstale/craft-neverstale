@@ -34,7 +34,6 @@ class WebhooksController extends BaseController
              return $this->asFailure('No webhook signature provided');
          }
 
-
          if (!$this->getPlugin()->content->validateSignature($payload, $requestSignature)) {
              Plugin::error('Invalid webhook signature');
              return $this->asFailure('Invalid webhook signature');
@@ -49,7 +48,7 @@ class WebhooksController extends BaseController
          // Update the content item based on the webhook data
          try {
              $transaction = ApiTransaction::fromWebhookPayload($data);
-             // Look for our content item
+             /** @var NeverstaleContent $content */
              $content = Plugin::getInstance()->content->findOrCreateByCustomId($transaction->customId);
 
              $this->plugin->content->onWebhook($content, $transaction);

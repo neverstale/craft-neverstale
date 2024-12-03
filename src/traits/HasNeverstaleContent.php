@@ -96,6 +96,26 @@ trait HasNeverstaleContent
             default => false,
         };
     }
+    public function isStale(): bool
+    {
+        return match ($this->getAnalysisStatus()) {
+            AnalysisStatus::STALE => true,
+            default => false,
+        };
+    }
+
+    public function isPendingProcessingOrStale(): bool
+    {
+        return match ($this->getAnalysisStatus()) {
+            AnalysisStatus::UNSENT,
+            AnalysisStatus::STALE,
+            AnalysisStatus::PENDING_INITIAL_ANALYSIS,
+            AnalysisStatus::PENDING_REANALYSIS,
+            AnalysisStatus::PROCESSING_REANALYSIS,
+            AnalysisStatus::PROCESSING_INITIAL_ANALYSIS => true,
+            default => false,
+        };
+    }
 
     public function getWebhookUrl()
     {

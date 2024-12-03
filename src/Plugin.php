@@ -225,7 +225,7 @@ class Plugin extends BasePlugin
 
                 $event->html .= Craft::$app->view->renderTemplate('neverstale/entry/_sidebar', [
                     'content' => $content,
-                    'flagData' => $plugin->content->fetchByCustomId($customId),
+                    'flagData' => $plugin->content->fetchByCustomId($customId)['data'],
                     'customId' => $customId,
                 ]);
             });

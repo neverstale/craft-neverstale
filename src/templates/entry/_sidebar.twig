@@ -1,19 +1,37 @@
-{# @var flagData #}
 <div id="neverstale-flags" class="content" style="margin-bottom: 1rem">
   <div class="meta ns-sidebar">
     <header class="ns-sidebar-header">
-      <h2 class="h2">NEVERSTALE</h2>
-      <form method="post">
-        {{ hiddenInput('contentId', content.id) }}
-        {{ actionInput('neverstale/content/ingest') }}
-        {{ redirectInput(craft.app.request.url) }}
-        {{ csrfInput() }}
-        {{ tag('button', {
-          type: 'submit',
-          class: 'btn submit' ~ (not content.isAnalyzed ? 'btn-primary'),
-          text: 'Resubmit content'|t('neverstale'),
-        }) }}
-      </form>
+      <h2 class="h2">{{ 'Neverstale'|t('neverstale') }}</h2>
+      <div class="flex">
+        <form method="post">
+          {{ hiddenInput('contentId', content.id) }}
+          {{ actionInput('neverstale/content/refresh') }}
+          {{ redirectInput(craft.app.request.url) }}
+          {{ csrfInput() }}
+          <button type="submit" class="btn" title="{{ 'Refresh Neverstale Data'|t('neverstale') }}">
+            {{ tag('span', {
+              'data-icon': 'arrows-rotate',
+              'data-icon-size': 'small',
+              'role': 'img',
+              'style': 'margin: 0',
+            }) }}
+          </button>
+        </form>
+        <form method="post">
+          {{ hiddenInput('contentId', content.id) }}
+          {{ actionInput('neverstale/content/ingest') }}
+          {{ redirectInput(craft.app.request.url) }}
+          {{ csrfInput() }}
+          <button type="submit" class="btn btn-primary" title="{{ 'Resubmit Content'|t('neverstale') }}">
+            {{ tag('span', {
+              'data-icon': 'circle-arrow-up',
+              'data-icon-size': 'small',
+              'role': 'img',
+              'style': 'margin: 0',
+            }) }}
+          </button>
+        </form>
+      </div>
     </header>
     <dl class="meta ns-sidebar-meta">
       <div class="data">
@@ -23,16 +41,22 @@
           <span>{{ content.statusAsEnum.label | t('neverstale') }}</span>
         </dd>
       </div>
-      {%- if content.dateAnalyzed %}
       <div class="data">
-        <dt class="heading">{{ 'Last analyzed At' | t('neverstale') }}</dt>
+        <dt class="heading">{{ 'Date Updated' | t('app') }}</dt>
         <dd class="">
-          <span>{{ content.dateAnalyzed | timestamp }}</span>
+          <span>{{ content.dateUpdated | timestamp }}</span>
         </dd>
       </div>
+      {%- if content.dateAnalyzed %}
+        <div class="data">
+          <dt class="heading">{{ 'Last Analyzed' | t('neverstale') }}</dt>
+          <dd class="">
+            <span>{{ content.dateAnalyzed | timestamp }}</span>
+          </dd>
+        </div>
         {%- if content.dateExpired %}
           <div class="data">
-            <dt class="heading">{{ 'Content Expired At' | t('neverstale') }}</dt>
+            <dt class="heading">{{ 'Content Expired' | t('neverstale') }}</dt>
             <dd class="">
               <span>{{ content.dateExpired | timestamp }}</span>
             </dd>
@@ -40,62 +64,93 @@
         {%- endif %}
       {%- endif %}
     </dl>
-    {% if flagData.data.flags is not empty %}
-    <h3 class="h4">{{ content.flagCount }} Content Flag{{ content.flagCount > 1 ? 's' }}</h3>
-      <ul class="data">
-        {% for item in flagData.data.flags %}
-          <li class="ns-flag-list-item">
-            <details>
-              <summary class="h4">{{ item.flag | title }} ({{ item.expired_at | timestamp }})</summary>
-              <div>
-                <dl>
-                  <dt class="h6">Expired at:</dt>
-                  <dd>{{ item.expired_at | timestamp }}</dd>
-                  <dt class="h6">Reason:</dt>
-                  <dd>{{ item.reason }}</dd>
-                  <dt class="h6">Snippet:</dt>
-                  <dd><code>{{ item.snippet }}</code></dd>
-                </dl>
+    {%- if content.isPendingProcessingOrStale %}
+      <div id="isPendingProcessingOrStale-tip" class="readable" style="margin: 1rem 0">
+        <blockquote class="note warning" style="font-size: 13px"><p>{{ 'This content is currently pending processing by Neverstale, and as such
+          some values may be out of date'|t('neverstale') }}</p>
+        </blockquote>
+      </div>
+    {%- endif %}
+    {% if flagData.flags is not empty %}
+{#      @todo i18n #}
+      <div {{ attr({
+        style: content.isPendingProcessingOrStale ? 'opacity: 0.5',
+      }) }}>
+        <h3 class="h4">{{ content.flagCount }} Content Flag{{ content.flagCount > 1 ? 's' }}</h3>
+        <ul class="data">
+          {% for item in flagData.flags %}
+            <li class="ns-flag-list-item">
+              <details>
+                <summary class="h4">{{ item.flag | title }} ({{ item.expired_at | timestamp }})</summary>
+                <div>
+                  <dl>
+                    <dt class="h6">Expired at:</dt>
+                    <dd>{{ item.expired_at | timestamp }}</dd>
+                    <dt class="h6">Reason:</dt>
+                    <dd>{{ item.reason }}</dd>
+                    <dt class="h6">Snippet:</dt>
+                    <dd><code>{{ item.snippet }}</code></dd>
+                  </dl>
 
-                <hr>
-                <div class="flex flex-nowrap" style="padding-bottom: 1.25rem; font-size: 12px">
-                  <form {{ attr({
-                    id: 'neverstale-flag-ignore-' ~ item.id,
-                    method: 'POST',
-                  }) }}
-                    onsubmit="return confirm('Are you sure you want to ignore this flag? There is no undo')">
-                    {{ csrfInput() }}
-                    {{ actionInput("neverstale/flag/ignore") }}
-                    {{ redirectInput(craft.app.request.url) }}
-                    {{ hiddenInput("flagId", item.id) }}
-                    {{ hiddenInput("contentId", content.id) }}
-                    <button type="submit" class="btn btn-primary">{{ "Ignore"|t('neverstale') }}</button>
-                  </form>
-                  <form {{ attr({
-                    id: 'neverstale-flag-reschedule-' ~ item.id,
-                    method: 'POST',
-                  }) }}>
-                    {{ csrfInput() }}
-                    {{ actionInput("neverstale/flag/reschedule") }}
-                    {{ redirectInput(craft.app.request.url) }}
-                    {{ hiddenInput("flagId", item.id) }}
-                    {{ hiddenInput("contentId", content.id) }}
-                    <button type="submit" class="btn">{{ "Reschedule"|t('neverstale') }}</button>
-                    {{ tag('label', {
-                      for: 'ns-expired-at-' ~ item.id,
-                      class: 'sr-only',
+                  <hr>
+                  <div class="flex flex-nowrap" style="padding-bottom: 1.25rem; font-size: 12px">
+                    <form {{ attr({
+                      id: 'neverstale-flag-ignore-' ~ item.id,
+                      method: 'POST',
                     }) }}
-                    {{ input('date', 'expiredAt', null, {
-                      id: 'ns-expired-at-' ~ item.id,
-                    }) }}
-                  </form>
+                      onsubmit="return confirm('{{ 'Are you sure you want to ignore this flag? There is no undo'|t('neverstale') }}')">
+                      {{ csrfInput() }}
+                      {{ actionInput("neverstale/flag/ignore") }}
+                      {{ redirectInput(craft.app.request.url) }}
+                      {{ hiddenInput("flagId", item.id) }}
+                      {{ hiddenInput("contentId", content.id) }}
+                      <button type="submit" class="btn btn-primary" {{ content.isPendingProcessingOrStale ? 'disabled' }}>
+                        {{ tag('span', {
+                          'data-icon': 'xmark',
+                          'data-icon-size': 'puny',
+                          'role': 'img',
+                        }) }}
+                        {{ "Ignore"|t('neverstale') }}</button>
+                    </form>
+                    <form {{ attr({
+                      id: 'neverstale-flag-reschedule-' ~ item.id,
+                      method: 'POST',
+                    }) }}>
+                      {{ csrfInput() }}
+                      {{ actionInput("neverstale/flag/reschedule") }}
+                      {{ redirectInput(craft.app.request.url) }}
+                      {{ hiddenInput("flagId", item.id) }}
+                      {{ hiddenInput("contentId", content.id) }}
+                      <button type="submit" class="btn icon" {{ content.isPendingProcessingOrStale ? 'disabled' }}>
+                        {{ tag('span', {
+                          'data-icon': 'calendar-days',
+                          'data-icon-size': 'puny',
+                          'role': 'img',
+                        }) }}{{ "Reschedule"|t('neverstale') }}
+                      </button>
+                      {{ tag('label', {
+                        for: 'ns-expired-at-' ~ item.id,
+                        class: 'sr-only',
+                      }) }}
+                      {{ input('date', 'expiredAt', null, {
+                        id: 'ns-expired-at-' ~ item.id,
+                      }) }}
+                    </form>
+                  </div>
                 </div>
-              </div>
-            </details>
-          </li>
-        {% endfor %}
-      </ul>
+              </details>
+            </li>
+          {% endfor %}
+        </ul>
+      </div>
     {% endif %}
+    <footer>
+
+      <div class="flex ">
+        <a href="{{ content.cpEditUrl }}" class="btn">{{ 'More Details'|t('neverstale') }}</a>
+        <a href="{{ flagData.permalink }}" target="_blank" class="btn submit icon external">{{ 'View in Neverstale'|t('neverstale') }}</a>
+      </div>
+    </footer>
   </div>
 </div>
 {% css %}

@@ -25,4 +25,32 @@ class BaseController extends Controller
     {
         return Plugin::getInstance();
     }
+
+    protected function respondWithError($message): Response
+    {
+        if ($this->request->getAcceptsJson()) {
+            return $this->asJson([
+                'success' => false,
+                'error' => $message,
+            ]);
+        }
+
+        Craft::$app->getSession()->setError($message);
+
+        return $this->redirectToPostedUrl();
+    }
+
+    protected function respondWithSuccess($message): Response
+    {
+        if ($this->request->getAcceptsJson()) {
+            return $this->asJson([
+                'success' => true,
+                'message' => $message,
+            ]);
+        }
+
+        Craft::$app->getSession()->setNotice($message);
+
+        return $this->redirectToPostedUrl();
+    }
 }

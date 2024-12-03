@@ -42,8 +42,26 @@ class ContentController extends BaseController
         }
         return $this->renderTemplate('neverstale/content/_show', [
             'content' => $content,
+            'flagData' => $this->plugin->content->fetchByCustomId($content->customId)['data'],
             'title' => $content->title,
         ]);
+    }
+
+    public function actionRefresh(): Response
+    {
+        $this->requireCpRequest();
+        $this->requirePostRequest();
+        $contentId = $this->request->getRequiredBodyParam('contentId');
+
+        $content = NeverstaleContent::findOne($contentId);
+
+        if (!$content) {
+            throw new NotFoundHttpException('Content not found');
+        }
+
+        $this->plugin->content->refresh($content);
+
+        return $this->redirectToPostedUrl();
     }
 
     public function actionDelete(): ?Response
