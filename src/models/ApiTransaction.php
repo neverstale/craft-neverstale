@@ -81,7 +81,7 @@ class ApiTransaction extends Model
         return new self([
             'event' => $event,
             'message' => $e->getMessage(),
-            'transactionStatus' => 'error',
+            'transactionStatus' => 'api-error',
             'content' => [],
         ]);
     }
