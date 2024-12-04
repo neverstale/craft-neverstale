@@ -14,6 +14,7 @@ use zaengle\neverstale\models\ApiTransaction;
 use zaengle\neverstale\models\CustomId;
 use zaengle\neverstale\Plugin;
 use zaengle\neverstale\support\ApiClient;
+
 /**
  * Neverstale API Service
  *

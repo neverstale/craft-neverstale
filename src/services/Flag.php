@@ -2,7 +2,6 @@
 
 namespace zaengle\neverstale\services;
 
-use Craft;
 use yii\base\Component;
 use zaengle\neverstale\elements\NeverstaleContent;
 use zaengle\neverstale\Plugin;

@@ -1,6 +1,7 @@
 <?php
 
 namespace zaengle\neverstale\models;
+
 use craft\base\Model;
 use GuzzleHttp\Exception\GuzzleException;
 use Illuminate\Support\Arr;
@@ -36,7 +37,7 @@ class ApiTransaction extends Model
     public function getAnalysisStatus(): AnalysisStatus
     {
         $status = Arr::get($this->content, 'analysis_status');
-        return AnalysisStatus::from($status ??  $this->transactionStatus ?? AnalysisStatus::UNKNOWN->value);
+        return AnalysisStatus::from($status ?? $this->transactionStatus ?? AnalysisStatus::UNKNOWN->value);
     }
     public function getDateExpired(): ?\DateTime
     {

@@ -3,7 +3,6 @@
 namespace zaengle\neverstale\traits;
 
 use craft\helpers\UrlHelper;
-use Illuminate\Support\Collection;
 use zaengle\neverstale\enums\AnalysisStatus;
 use zaengle\neverstale\models\CustomId;
 use zaengle\neverstale\Plugin;

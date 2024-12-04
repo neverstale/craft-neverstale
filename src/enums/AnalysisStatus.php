@@ -2,8 +2,9 @@
 
 namespace zaengle\neverstale\enums;
 
-use zaengle\neverstale\Plugin;
 use craft\enums\Color;
+use zaengle\neverstale\Plugin;
+
 /**
  * Neverstale Analysis Status Enum
  *

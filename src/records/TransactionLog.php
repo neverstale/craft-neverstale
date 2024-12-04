@@ -2,7 +2,6 @@
 
 namespace zaengle\neverstale\records;
 
-use Craft;
 use craft\db\ActiveRecord;
 use yii\db\ActiveQueryInterface;
 use zaengle\neverstale\elements\NeverstaleContent;
@@ -32,4 +31,3 @@ class TransactionLog extends ActiveRecord
         return self::hasOne(NeverstaleContent::class, ['id' => 'contentId']);
     }
 }
-

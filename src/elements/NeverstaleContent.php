@@ -21,11 +21,11 @@ use yii\base\Exception;
 use yii\base\InvalidConfigException;
 use yii\web\Response;
 
-use zaengle\neverstale\enums\AnalysisStatus;
-use zaengle\neverstale\Plugin;
 use zaengle\neverstale\elements\conditions\NeverstaleContentCondition;
 use zaengle\neverstale\elements\db\NeverstaleContentQuery;
+use zaengle\neverstale\enums\AnalysisStatus;
 use zaengle\neverstale\enums\Permission;
+use zaengle\neverstale\Plugin;
 use zaengle\neverstale\traits\HasNeverstaleContent;
 
 /**
@@ -151,7 +151,7 @@ class NeverstaleContent extends Element
         return $this->getStatusAsEnum()->color()->value;
     }
 
-        public function getStatusAsEnum(): AnalysisStatus
+    public function getStatusAsEnum(): AnalysisStatus
     {
         return AnalysisStatus::from($this->getStatus());
     }
@@ -189,7 +189,7 @@ class NeverstaleContent extends Element
                 'key' => AnalysisStatus::ANALYZED_FLAGGED->value,
                 'label' => AnalysisStatus::ANALYZED_FLAGGED->label(),
                 'criteria' => [
-                    'analysisStatus' => AnalysisStatus::ANALYZED_FLAGGED->value
+                    'analysisStatus' => AnalysisStatus::ANALYZED_FLAGGED->value,
                 ],
                 'defaultSort' => ['flagCount', 'desc'],
             ],
@@ -197,7 +197,7 @@ class NeverstaleContent extends Element
                 'key' => AnalysisStatus::ANALYZED_CLEAN->value,
                 'label' => AnalysisStatus::ANALYZED_CLEAN->label(),
                 'criteria' => [
-                    'analysisStatus' => AnalysisStatus::ANALYZED_CLEAN->value
+                    'analysisStatus' => AnalysisStatus::ANALYZED_CLEAN->value,
                 ],
             ],
         ];
@@ -279,7 +279,7 @@ class NeverstaleContent extends Element
     protected function attributeHtml(string $attribute): string
     {
         return match ($attribute) {
-            'entry' => Cp::elementChipHtml($this->getEntry()),
+            'entry' => Cp::elementChipHtml($this->getEntry()) ?? '',
             default => parent::attributeHtml($attribute),
         };
     }

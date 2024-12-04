@@ -17,7 +17,7 @@ class CustomId extends Model
     public string $id;
     public string $env;
 
-    public const KEY_SEPARATOR=  ':';
+    public const KEY_SEPARATOR = ':';
     public const PART_DELIMITER = '|';
     public const ATTR_MAP = [
         'entryId' => 'el',
@@ -29,7 +29,7 @@ class CustomId extends Model
     public function toString(): string
     {
         return collect(self::ATTR_MAP)
-            ->map(fn ($strKey, $attr): string => $strKey . self::KEY_SEPARATOR . $this->$attr)
+            ->map(fn($strKey, $attr): string => $strKey . self::KEY_SEPARATOR . $this->$attr)
             ->push(self::ENV_KEY . self::KEY_SEPARATOR . $this->env)
             ->implode(self::PART_DELIMITER);
     }
@@ -42,7 +42,7 @@ class CustomId extends Model
         $contentKeys = collect(self::ATTR_MAP)->keys();
 
         /** @var Collection $attrs */
-        $attrs = $contentKeys->reduce(function (Collection $carry, string $attr) use ($content) {
+        $attrs = $contentKeys->reduce(function(Collection $carry, string $attr) use ($content) {
             $carry->put($attr, $content->$attr);
             return $carry;
         }, collect());
@@ -59,7 +59,7 @@ class CustomId extends Model
         $attrs = collect(
             explode(self::PART_DELIMITER, $customId)
         )
-        ->reduce(function ($carry, $part) use ($map) {
+        ->reduce(function($carry, $part) use ($map) {
             [$key, $value] = explode(self::KEY_SEPARATOR, $part);
 
             $carry[$map->get($key) ?? $key] = $value;

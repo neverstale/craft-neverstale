@@ -3,11 +3,9 @@
 namespace zaengle\neverstale\jobs;
 
 use craft\errors\ElementNotFoundException;
-use craft\errors\InvalidElementException;
-use craft\helpers\Queue as QueueHelper;
 use craft\queue\BaseJob;
-use zaengle\neverstale\Plugin;
 use zaengle\neverstale\elements\NeverstaleContent;
+use zaengle\neverstale\Plugin;
 
 /**
  *  Neverstale Ingest Content Job

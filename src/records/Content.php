@@ -2,12 +2,8 @@
 
 namespace zaengle\neverstale\records;
 
-use Craft;
 use craft\db\ActiveRecord;
-use craft\helpers\Json;
 use yii\db\ActiveQueryInterface;
-use zaengle\neverstale\enums\AnalysisStatus;
-use zaengle\neverstale\models\ApiTransaction;
 
 /**
  * Neverstale Content record

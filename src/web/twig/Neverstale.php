@@ -19,7 +19,7 @@ class Neverstale extends AbstractExtension
     public function getFunctions()
     {
         return [
-            new TwigFunction('neverstaleToAnalysisStatus', fn (string $status): ?AnalysisStatus  => AnalysisStatus::tryFrom($status)),
+            new TwigFunction('neverstaleToAnalysisStatus', fn(string $status): ?AnalysisStatus => AnalysisStatus::tryFrom($status)),
         ];
     }
 

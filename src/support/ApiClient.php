@@ -36,6 +36,11 @@ class ApiClient
             ],
         ]);
     }
+    public function ping(): bool
+    {
+        // @todo implement when endpoint is available
+        return true;
+    }
     /**
      * @param array<string,mixed> $data
      * @throws \GuzzleHttp\Exception\GuzzleException
@@ -43,7 +48,7 @@ class ApiClient
     public function ingest(array $data, ?array $callbackConfig = []): ResponseInterface
     {
         return $this->client->post('api/ingest', [
-            'json' =>  array_merge($data, $callbackConfig),
+            'json' => array_merge($data, $callbackConfig),
         ]);
     }
     public function getByCustomId(string $customId): ResponseInterface

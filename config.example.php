@@ -8,7 +8,6 @@
  * neverstale.php
  */
 
-use zaengle\neverstale\models\IngestContent;
 
 return [
     '*' => [

@@ -3,14 +3,11 @@
 namespace zaengle\neverstale\controllers;
 
 use Craft;
-use craft\helpers\Json;
-use phpDocumentor\Reflection\Types\Self_;
 use yii\web\BadRequestHttpException;
 use yii\web\NotFoundHttpException;
 use yii\web\Response;
 use zaengle\neverstale\elements\NeverstaleContent;
 use zaengle\neverstale\enums\Permission;
-use zaengle\neverstale\models\ApiTransaction;
 use zaengle\neverstale\Plugin;
 
 /**
@@ -86,7 +83,7 @@ class ContentController extends BaseController
 
     /**
      * (Re-)ingest content to the Neverstale API
-     * 
+     *
      * @return Response|null
      * @throws BadRequestHttpException
      * @throws \craft\errors\MissingComponentException
@@ -102,7 +99,7 @@ class ContentController extends BaseController
         $contentId = $this->request->getParam('contentId');
         $content = NeverstaleContent::findOne(['id' => $contentId]);
 
-        if(!$content) {
+        if (!$content) {
             $session->setError(Plugin::t("Content #{id} not found", ['id' => $contentId]));
 
             return null;
@@ -128,7 +125,7 @@ class ContentController extends BaseController
         $contentId = $this->request->getParam('contentId');
         $content = NeverstaleContent::findOne(['id' => $contentId]);
 
-        if(!$content) {
+        if (!$content) {
             $session->setError(Plugin::t("Content #{id} not found", ['id' => $contentId]));
 
             return null;

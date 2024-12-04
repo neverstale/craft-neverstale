@@ -17,7 +17,7 @@ class PreviewContent extends Utility
         return Craft::t('neverstale', 'Preview Neverstale Content');
     }
 
-    static function id(): string
+    public static function id(): string
     {
         return 'preview-neverstale-content';
     }
@@ -27,7 +27,7 @@ class PreviewContent extends Utility
         return 'wrench';
     }
 
-    static function contentHtml(): string
+    public static function contentHtml(): string
     {
         $entryId = Craft::$app->request->getParam('entryId');
         $previewEntry = $entryId ? null : Entry::find()->id($entryId)->one();

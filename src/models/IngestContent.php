@@ -121,7 +121,7 @@ class IngestContent extends Model implements Arrayable
             'author' => $this->author,
         ]);
 
-        return $result->filter(fn ($value) => $value !== null)->toArray();
+        return $result->filter(fn($value) => $value !== null)->toArray();
     }
     public static function fromContent(NeverstaleContent $content): self
     {
@@ -132,7 +132,7 @@ class IngestContent extends Model implements Arrayable
             [
                 'content' => $content,
                 'customId' => $content->getCustomId(),
-                'data'  => Plugin::getInstance()->format->entryContent($entry),
+                'data' => Plugin::getInstance()->format->entryContent($entry),
             ]));
     }
     public static function metaFromEntry(Entry $entry): array

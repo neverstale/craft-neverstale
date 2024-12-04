@@ -39,7 +39,6 @@ class CreateNeverstaleContentJob extends BaseJob
         Queue::push(new IngestContentJob([
             'contentId' => $content->id,
         ]));
-
     }
     protected function defaultDescription(): ?string
     {

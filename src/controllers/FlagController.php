@@ -2,8 +2,6 @@
 
 namespace zaengle\neverstale\controllers;
 
-use Craft;
-use craft\helpers\DateTimeHelper;
 use craft\web\Controller;
 use yii\web\Response;
 use zaengle\neverstale\elements\NeverstaleContent;
@@ -66,7 +64,7 @@ class FlagController extends BaseController
             $content->save();
 
             return $this->respondWithSuccess(Plugin::t("Flag rescheduled to {expiredAt}", [
-                'expiredAt' => $expiredAt->format('Y-m-d')
+                'expiredAt' => $expiredAt->format('Y-m-d'),
             ]));
         } catch (\Exception $e) {
             return $this->respondWithError(Plugin::t('Could not reschedule flag, check the logs for details'));
