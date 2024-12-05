@@ -18,7 +18,7 @@ class ApiClient
     public const STATUS_SUCCESS = 'success';
     public const STATUS_ERROR = 'error';
     public string $apiKey;
-    public string $baseUri = 'https://app.neverstale.io/api';
+    public string $baseUri = 'https://app.neverstale.io/api/v1/';
 
     private Client $client;
 
@@ -47,23 +47,23 @@ class ApiClient
      */
     public function ingest(array $data, ?array $callbackConfig = []): ResponseInterface
     {
-        return $this->client->post('api/ingest', [
+        return $this->client->post('ingest', [
             'json' => array_merge($data, $callbackConfig),
         ]);
     }
     public function getByCustomId(string $customId): ResponseInterface
     {
-        return $this->client->get("api/content/$customId");
+        return $this->client->get("content/$customId");
     }
 
     public function ignoreFlag(string $flagId): ResponseInterface
     {
-        return $this->client->post("api/flags/$flagId/ignore");
+        return $this->client->post("flags/$flagId/ignore");
     }
 
     public function rescheduleFlag(string $flagId, \DateTime $expiredAt): ResponseInterface
     {
-        return $this->client->post("api/flags/$flagId/reschedule",[
+        return $this->client->post("flags/$flagId/reschedule",[
             'json' => [
                 'expired_at' => $expiredAt->format('Y-m-d H:i:s'),
             ],
