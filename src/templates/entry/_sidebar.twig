@@ -71,7 +71,7 @@
         </blockquote>
       </div>
     {%- endif %}
-    {% if flagData.flags is not empty %}
+    {% if flagData and flagData.flags is not empty %}
 {#      @todo i18n #}
       <div {{ attr({
         style: content.isPendingProcessingOrStale ? 'opacity: 0.5',
@@ -146,9 +146,11 @@
     {% endif %}
     <footer>
 
-      <div class="flex ">
+      <div class="flex">
         <a href="{{ content.cpEditUrl }}" class="btn">{{ 'More Details'|t('neverstale') }}</a>
-        <a href="{{ flagData.permalink }}" target="_blank" class="btn submit icon external">{{ 'View in Neverstale'|t('neverstale') }}</a>
+        {% if flagData %}
+          <a href="{{ flagData.permalink }}" target="_blank" class="btn submit icon external">{{ 'View in Neverstale'|t('neverstale') }}</a>
+        {% endif %}
       </div>
     </footer>
   </div>
