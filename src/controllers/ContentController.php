@@ -37,9 +37,17 @@ class ContentController extends BaseController
                 throw new NotFoundHttpException('Content not found');
             }
         }
+
+        try {
+            $flagData = $this->plugin->content->fetchByCustomId($content->customId)['data'];
+        } catch (\Exception $e) {
+            Plugin::error($e->getMessage());
+            $flagData = null;
+        }
+
         return $this->renderTemplate('neverstale/content/_show', [
             'content' => $content,
-            'flagData' => $this->plugin->content->fetchByCustomId($content->customId)['data'],
+            'flagData' => $flagData,
             'title' => $content->title,
         ]);
     }

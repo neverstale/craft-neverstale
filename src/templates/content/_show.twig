@@ -66,7 +66,9 @@
       <span>{{ 'Resubmit Content'|t('neverstale') }}</span>
     </button>
   </form>
-  <a href="{{ flagData.permalink }}" target="_blank" class="btn submit icon external">{{ 'View in Neverstale'|t('neverstale') }}</a>
+  {%- if flagData %}
+    <a href="{{ flagData.permalink }}" target="_blank" class="btn submit icon external">{{ 'View in Neverstale'|t('neverstale') }}</a>
+  {%- endif %}
 {%- endblock %}
 {%- block main %}
   <div id="content" class="content-pane">
@@ -153,9 +155,9 @@
       </div>
     </dl>
     <hr>
-    <h2></h2>
-    {% if flagData.flags is not empty %}
-      <h2>{{ 'Content Flags'| t('neverstale') }}</h2>
+    <h2>{{ 'Content Flags'| t('neverstale') }}</h2>
+
+    {% if flagData and flagData.flags is not empty %}
 {#      @todo i18n #}
       <p class="readable">{{ content.flagCount }} Content flag{{ content.flagCount > 1 ? 's' }} found</p>
       <ol class="data" style="padding-left:16px">
@@ -226,6 +228,8 @@
           <li>{{ 'No flags found' | t('neverstale') }}</li>
         {% endfor %}
       </ol>
+    {% else %}
+      <p>{{ 'No flag data found' | t('neverstale') }}</p>
     {% endif %}
     <hr>
     <h2>{{ 'Transaction Log'|t('neverstale') }}</h2>

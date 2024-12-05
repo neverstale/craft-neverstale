@@ -91,6 +91,7 @@ class Plugin extends BasePlugin
         $this->registerOnElementSaveHandler();
         $this->registerUtilities();
         $this->registerUserPermissions();
+        $this->registerEntryBehaviors();
         $this->registerCpRoutes();
         $this->registerCpNavItems();
         $this->registerEntryTableAttributes();
@@ -167,7 +168,7 @@ class Plugin extends BasePlugin
     /**
      * @return void
      */
-    public function defineBehaviors(): void
+    public function registerEntryBehaviors(): void
     {
         Event::on(Entry::class, Model::EVENT_DEFINE_BEHAVIORS, function(DefineBehaviorsEvent $event) {
             $event->behaviors['previewNeverstaleContent'] = HasNeverstaleContentBehavior::class;
@@ -216,9 +217,16 @@ class Plugin extends BasePlugin
                 $plugin = Plugin::getInstance();
                 $customId = $plugin->format->forIngest($content)->customId;
 
+                try {
+                    $flagData = Plugin::getInstance()->content->fetchByCustomId($content->customId)['data'];
+                } catch (\Exception $e) {
+                    Plugin::error($e->getMessage());
+                    $flagData = null;
+                }
+
                 $event->html .= Craft::$app->view->renderTemplate('neverstale/entry/_sidebar', [
                     'content' => $content,
-                    'flagData' => $plugin->content->fetchByCustomId($customId)['data'],
+                    'flagData' => $flagData,
                     'customId' => $customId,
                 ]);
             });

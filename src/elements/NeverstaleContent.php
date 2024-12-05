@@ -280,7 +280,7 @@ class NeverstaleContent extends Element
     {
         return match ($attribute) {
             'entry' => Cp::elementChipHtml($this->getEntry()) ?? '',
-            default => parent::attributeHtml($attribute),
+            default => parent::attributeHtml($attribute) ?? '',
         };
     }
 
