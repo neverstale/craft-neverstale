@@ -58,6 +58,7 @@ class Content extends Component
                     return false;
             }
         } catch (GuzzleException $e) {
+            Plugin::error("Failed to ingest content #{$content->id}: {$e->getMessage()}");
             $transaction = ApiTransaction::fromGuzzleException($e, 'api.error');
             return $this->onIngestError($content, $transaction);
         } catch (\Exception $e) {
