@@ -9,6 +9,7 @@ use yii\web\Response;
 use zaengle\neverstale\elements\NeverstaleContent;
 use zaengle\neverstale\enums\Permission;
 use zaengle\neverstale\Plugin;
+use zaengle\neverstale\web\assets\neverstale\NeverstaleAsset;
 
 /**
  * Neverstale Content Controller
@@ -44,6 +45,8 @@ class ContentController extends BaseController
             Plugin::error($e->getMessage());
             $flagData = null;
         }
+
+        $this->view->registerAssetBundle(NeverstaleAsset::class);
 
         return $this->renderTemplate('neverstale/content/_show', [
             'content' => $content,

@@ -3,13 +3,14 @@
   "description": "Neverstale integration for CraftCMS",
   "type": "craft-plugin",
   "require": {
-    "php": ">=8.2",
-    "craftcms/cms": "5.x-dev"
+    "php": ">=8.2"
   },
   "require-dev": {
+    "craftcms/cms": "5.x-dev",
     "craftcms/ecs": "dev-main",
     "craftcms/phpstan": "dev-main",
     "markhuot/craft-pest-core": "dev-main",
+    "nystudio107/craft-plugin-vite": "5.0.2",
     "roave/security-advisories": "dev-latest"
   },
   "license": "proprietary",

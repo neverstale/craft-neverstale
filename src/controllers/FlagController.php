@@ -2,7 +2,6 @@
 
 namespace zaengle\neverstale\controllers;
 
-use craft\web\Controller;
 use yii\web\Response;
 use zaengle\neverstale\elements\NeverstaleContent;
 use zaengle\neverstale\enums\AnalysisStatus;

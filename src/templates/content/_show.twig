@@ -71,6 +71,7 @@
   {%- endif %}
 {%- endblock %}
 {%- block main %}
+<div id="neverstale-container">
   <div id="content" class="content-pane">
     {%- if content.isPendingProcessingOrStale %}
       <div id="isPendingProcessingOrStale-tip" class="readable">
@@ -275,6 +276,14 @@
       </table>
     </div>
   </div>
+  <!-- END TWIG FLAGS WIDGET #-->
+  {% set scriptTagOptions = {
+    'depends': [
+      'zaengle\\neverstale\\web\\assets\\neverstale\\NeverstaleAsset',
+    ],
+  } %}
+  {{ craft.neverstale.viteService.register('src/web/assets/neverstale/src/main.ts', false, scriptTagOptions) }}
+</div>
 {% endblock %}
 {% css %}
 .ns-meta {

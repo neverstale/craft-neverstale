@@ -26,6 +26,8 @@ use craft\web\twig\variables\Cp as CpVariable;
 use craft\web\twig\variables\CraftVariable;
 use craft\web\UrlManager;
 
+use nystudio107\pluginvite\services\VitePluginService;
+
 use yii\base\Event;
 use yii\base\InvalidConfigException;
 
@@ -45,6 +47,8 @@ use zaengle\neverstale\support\ApiClient;
 use zaengle\neverstale\traits\HasPluginLogfile;
 use zaengle\neverstale\utilities\PreviewContent;
 use zaengle\neverstale\utilities\ScanUtility;
+use zaengle\neverstale\variables\NeverstaleVariable;
+use zaengle\neverstale\web\assets\neverstale\NeverstaleAsset;
 use zaengle\neverstale\web\twig\Neverstale as NeverstaleTwigExtension;
 
 /**
@@ -68,6 +72,7 @@ use zaengle\neverstale\web\twig\Neverstale as NeverstaleTwigExtension;
  * @property-read Settings $settings
  * @property-read Setup $setup
  * @property-read TransactionLog $transactionLog
+ * @property-read VitePluginService $vite
  */
 class Plugin extends BasePlugin
 {
@@ -117,6 +122,16 @@ class Plugin extends BasePlugin
                 'format' => FormatService::class,
                 'setup' => Setup::class,
                 'transactionLog' => TransactionLog::class,
+                'vite' => [
+                    'class' => VitePluginService::class,
+                    'assetClass' => NeverstaleAsset::class,
+                    'checkDevServer' => true,
+                    'useDevServer' => true,
+                    'devServerPublic' => App::env('PRIMARY_SITE_URL') . ':3333',
+                    'serverPublic' => App::env('PRIMARY_SITE_URL'),
+                    'errorEntry' => 'src/js/Neverstale.js',
+                    'devServerInternal' => App::env('PRIMARY_SITE_URL') . ':3333',
+                ],
             ]);
 
             Craft::$app->view->registerTwigExtension(new NeverstaleTwigExtension());
@@ -161,7 +176,11 @@ class Plugin extends BasePlugin
             function(Event $e) {
                 /** @var CraftVariable $variable */
                 $variable = $e->sender;
-                $variable->set('neverstale', $this);
+                $variable->set('neverstale', [
+                    'class' => NeverstaleVariable::class,
+                    'viteService' => $this->vite,
+                    'config' => $this->config,
+                ]);
             }
         );
     }
