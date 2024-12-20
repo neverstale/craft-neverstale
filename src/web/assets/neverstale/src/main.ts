@@ -8,7 +8,7 @@ const app = createApp({
 })
 
 components.forEach((Component) => {
-  app.component(Component.name, Component)
+  app.component(Component.name ?? '', Component)
 })
 
 
