@@ -160,7 +160,7 @@
     <neverstale-flags
       :custom-id="'{{ content.customId }}'"
       :endpoints="{{ {
-        GET_CONTENT: actionUrl('neverstale/content/get'),
+        GET_CONTENT: actionUrl("neverstale/content/#{content.id}"),
         IGNORE_FLAG: actionUrl('neverstale/flag/ignore'),
         RESCHEDULE_FLAG: actionUrl('neverstale/flag/reschedule'),
       } | json_encode(constant('JSON_PRETTY_PRINT')) }}"
@@ -168,7 +168,7 @@
         name: craft.app.config.general.csrfTokenName,
         value: craft.app.request.csrfToken,
       } | json_encode(constant('JSON_PRETTY_PRINT')) }}"
-{#      We will need to add more translations here #}
+      {# We will need to add more translations here #}
       :i18n="{{ {
         'No flags found': 'No flags found' | t('neverstale'),
         'Ignore': 'Ignore' | t('neverstale'),
@@ -177,6 +177,8 @@
       ></neverstale-flags>
 <!-- END VUE FLAGS WIDGET #-->
 <!-- START TWIG FLAGS WIDGET #-->
+    <hr>
+    <strong>TWIG FLAGS WIDGET</strong>
     {% if flagData and flagData.flags is not empty %}
 {#      @todo i18n #}
       <p class="readable">{{ content.flagCount }} Content flag{{ content.flagCount > 1 ? 's' }} found</p>
