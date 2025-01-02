@@ -12,6 +12,16 @@ use zaengle\neverstale\Plugin;
  */
 class FlagController extends BaseController
 {
+    /**
+     * Ignore a flag on a content item in the NS API
+     *
+     * - there is no undo, so this should be used with caution / be confirmed by the user
+     * - requires a POST request
+     * - requires a CP request
+     * - requires a flagId and contentId in the request body
+     *
+     * @return Response
+     */
     public function actionIgnore(): Response
     {
         $this->requirePostRequest();
@@ -35,6 +45,15 @@ class FlagController extends BaseController
         }
     }
 
+    /**
+     * Reschedule a flag on a content item in the NS API
+     *
+     * - requires a POST request
+     * - requires a CP request
+     * - requires a flagId, contentId, and expiredAt in the request body
+     *
+     * @return Response
+     */
     public function actionReschedule(): Response
     {
         $this->requirePostRequest();

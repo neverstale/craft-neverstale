@@ -3,7 +3,7 @@
 <!--  <p>Custom ID: {{ customId }}</p>-->
 <!--  <h2>Endpoints:</h2>-->
 <!--  <ul>-->
-<!--    <li>GET_CONTENT: {{ endpoints.GET_CONTENT }}</li>-->
+<!--    <li>FETCH_CONTENT: {{ endpoints.FETCH_CONTENT }}</li>-->
 <!--    <li>IGNORE_FLAG: {{ endpoints.IGNORE_FLAG }}</li>-->
 <!--    <li>RESCHEDULE_FLAG: {{ endpoints.RESCHEDULE_FLAG }}</li>-->
 <!--  </ul>-->
@@ -28,7 +28,8 @@ defineOptions({
 })
 
 interface Endpoints {
-  GET_CONTENT: string
+  FETCH_API_CONTENT: string
+  VIEW_LOCAL_CONTENT: string
   IGNORE_FLAG: string
   RESCHEDULE_FLAG: string
 }
@@ -52,7 +53,11 @@ const props = defineProps<{
 onBeforeMount(async () => {
   console.log('NeverstaleFlags mounted')
 
-  const response = await fetch(props.endpoints.GET_CONTENT)
+  const response = await fetch(props.endpoints.FETCH_API_CONTENT, {
+    headers: {
+      'Accept': 'application/json',
+    },
+  })
 
   const data = await response.json()
 

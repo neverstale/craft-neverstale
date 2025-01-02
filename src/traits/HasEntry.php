@@ -9,7 +9,7 @@ use craft\elements\Entry;
 /**
  * Trait HasEntry
  *
- * @property Entry|null entry
+ * @property Entry|null $entry
  */
 trait HasEntry
 {

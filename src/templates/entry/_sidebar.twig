@@ -1,37 +1,13 @@
+{#
+  Neverstale Entry Sidebar Widget Template
+
+  @todo replace with Vue / web component rendering
+#}
+<!-- START TWIG FLAGS WIDGET -->
 <div id="neverstale-flags" class="content" style="margin-bottom: 1rem">
   <div class="meta ns-sidebar">
     <header class="ns-sidebar-header">
       <h2 class="h2">{{ 'Neverstale'|t('neverstale') }}</h2>
-      <div class="flex">
-        <form method="post">
-          {{ hiddenInput('contentId', content.id) }}
-          {{ actionInput('neverstale/content/refresh') }}
-          {{ redirectInput(craft.app.request.url) }}
-          {{ csrfInput() }}
-          <button type="submit" class="btn" title="{{ 'Refresh Neverstale Data'|t('neverstale') }}">
-            {{ tag('span', {
-              'data-icon': 'arrows-rotate',
-              'data-icon-size': 'small',
-              'role': 'img',
-              'style': 'margin: 0',
-            }) }}
-          </button>
-        </form>
-        <form method="post">
-          {{ hiddenInput('contentId', content.id) }}
-          {{ actionInput('neverstale/content/ingest') }}
-          {{ redirectInput(craft.app.request.url) }}
-          {{ csrfInput() }}
-          <button type="submit" class="btn btn-primary" title="{{ 'Resubmit Content'|t('neverstale') }}">
-            {{ tag('span', {
-              'data-icon': 'circle-arrow-up',
-              'data-icon-size': 'small',
-              'role': 'img',
-              'style': 'margin: 0',
-            }) }}
-          </button>
-        </form>
-      </div>
     </header>
     <dl class="meta ns-sidebar-meta">
       <div class="data">
@@ -155,6 +131,8 @@
     </footer>
   </div>
 </div>
+<!-- END TWIG FLAGS WIDGET -->
+{# Temp styles, to replace with own TW classes in widget #}
 {% css %}
   .ns-sidebar {
     padding-top: 1rem;
