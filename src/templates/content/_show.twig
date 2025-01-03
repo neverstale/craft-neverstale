@@ -156,9 +156,10 @@
     </dl>
     <hr>
     <h2>{{ 'Content Flags'| t('neverstale') }}</h2>
-<!-- START VUE FLAGS WIDGET -->
+    <!-- START VUE FLAGS WIDGET -->
     <neverstale-flags
       :custom-id="'{{ content.customId }}'"
+      :content-id="'{{ content.id }}'"
       :endpoints="{{ {
         FETCH_API_CONTENT: actionUrl('neverstale/content/fetch', {
           customId: content.customId,
@@ -173,17 +174,18 @@
       } | json_encode(constant('JSON_PRETTY_PRINT')) }}"
       {# We will need to add more translations here #}
       :i18n="{{ {
-        'No flags found': 'No flags found' | t('neverstale'),
-        'Ignore': 'Ignore' | t('neverstale'),
-        'Reschedule': 'Reschedule' | t('neverstale'),
+        NO_FLAGS_FOUND: 'No flags found.' | t('neverstale'),
+        IGNORE: 'Ignore' | t('neverstale'),
+        RESCHEDULE: 'Reschedule' | t('neverstale'),
       } | json_encode(constant('JSON_PRETTY_PRINT')) }}"
-      ></neverstale-flags>
-<!-- END VUE FLAGS WIDGET #-->
-<!-- START TWIG FLAGS WIDGET #-->
+    ></neverstale-flags>
+    <!-- END VUE FLAGS WIDGET #-->
+
+    <!-- START TWIG FLAGS WIDGET #-->
     <hr>
     <strong>TWIG FLAGS WIDGET</strong>
     {% if flagData and flagData.flags is not empty %}
-{#      @todo i18n #}
+      {# @todo i18n #}
       <p class="readable">{{ content.flagCount }} Content flag{{ content.flagCount > 1 ? 's' }} found</p>
       <ol class="data" style="padding-left:16px">
         {% for item in flagData.flags %}
