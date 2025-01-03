@@ -3,6 +3,36 @@
 
   @todo replace with Vue / web component rendering
 #}
+
+<!-- START VUE FLAGS WIDGET -->
+<div id="neverstale-container" class="content">
+  <neverstale-flags
+    content-id="{{ content.id }}"
+    content-status="{{ content.statusAsEnum.label }}"
+    content-updated-date="{{ content.dateUpdated | timestamp }}"
+    :is-pending-processing-or-stale="{{ content.isPendingProcessingOrStale | json_encode }}"
+    :endpoints="{{ {
+      FETCH_API_CONTENT: actionUrl('neverstale/content/fetch', {
+        customId: content.customId,
+      }),
+      VIEW_LOCAL_CONTENT: url("neverstale/content/#{content.id}"),
+      IGNORE_FLAG: actionUrl('neverstale/flag/ignore'),
+      RESCHEDULE_FLAG: actionUrl('neverstale/flag/reschedule'),
+    } | json_encode(constant('JSON_PRETTY_PRINT')) }}"
+    :csrf-token="{{ {
+      name: craft.app.config.general.csrfTokenName,
+      value: craft.app.request.csrfToken,
+    } | json_encode(constant('JSON_PRETTY_PRINT')) }}"
+    {# We will need to add more translations here #}
+    :i18n="{{ {
+      NO_FLAGS_FOUND: 'No flags found.' | t('neverstale'),
+      IGNORE: 'Ignore' | t('neverstale'),
+      RESCHEDULE: 'Reschedule' | t('neverstale'),
+    } | json_encode(constant('JSON_PRETTY_PRINT')) }}"
+  ></neverstale-flags>
+</div>
+<!-- END VUE FLAGS WIDGET #-->
+
 <!-- START TWIG FLAGS WIDGET -->
 <div id="neverstale-flags" class="content" style="margin-bottom: 1rem">
   <div class="meta ns-sidebar">
@@ -48,7 +78,7 @@
       </div>
     {%- endif %}
     {% if flagData and flagData.flags is not empty %}
-{#      @todo i18n #}
+      {#      @todo i18n #}
       <div {{ attr({
         style: content.isPendingProcessingOrStale ? 'opacity: 0.5',
       }) }}>
@@ -132,6 +162,15 @@
   </div>
 </div>
 <!-- END TWIG FLAGS WIDGET -->
+
+{% set scriptTagOptions = {
+  'depends': [
+    'zaengle\\neverstale\\web\\assets\\neverstale\\NeverstaleAsset',
+  ],
+} %}
+
+{{ craft.neverstale.viteService.register('src/web/assets/neverstale/src/main.ts', false, scriptTagOptions) }}
+
 {# Temp styles, to replace with own TW classes in widget #}
 {% css %}
   .ns-sidebar {
