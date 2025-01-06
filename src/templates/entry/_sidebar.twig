@@ -9,6 +9,7 @@
   <neverstale-flags
     content-id="{{ content.id }}"
     content-status="{{ content.statusAsEnum.label }}"
+    content-status-color="{{ content.statusColor }}"
     content-updated-date="{{ content.dateUpdated | timestamp }}"
     :is-pending-processing-or-stale="{{ content.isPendingProcessingOrStale | json_encode }}"
     :endpoints="{{ {

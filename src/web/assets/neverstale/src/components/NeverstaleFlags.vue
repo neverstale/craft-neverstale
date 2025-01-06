@@ -7,7 +7,13 @@
     <dl v-if="flagData">
       <div class="ns-flags-data-item">
         <dt v-text="'Content Status'" />
-        <dd v-text="contentStatus" />
+        <dd>
+          <span
+            class="ns-flags-content-status"
+            aria-hidden="true"
+          />
+          <span v-text="contentStatus" />
+        </dd>
       </div>
 
       <div class="ns-flags-data-item">
@@ -134,6 +140,7 @@ const props = defineProps<{
   endpoints: Endpoints,
   i18n: I18nDictionary,
   contentStatus: string,
+  contentStatusColor: string,
   contentUpdatedDate: string,
   isPendingProcessingOrStale: boolean,
 }>()
@@ -276,6 +283,20 @@ dl {
   display: flex;
   flex-direction: column;
   gap: 1rem;
+}
+
+dd {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.ns-flags-content-status {
+  display: inline-block;
+  width: 0.75rem;
+  height: 0.75rem;
+  border-radius: 50%;
+  background-color: v-bind(contentStatusColor);
 }
 
 .ns-flags-data-item {
