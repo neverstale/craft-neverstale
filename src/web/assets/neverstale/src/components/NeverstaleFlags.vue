@@ -151,6 +151,26 @@ const handleRescheduleFlag = (flagId: string): void => {
 </script>
 
 <style scoped>
+/*
+  Variables needed:
+
+  - Background color
+  - Padding
+  - Margin (e.g., Craft needs margin-inline-end & margin-inline-start)
+  - Border color
+  - Border radius
+  - Box shadow
+  - Text color
+  - Primary button color (background and text)
+  - Secondary button color (background and text)
+  - Button border radius
+  - Button padding
+  - Date input background color
+  - Date input border color
+  - Date input border radius
+  - Date input padding
+*/
+
 .ns-flags-wrapper {
   display: flex;
   flex-direction: column;
