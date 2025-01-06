@@ -26,7 +26,7 @@
         class="ns-flags-data-item"
       >
         <dt v-text="'Last Analyzed'" />
-        <dd v-text="formatDate(flagData.analyzed_at)" />
+        <dd v-text="formatDate(flagData.analyzed_at, { showTime: true })" />
       </div>
 
       <div
@@ -52,52 +52,17 @@
       />
 
       <ul class="ns-flags-flag-items">
-        <li
+        <FlagItem
           v-for="flag in flagData.flags"
           :key="flag.id"
-        >
-          <details>
-            <summary v-text="`${flag.flag} (${formatDate(flag.expired_at)})`" />
-
-            <div>
-              <dl>
-                <dt v-text="'Expired at:'" />
-                <dd v-text="formatDate(flag.expired_at)" />
-
-                <dt v-text="'Reason:'" />
-                <dd v-text="flag.reason" />
-
-                <dt v-text="'Snippet:'" />
-                <dd v-text="flag.snippet" />
-              </dl>
-
-              <hr>
-
-              <div class="flex">
-                <form @submit.prevent="handleIgnore(flag.id)">
-                  <button
-                    type="submit"
-                    class="btn"
-                    v-text="i18n.IGNORE"
-                  />
-                </form>
-
-                <form @submit.prevent="handleReschedule(flag.id)">
-                  <input
-                    v-model="rescheduleDate"
-                    type="date"
-                  >
-                  
-                  <button
-                    type="submit"
-                    class="btn"
-                    v-text="i18n.RESCHEDULE"
-                  />
-                </form>
-              </div>
-            </div>
-          </details>
-        </li>
+          :content-id="contentId"
+          :csrf-token="csrfToken"
+          :endpoints="endpoints"
+          :flag="flag"
+          :i18n="i18n"
+          @ignore-flag="handleIgnoreFlag"
+          @reschedule-flag="handleRescheduleFlag"
+        />
       </ul>
     </div>
 
@@ -110,29 +75,18 @@
 <script setup lang="ts">
 import { onBeforeMount, ref } from 'vue'
 
+import FlagItem from './FlagItem.vue'
+
+import { formatDate } from '../utils/formatDate.ts'
+
+import { CsrfToken } from '../types/CsrfToken.ts'
+import { Endpoints } from '../types/Endpoints.ts'
+import { I18nDictionary } from '../types/I18nDictionary.ts'
 import { FetchApiContentResponse } from '../types/FetchApiContentResponse.ts'
 
 defineOptions({
   name: 'NeverstaleFlags',
 })
-
-interface Endpoints {
-  IGNORE_FLAG: string
-  RESCHEDULE_FLAG: string
-  FETCH_API_CONTENT: string
-  VIEW_LOCAL_CONTENT: string
-}
-
-interface I18nDictionary {
-  IGNORE: string
-  RESCHEDULE: string
-  NO_FLAGS_FOUND: string
-}
-
-interface CsrfToken {
-  name: string
-  value: string
-}
 
 const props = defineProps<{
   contentId: string,
@@ -145,8 +99,11 @@ const props = defineProps<{
   isPendingProcessingOrStale: boolean,
 }>()
 
-// TODO: Make this an object so we can have one for each flag
-const rescheduleDate = ref('')
+const emit = defineEmits<{
+  ignoreFlag: [flagId: string],
+  rescheduleFlag: [flagId: string],
+}>()
+
 const flagData = ref<FetchApiContentResponse | null>(null)
 
 onBeforeMount(async () => {
@@ -165,78 +122,18 @@ onBeforeMount(async () => {
   // TODO: Add error handling
 })
 
-const formatDate = (date: string): string => {
-  return Intl.DateTimeFormat('en-US', {
-    dateStyle: 'short',
-    timeStyle: 'short',
-    timeZone: Intl.DateTimeFormat().resolvedOptions().timeZone,
-  })
-    .format(new Date(date))
+const handleIgnoreFlag = (flagId: string): void => {
+  const indexToRemove = flagData.value?.flags.findIndex(flag => flag.id === flagId)
+
+  if (indexToRemove !== undefined && indexToRemove !== -1) {
+    flagData.value?.flags.splice(indexToRemove, 1)
+  }
+
+  emit('ignoreFlag', flagId)
 }
 
-const handleIgnore = async (flagId: string): Promise<void> => {
-  const confirmed = confirm('Are you sure you want to ignore this flag? There is no undo.')
-
-  if (confirmed) {
-    const response = await fetch(props.endpoints.IGNORE_FLAG, {
-      method: 'POST',
-      headers: {
-        'Accept': 'application/json',
-        'Content-Type': 'application/json',
-        'X-Requested-With': 'XMLHttpRequest',
-        'X-CSRF-TOKEN': props.csrfToken.value,
-      },
-      body: JSON.stringify({
-        flagId,
-        contentId: props.contentId,
-      }),
-    })
-
-    if (response.ok) {
-      const indexToRemove = flagData.value?.flags.findIndex(flag => flag.id === flagId)
-
-      if (indexToRemove !== undefined && indexToRemove !== -1) {
-        flagData.value?.flags.splice(indexToRemove, 1)
-      }
-
-      // TODO: Emit an event back to the CMS to update the UI
-    }
-
-    // TODO: Add error handling
-  }
-}
-
-const handleReschedule = async (flagId: string): Promise<void> => {
-  if (!rescheduleDate.value) {
-    alert('Please select a date to reschedule this flag.')
-
-    return
-  }
-
-  const confirmed = confirm('Are you sure you want to reschedule this flag?')
-
-  if (confirmed) {
-    const response = await fetch(props.endpoints.RESCHEDULE_FLAG, {
-      method: 'POST',
-      headers: {
-        'Accept': 'application/json',
-        'Content-Type': 'application/json',
-        'X-Requested-With': 'XMLHttpRequest',
-        'X-CSRF-TOKEN': props.csrfToken.value,
-      },
-      body: JSON.stringify({
-        flagId,
-        contentId: props.contentId,
-        expiredAt: rescheduleDate.value,
-      }),
-    })
-
-    if (response.ok) {
-      rescheduleDate.value = ''
-
-      // TODO: Emit an event back to the CMS to update the UI
-    }
-  }
+const handleRescheduleFlag = (flagId: string): void => {
+  emit('rescheduleFlag', flagId)
 }
 </script>
 
@@ -317,9 +214,5 @@ dd {
   & > *:last-child {
     border-bottom: none;
   }
-}
-
-summary {
-  text-transform: capitalize;
 }
 </style>
