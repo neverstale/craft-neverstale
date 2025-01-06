@@ -1,4 +1,5 @@
 type DateOptions = {
+  locale?: string
   showTime?: boolean
   dateStyle?: 'full' | 'long' | 'medium' | 'short'
   timeStyle?: 'full' | 'long' | 'medium' | 'short'
@@ -17,7 +18,7 @@ export function formatDate(
     }
   }
 
-  return Intl.DateTimeFormat('en-US', {
+  return Intl.DateTimeFormat(options.locale || 'en-US', {
     dateStyle: options.dateStyle || 'short',
     ...formatOptions,
   })
