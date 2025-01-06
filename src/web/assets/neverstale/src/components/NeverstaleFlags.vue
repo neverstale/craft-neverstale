@@ -4,67 +4,80 @@
       <h2 v-text="'Neverstale'" />
     </header>
 
-    <dl v-if="flagData">
-      <div class="ns-flags-data-item">
-        <dt v-text="'Content Status'" />
-        <dd>
-          <span
-            class="ns-flags-content-status"
-            aria-hidden="true"
-          />
-          <span v-text="contentStatus" />
-        </dd>
+    <template v-if="flagData">
+      <dl>
+        <div class="ns-flags-data-item">
+          <dt v-text="'Content Status'" />
+          <dd>
+            <span
+              class="ns-flags-content-status"
+              aria-hidden="true"
+            />
+            <span v-text="contentStatus" />
+          </dd>
+        </div>
+
+        <div class="ns-flags-data-item">
+          <dt v-text="'Date Updated'" />
+          <dd v-text="contentUpdatedDate" />
+        </div>
+
+        <div
+          v-if="flagData.analyzed_at"
+          class="ns-flags-data-item"
+        >
+          <dt v-text="'Last Analyzed'" />
+          <dd v-text="formatDate(flagData.analyzed_at, { showTime: true })" />
+        </div>
+
+        <div
+          v-if="flagData.analyzed_at && flagData.expired_at"
+          class="ns-flags-data-item"
+        >
+          <dt v-text="'Content Expired'" />
+          <dd v-text="formatDate(flagData.expired_at)" />
+        </div>
+      </dl>
+
+      <div v-if="isPendingProcessingOrStale">
+        <blockquote>
+          <p v-text="'This content is currently pending processing by Neverstale, and, as such, some values may be out of date.'" />
+        </blockquote>
       </div>
 
-      <div class="ns-flags-data-item">
-        <dt v-text="'Date Updated'" />
-        <dd v-text="contentUpdatedDate" />
-      </div>
-
-      <div
-        v-if="flagData.analyzed_at"
-        class="ns-flags-data-item"
-      >
-        <dt v-text="'Last Analyzed'" />
-        <dd v-text="formatDate(flagData.analyzed_at, { showTime: true })" />
-      </div>
-
-      <div
-        v-if="flagData.analyzed_at && flagData.expired_at"
-        class="ns-flags-data-item"
-      >
-        <dt v-text="'Content Expired'" />
-        <dd v-text="formatDate(flagData.expired_at)" />
-      </div>
-    </dl>
-
-    <div v-if="isPendingProcessingOrStale">
-      <blockquote>
-        <p v-text="'This content is currently pending processing by Neverstale, and, as such, some values may be out of date.'" />
-      </blockquote>
-    </div>
-
-    <div v-if="flagData && flagData.flags.length > 0">
-      <!-- TODO: Add i18n -->
-      <h3
-        class=""
-        v-text="`${flagData.flags.length} Content ${flagData.flags.length === 1 ? 'Flag' : 'Flags'}`"
-      />
-
-      <ul class="ns-flags-flag-items">
-        <FlagItem
-          v-for="flag in flagData.flags"
-          :key="flag.id"
-          :content-id="contentId"
-          :csrf-token="csrfToken"
-          :endpoints="endpoints"
-          :flag="flag"
-          :i18n="i18n"
-          @ignore-flag="handleIgnoreFlag"
-          @reschedule-flag="handleRescheduleFlag"
+      <div v-if="flagData.flags.length > 0">
+        <!-- TODO: Add i18n -->
+        <h3
+          class=""
+          v-text="`${flagData.flags.length} Content ${flagData.flags.length === 1 ? 'Flag' : 'Flags'}`"
         />
-      </ul>
-    </div>
+
+        <ul class="ns-flags-flag-items">
+          <FlagItem
+            v-for="flag in flagData.flags"
+            :key="flag.id"
+            :content-id="contentId"
+            :csrf-token="csrfToken"
+            :endpoints="endpoints"
+            :flag="flag"
+            :i18n="i18n"
+            @ignore-flag="handleIgnoreFlag"
+            @reschedule-flag="handleRescheduleFlag"
+          />
+        </ul>
+      </div>
+
+      <footer>
+        <!-- TODO: Add i18n -->
+        <a
+          :href="flagData.permalink"
+          class="ns-flags-view-link"
+          target="_blank"
+          rel="noopener noreferrer"
+          v-text="'View in Neverstale'"
+        />
+      </footer>
+    </template>
 
     <div v-else>
       <p v-text="props.i18n.NO_FLAGS_FOUND" />
@@ -212,7 +225,16 @@ dd {
   }
 
   & > *:last-child {
+    padding-bottom: 0;
     border-bottom: none;
   }
+}
+
+.ns-flags-view-link {
+  padding: 0.5rem 1rem;
+  background-color: red;
+  color: white;
+  text-decoration: none;
+  border-radius: 5px;
 }
 </style>

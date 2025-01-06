@@ -3,16 +3,24 @@
     <details>
       <summary v-text="`${flag.flag} (${formatDate(flag.expired_at)})`" />
 
-      <div>
+      <div class="flag-item-info-container">
         <dl>
-          <dt v-text="'Expired at:'" />
-          <dd v-text="formatDate(flag.expired_at)" />
+          <div>
+            <dt v-text="'Expired at:'" />
+            <dd v-text="formatDate(flag.expired_at)" />
+          </div>
 
-          <dt v-text="'Reason:'" />
-          <dd v-text="flag.reason" />
+          <div>
+            <dt v-text="'Reason:'" />
+            <dd v-text="flag.reason" />
+          </div>
 
-          <dt v-text="'Snippet:'" />
-          <dd v-text="flag.snippet" />
+          <div>
+            <dt v-text="'Snippet:'" />
+            <dd>
+              <code v-text="flag.snippet" />
+            </dd>
+          </div>
         </dl>
 
         <hr>
@@ -138,11 +146,22 @@ const handleReschedule = async (flagId: string): Promise<void> => {
 <style scoped>
 summary {
   text-transform: capitalize;
+  font-weight: 500;
+}
+
+.flag-item-info-container {
+  margin-top: 1rem;
 }
 
 dl {
   display: flex;
   flex-direction: column;
   gap: 1rem;
+}
+
+dt {
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  color: #606d7b;
 }
 </style>
