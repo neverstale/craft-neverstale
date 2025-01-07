@@ -5,12 +5,11 @@
 #}
 
 <!-- START VUE FLAGS WIDGET -->
-<div id="neverstale-container" class="content">
+<div id="neverstale-container" class="content" style="margin-inline: -1.5rem;">
   <neverstale-flags
     content-id="{{ content.id }}"
     content-status="{{ content.statusAsEnum.label }}"
     content-status-color="{{ content.statusColor }}"
-    content-updated-date="{{ content.dateUpdated | timestamp }}"
     :is-pending-processing-or-stale="{{ content.isPendingProcessingOrStale | json_encode }}"
     :endpoints="{{ {
       FETCH_API_CONTENT: actionUrl('neverstale/content/fetch', {
@@ -174,6 +173,25 @@
 
 {# Temp styles, to replace with own TW classes in widget #}
 {% css %}
+  #neverstale-container {
+    --ns-flags-background-color: #F1F6FB;
+    --ns-flags-padding: 1rem;
+    --ns-flags-border: 1px solid #e5e7eb;
+    --ns-flags-border-radius: 5px;
+    --ns-flags-box-shadow: 0 0 0 1px #cdd8e4, 0 2px 12px rgba(205, 216, 228, .5);
+    --ns-flags-text-color: #000;
+    --ns-flags-primary-button-color: #dc2626;
+    --ns-flags-primary-button-text: #ffffff;
+    --ns-flags-secondary-button-color: rgba(96, 125, 159, .25);
+    --ns-flags-secondary-button-text: rgba(63, 77, 90, 1);
+    --ns-flags-button-border-radius: 5px;
+    --ns-flags-button-padding: 0.5rem 1rem;
+    --ns-flags-date-input-background-color: #ffffff;
+    --ns-flags-date-input-border-color: #e5e7eb;
+    --ns-flags-date-input-border-radius: 5px;
+    --ns-flags-date-input-padding: 0.5rem 1rem;
+  }
+
   .ns-sidebar {
     padding-top: 1rem;
     padding-bottom: 1rem;

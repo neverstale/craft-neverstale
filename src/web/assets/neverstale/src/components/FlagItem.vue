@@ -29,20 +29,29 @@
           <form @submit.prevent="handleIgnore(flag.id)">
             <button
               type="submit"
-              class="btn"
               v-text="i18n.IGNORE"
             />
           </form>
 
-          <form @submit.prevent="handleReschedule(flag.id)">
-            <input
-              v-model="rescheduleDate"
-              type="date"
-            >
+          <form
+            class="ns-flags-reschedule-form"
+            @submit.prevent="handleReschedule(flag.id)"
+          >
+            <div>
+              <!-- TODO: Add i18n -->
+              <label
+                :for="`reschedule-date-${flag.id}`"
+                v-text="`${i18n.RESCHEDULE} Date`"
+              />
+              <input
+                :id="`reschedule-date-${flag.id}`"
+                v-model="rescheduleDate"
+                type="date"
+              >
+            </div>
 
             <button
               type="submit"
-              class="btn"
               v-text="i18n.RESCHEDULE"
             />
           </form>
@@ -163,5 +172,38 @@ dt {
   font-size: 0.75rem;
   text-transform: uppercase;
   color: #606d7b;
+}
+
+button {
+  padding: var(--ns-flags-button-padding);
+  background-color: var(--ns-flags-secondary-button-color);
+  color: var(--ns-flags-secondary-button-text);
+  border-radius: var(--ns-flags-button-border-radius);
+}
+
+form {
+  display: flex;
+  gap: 1rem;
+}
+
+.ns-flags-reschedule-form {
+  label {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border-width: 0;
+  }
+}
+
+input[type="date"] {
+  padding: var(--ns-flags-date-input-padding);
+  background-color: var(--ns-flags-date-input-background-color);
+  border: 1px solid var(--ns-flags-date-input-border-color);
+  border-radius: var(--ns-flags-date-input-border-radius);
 }
 </style>
