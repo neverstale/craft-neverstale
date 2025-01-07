@@ -7,7 +7,7 @@
     <template v-if="flagData">
       <dl>
         <div class="ns-flags-data-item">
-          <dt v-text="'Content Status'" />
+          <dt v-text="i18n.CONTENT_STATUS" />
           <dd>
             <span
               class="ns-flags-content-status"
@@ -21,7 +21,7 @@
           v-if="flagData.analyzed_at"
           class="ns-flags-data-item"
         >
-          <dt v-text="'Last Analyzed'" />
+          <dt v-text="i18n.LAST_ANALYZED" />
           <dd v-text="formatDate(flagData.analyzed_at, { showTime: true })" />
         </div>
 
@@ -29,7 +29,7 @@
           v-if="flagData.analyzed_at && flagData.expired_at"
           class="ns-flags-data-item"
         >
-          <dt v-text="'Content Expired'" />
+          <dt v-text="i18n.CONTENT_EXPIRED" />
           <dd v-text="formatDate(flagData.expired_at)" />
         </div>
       </dl>
@@ -50,14 +50,13 @@
           </svg>
 
           <div>
-            <!-- TODO: Add i81n -->
-            <p v-text="'This content is currently pending processing by Neverstale, and, as such, some values may be out of date.'" />
+            <p v-text="i18n.IS_STALE_NOTICE" />
 
             <button
               type="button"
               class="ns-flags-reload-button"
               @click="handleReloadPage"
-              v-text="'Reload the Page'"
+              v-text="i18n.RELOAD_PAGE"
             />
           </div>
         </blockquote>
@@ -67,8 +66,7 @@
         v-if="flagData.flags.length > 0"
         :style="{ opacity: (isStale || isPendingProcessingOrStale) ? 0.5 : 1 }"
       >
-        <!-- TODO: Add i18n -->
-        <h3 v-text="`${flagData.flags.length} Content ${flagData.flags.length === 1 ? 'Flag' : 'Flags'}`" />
+        <h3 v-text="contentFlagsHeadingText" />
 
         <ul class="ns-flags-flag-items">
           <FlagItem
@@ -86,13 +84,12 @@
       </div>
 
       <footer>
-        <!-- TODO: Add i18n -->
         <a
           :href="flagData.permalink"
           class="ns-flags-view-link"
           target="_blank"
           rel="noopener noreferrer"
-          v-text="'View in Neverstale'"
+          v-text="i18n.VIEW_IN_NEVERSTALE"
         />
       </footer>
     </template>
@@ -104,11 +101,12 @@
 </template>
 
 <script setup lang="ts">
-import { onBeforeMount, ref } from 'vue'
+import { computed, onBeforeMount, ref } from 'vue'
 
 import FlagItem from './FlagItem.vue'
 
 import { formatDate } from '../utils/formatDate.ts'
+import { defaultI18nDictionary } from '../utils/i18n.ts'
 
 import { CsrfToken } from '../types/CsrfToken.ts'
 import { Endpoints } from '../types/Endpoints.ts'
@@ -119,15 +117,20 @@ defineOptions({
   name: 'NeverstaleFlags',
 })
 
-const props = defineProps<{
-  contentId: string
-  csrfToken: CsrfToken
-  endpoints: Endpoints
-  i18n: I18nDictionary
-  contentStatus: string
-  contentStatusColor: string
-  isPendingProcessingOrStale: boolean
-}>()
+const props = withDefaults(
+  defineProps<{
+    contentId: string
+    csrfToken: CsrfToken
+    endpoints: Endpoints
+    i18n?: I18nDictionary
+    contentStatus: string
+    contentStatusColor: string
+    isPendingProcessingOrStale: boolean
+  }>(),
+  {
+    i18n: () => defaultI18nDictionary,
+  },
+)
 
 const emit = defineEmits<{
   ignoreFlag: [flagId: string]
@@ -136,6 +139,12 @@ const emit = defineEmits<{
 
 const isStale = ref(false)
 const flagData = ref<FetchApiContentResponse | null>(null)
+
+const contentFlagsHeadingText = computed(() => {
+  const flagWord = flagData.value?.flags.length === 1 ? props.i18n.FLAG : props.i18n.FLAGS
+
+  return `${flagData.value?.flags.length} ${props.i18n.CONTENT} ${flagWord}`
+})
 
 onBeforeMount(async () => {
   const response = await fetch(props.endpoints.FETCH_API_CONTENT, {

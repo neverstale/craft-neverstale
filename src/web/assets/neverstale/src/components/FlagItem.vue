@@ -6,17 +6,17 @@
       <div class="flag-item-info-container">
         <dl>
           <div>
-            <dt v-text="'Expired at:'" />
+            <dt v-text="`${i18n.EXPIRED_AT}:`" />
             <dd v-text="formatDate(flag.expired_at)" />
           </div>
 
           <div>
-            <dt v-text="'Reason:'" />
+            <dt v-text="`${i18n.REASON}:`" />
             <dd v-text="flag.reason" />
           </div>
 
           <div>
-            <dt v-text="'Snippet:'" />
+            <dt v-text="`${i18n.SNIPPET}:`" />
             <dd>
               <code v-text="flag.snippet" />
             </dd>
@@ -38,10 +38,9 @@
             @submit.prevent="handleReschedule(flag.id)"
           >
             <div>
-              <!-- TODO: Add i18n -->
               <label
                 :for="`reschedule-date-${flag.id}`"
-                v-text="`${i18n.RESCHEDULE} Date`"
+                v-text="`${i18n.RESCHEDULE} ${i18n.DATE}`"
               />
               <input
                 :id="`reschedule-date-${flag.id}`"

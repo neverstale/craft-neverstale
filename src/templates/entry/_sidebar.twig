@@ -25,9 +25,22 @@
     } | json_encode(constant('JSON_PRETTY_PRINT')) }}"
     {# We will need to add more translations here #}
     :i18n="{{ {
+      DATE: 'Date' | t('neverstale'),
+      CONTENT_STATUS: 'Content Status' | t('neverstale'),
       NO_FLAGS_FOUND: 'No flags found.' | t('neverstale'),
       IGNORE: 'Ignore' | t('neverstale'),
       RESCHEDULE: 'Reschedule' | t('neverstale'),
+      LAST_ANALYZED: 'Last Analyzed' | t('neverstale'),
+      CONTENT_EXPIRED: 'Content Expired' | t('neverstale'),
+      RELOAD_PAGE: 'Reload Page' | t('neverstale'),
+      VIEW_IN_NEVERSTALE: 'View in Neverstale' | t('neverstale'),
+      EXPIRED_AT: 'Expired at' | t('neverstale'),
+      REASON: 'Reason' | t('neverstale'),
+      SNIPPET: 'Snippet' | t('neverstale'),
+      CONTENT: 'Content' | t('neverstale'),
+      FLAG: 'Flag' | t('neverstale'),
+      FLAGS: 'Flags' | t('neverstale'),
+      IS_STALE_NOTICE: 'This content is currently pending processing by Neverstale, and, as such, some values may be out of date.' | t('neverstale'),
     } | json_encode(constant('JSON_PRETTY_PRINT')) }}"
   ></neverstale-flags>
 </div>
