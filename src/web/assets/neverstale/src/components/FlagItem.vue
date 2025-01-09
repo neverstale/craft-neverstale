@@ -26,7 +26,7 @@
         <hr>
 
         <div class="flex">
-          <form @submit.prevent="handleIgnore(flag.id)">
+          <form @submit.prevent="handleIgnore">
             <button
               type="submit"
               v-text="i18n.IGNORE"
@@ -35,7 +35,7 @@
 
           <form
             class="ns-flags-reschedule-form"
-            @submit.prevent="handleReschedule(flag.id)"
+            @submit.prevent="handleReschedule"
           >
             <div>
               <label
@@ -63,7 +63,9 @@
 <script setup lang="ts">
 import { ref } from 'vue'
 
+import { ignoreFlag } from '@/api/ignoreFlag'
 import { formatDate } from '@/utils/formatDate'
+import { rescheduleFlag } from '@/api/rescheduleFlag'
 
 import { CsrfToken } from '@/types/CsrfToken'
 import { Endpoints } from '@/types/Endpoints'
@@ -89,33 +91,26 @@ const emit = defineEmits<{
 
 const rescheduleDate = ref('')
 
-const handleIgnore = async (flagId: string): Promise<void> => {
+const handleIgnore = async (): Promise<void> => {
   const confirmed = confirm('Are you sure you want to ignore this flag? There is no undo.')
 
   if (confirmed) {
-    const response = await fetch(props.endpoints.IGNORE_FLAG, {
-      method: 'POST',
-      headers: {
-        'Accept': 'application/json',
-        'Content-Type': 'application/json',
-        'X-Requested-With': 'XMLHttpRequest',
-        'X-CSRF-TOKEN': props.csrfToken.value,
-      },
-      body: JSON.stringify({
-        flagId,
-        contentId: props.contentId,
-      }),
+    const response = await ignoreFlag({
+      flagId: props.flag.id,
+      contentId: props.contentId,
+      csrfToken: props.csrfToken.value,
+      endpoint: props.endpoints.IGNORE_FLAG,
     })
 
     if (response.ok) {
-      emit('ignoreFlag', flagId)
+      emit('ignoreFlag', props.flag.id)
     }
 
     // TODO: Add error handling
   }
 }
 
-const handleReschedule = async (flagId: string): Promise<void> => {
+const handleReschedule = async (): Promise<void> => {
   if (!rescheduleDate.value) {
     alert('Please select a date to reschedule this flag.')
 
@@ -125,25 +120,18 @@ const handleReschedule = async (flagId: string): Promise<void> => {
   const confirmed = confirm('Are you sure you want to reschedule this flag?')
 
   if (confirmed) {
-    const response = await fetch(props.endpoints.RESCHEDULE_FLAG, {
-      method: 'POST',
-      headers: {
-        'Accept': 'application/json',
-        'Content-Type': 'application/json',
-        'X-Requested-With': 'XMLHttpRequest',
-        'X-CSRF-TOKEN': props.csrfToken.value,
-      },
-      body: JSON.stringify({
-        flagId,
-        contentId: props.contentId,
-        expiredAt: rescheduleDate.value,
-      }),
+    const response = await rescheduleFlag({
+      flagId: props.flag.id,
+      contentId: props.contentId,
+      expiredAt: rescheduleDate.value,
+      csrfToken: props.csrfToken.value,
+      endpoint: props.endpoints.RESCHEDULE_FLAG,
     })
 
     if (response.ok) {
       rescheduleDate.value = ''
 
-      emit('rescheduleFlag', flagId)
+      emit('rescheduleFlag', props.flag.id)
     }
 
     // TODO: Add error handling

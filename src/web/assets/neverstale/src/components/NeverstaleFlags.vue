@@ -107,6 +107,7 @@ import FlagItem from '@/components/FlagItem.vue'
 
 import { formatDate } from '@/utils/formatDate'
 import { defaultI18nDictionary } from '@/utils/i18n'
+import { fetchApiContent } from '@/api/fetchApiContent'
 
 import { CsrfToken } from '@/types/CsrfToken'
 import { Endpoints } from '@/types/Endpoints'
@@ -147,11 +148,7 @@ const contentFlagsHeadingText = computed(() => {
 })
 
 onBeforeMount(async () => {
-  const response = await fetch(props.endpoints.FETCH_API_CONTENT, {
-    headers: {
-      'Accept': 'application/json',
-    },
-  })
+  const response = await fetchApiContent(props.endpoints.FETCH_API_CONTENT)
 
   if (response.ok) {
     const data: { success: boolean, data: FetchApiContentResponse } = await response.json()
