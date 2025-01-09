@@ -103,15 +103,15 @@
 <script setup lang="ts">
 import { computed, onBeforeMount, ref } from 'vue'
 
-import FlagItem from './FlagItem.vue'
+import FlagItem from '@/components/FlagItem.vue'
 
-import { formatDate } from '../utils/formatDate.ts'
-import { defaultI18nDictionary } from '../utils/i18n.ts'
+import { formatDate } from '@/utils/formatDate'
+import { defaultI18nDictionary } from '@/utils/i18n'
 
-import { CsrfToken } from '../types/CsrfToken.ts'
-import { Endpoints } from '../types/Endpoints.ts'
-import { I18nDictionary } from '../types/I18nDictionary.ts'
-import { FetchApiContentResponse } from '../types/FetchApiContentResponse.ts'
+import { CsrfToken } from '@/types/CsrfToken'
+import { Endpoints } from '@/types/Endpoints'
+import { I18nDictionary } from '@/types/I18nDictionary'
+import { FetchApiContentResponse } from '@/types/FetchApiContentResponse'
 
 defineOptions({
   name: 'NeverstaleFlags',

@@ -1,4 +1,4 @@
-import { I18nDictionary } from '../types/I18nDictionary.ts'
+import { I18nDictionary } from '@/types/I18nDictionary'
 
 export const defaultI18nDictionary: I18nDictionary = {
   DATE: 'Date',

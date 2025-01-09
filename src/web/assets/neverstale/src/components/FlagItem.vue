@@ -63,12 +63,12 @@
 <script setup lang="ts">
 import { ref } from 'vue'
 
-import { formatDate } from '../utils/formatDate.ts'
+import { formatDate } from '@/utils/formatDate'
 
-import { CsrfToken } from '../types/CsrfToken.ts'
-import { Endpoints } from '../types/Endpoints.ts'
-import { ContentFlag } from '../types/ContentFlag.ts'
-import { I18nDictionary } from '../types/I18nDictionary.ts'
+import { CsrfToken } from '@/types/CsrfToken'
+import { Endpoints } from '@/types/Endpoints'
+import { ContentFlag } from '@/types/ContentFlag'
+import { I18nDictionary } from '@/types/I18nDictionary'
 
 defineOptions({
   name: 'FlagItem',

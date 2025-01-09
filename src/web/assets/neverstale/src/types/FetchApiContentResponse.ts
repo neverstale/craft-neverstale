@@ -1,4 +1,4 @@
-import { ContentFlag } from './ContentFlag.ts'
+import { ContentFlag } from '@/types/ContentFlag.ts'
 
 export interface FetchApiContentResponse {
   analysis_status: string
