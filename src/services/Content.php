@@ -194,7 +194,7 @@ class Content extends Component
 
         $data = $this->fetchByCustomId($content->customId);
 
-        $data['message'] = 'Content refreshed from Neverstale';
+        $data['message'] = Plugin::t('Content refreshed from Neverstale');
         $transaction = ApiTransaction::fromContentResponse($data, 'api.refreshContent');
 
         $content->setAnalysisStatus($transaction->analysisStatus);

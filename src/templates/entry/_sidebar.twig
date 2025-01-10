@@ -1,37 +1,56 @@
+{#
+  Neverstale Entry Sidebar Widget Template
+
+  @todo replace with Vue / web component rendering
+#}
+
+<!-- START VUE FLAGS WIDGET -->
+<div id="neverstale-container" class="content" style="margin-inline: -1.5rem;">
+  <neverstale-flags
+    content-id="{{ content.id }}"
+    content-status="{{ content.statusAsEnum.label }}"
+    content-status-color="{{ content.statusColor }}"
+    :is-pending-processing-or-stale="{{ content.isPendingProcessingOrStale | json_encode }}"
+    :endpoints="{{ {
+      FETCH_API_CONTENT: actionUrl('neverstale/content/fetch', {
+        customId: content.customId,
+      }),
+      VIEW_LOCAL_CONTENT: url("neverstale/content/#{content.id}"),
+      IGNORE_FLAG: actionUrl('neverstale/flag/ignore'),
+      RESCHEDULE_FLAG: actionUrl('neverstale/flag/reschedule'),
+    } | json_encode(constant('JSON_PRETTY_PRINT')) }}"
+    :csrf-token="{{ {
+      name: craft.app.config.general.csrfTokenName,
+      value: craft.app.request.csrfToken,
+    } | json_encode(constant('JSON_PRETTY_PRINT')) }}"
+    {# We will need to add more translations here #}
+    :i18n="{{ {
+      DATE: 'Date' | t('neverstale'),
+      CONTENT_STATUS: 'Content Status' | t('neverstale'),
+      NO_FLAGS_FOUND: 'No flags found.' | t('neverstale'),
+      IGNORE: 'Ignore' | t('neverstale'),
+      RESCHEDULE: 'Reschedule' | t('neverstale'),
+      LAST_ANALYZED: 'Last Analyzed' | t('neverstale'),
+      CONTENT_EXPIRED: 'Content Expired' | t('neverstale'),
+      RELOAD_PAGE: 'Reload Page' | t('neverstale'),
+      VIEW_IN_NEVERSTALE: 'View in Neverstale' | t('neverstale'),
+      EXPIRED_AT: 'Expired at' | t('neverstale'),
+      REASON: 'Reason' | t('neverstale'),
+      SNIPPET: 'Snippet' | t('neverstale'),
+      CONTENT: 'Content' | t('neverstale'),
+      FLAG: 'Flag' | t('neverstale'),
+      FLAGS: 'Flags' | t('neverstale'),
+      IS_STALE_NOTICE: 'This content is currently pending processing by Neverstale, and, as such, some values may be out of date.' | t('neverstale'),
+    } | json_encode(constant('JSON_PRETTY_PRINT')) }}"
+  ></neverstale-flags>
+</div>
+<!-- END VUE FLAGS WIDGET #-->
+
+<!-- START TWIG FLAGS WIDGET -->
 <div id="neverstale-flags" class="content" style="margin-bottom: 1rem">
   <div class="meta ns-sidebar">
     <header class="ns-sidebar-header">
       <h2 class="h2">{{ 'Neverstale'|t('neverstale') }}</h2>
-      <div class="flex">
-        <form method="post">
-          {{ hiddenInput('contentId', content.id) }}
-          {{ actionInput('neverstale/content/refresh') }}
-          {{ redirectInput(craft.app.request.url) }}
-          {{ csrfInput() }}
-          <button type="submit" class="btn" title="{{ 'Refresh Neverstale Data'|t('neverstale') }}">
-            {{ tag('span', {
-              'data-icon': 'arrows-rotate',
-              'data-icon-size': 'small',
-              'role': 'img',
-              'style': 'margin: 0',
-            }) }}
-          </button>
-        </form>
-        <form method="post">
-          {{ hiddenInput('contentId', content.id) }}
-          {{ actionInput('neverstale/content/ingest') }}
-          {{ redirectInput(craft.app.request.url) }}
-          {{ csrfInput() }}
-          <button type="submit" class="btn btn-primary" title="{{ 'Resubmit Content'|t('neverstale') }}">
-            {{ tag('span', {
-              'data-icon': 'circle-arrow-up',
-              'data-icon-size': 'small',
-              'role': 'img',
-              'style': 'margin: 0',
-            }) }}
-          </button>
-        </form>
-      </div>
     </header>
     <dl class="meta ns-sidebar-meta">
       <div class="data">
@@ -72,7 +91,7 @@
       </div>
     {%- endif %}
     {% if flagData and flagData.flags is not empty %}
-{#      @todo i18n #}
+      {#      @todo i18n #}
       <div {{ attr({
         style: content.isPendingProcessingOrStale ? 'opacity: 0.5',
       }) }}>
@@ -155,7 +174,37 @@
     </footer>
   </div>
 </div>
+<!-- END TWIG FLAGS WIDGET -->
+
+{% set scriptTagOptions = {
+  'depends': [
+    'zaengle\\neverstale\\web\\assets\\neverstale\\NeverstaleAsset',
+  ],
+} %}
+
+{{ craft.neverstale.viteService.register('src/web/assets/neverstale/src/main.ts', false, scriptTagOptions) }}
+
+{# Temp styles, to replace with own TW classes in widget #}
 {% css %}
+  #neverstale-container {
+    --ns-flags-background-color: #F1F6FB;
+    --ns-flags-padding: 1rem;
+    --ns-flags-border: 1px solid #e5e7eb;
+    --ns-flags-border-radius: 5px;
+    --ns-flags-box-shadow: 0 0 0 1px #cdd8e4, 0 2px 12px rgba(205, 216, 228, .5);
+    --ns-flags-text-color: #000;
+    --ns-flags-primary-button-color: #dc2626;
+    --ns-flags-primary-button-text: #ffffff;
+    --ns-flags-secondary-button-color: rgba(96, 125, 159, .25);
+    --ns-flags-secondary-button-text: rgba(63, 77, 90, 1);
+    --ns-flags-button-border-radius: 5px;
+    --ns-flags-button-padding: 0.5rem 1rem;
+    --ns-flags-date-input-background-color: #ffffff;
+    --ns-flags-date-input-border-color: #e5e7eb;
+    --ns-flags-date-input-border-radius: 5px;
+    --ns-flags-date-input-padding: 0.5rem 1rem;
+  }
+
   .ns-sidebar {
     padding-top: 1rem;
     padding-bottom: 1rem;

@@ -23,7 +23,7 @@ use yii\base\Component;
 class Config extends Component
 {
     /**
-     * @property $fileConfig array<string,mixed>|null
+     * @property array<string,mixed>|null $fileConfig
      */
     private ?array $fileConfig = null;
 

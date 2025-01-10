@@ -16,4 +16,5 @@ enum Permission: string
     case View = 'neverstale:view';
     case Delete = 'neverstale:delete';
     case Ingest = 'neverstale:ingest';
+    case ClearLogs = 'neverstale:clearLogs';
 }

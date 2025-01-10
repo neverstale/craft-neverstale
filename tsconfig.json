@@ -6,6 +6,10 @@
     "module": "esnext",
     "lib": ["esnext", "DOM", "DOM.Iterable"],
     "skipLibCheck": true,
+    "paths": {
+      "~/*": ["node_modules/*"],
+      "@/*": ["src/web/assets/neverstale/src/*"]
+    },
 
     /* Bundler mode */
     "moduleResolution": "bundler",

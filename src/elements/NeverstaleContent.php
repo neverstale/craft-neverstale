@@ -159,7 +159,7 @@ class NeverstaleContent extends Element
 
     public function getUiLabel(): string
     {
-        return $this->id;
+        return (string) $this->id;
     }
 
     /**
