@@ -42,7 +42,7 @@ class Settings extends Model
     public function defineRules(): array
     {
         return [
-            [['apiKey'], 'required'],
+            [['apiKey', 'webhookSecret'], 'required'],
         ];
     }
     /**
@@ -98,13 +98,24 @@ class Settings extends Model
     {
         Typecast::properties(static::class, $values);
 
-        if (isset($values['enabledSectionIds']) && $values['enabledSectionIds'][0] === '*') {
-            $values['allowAllSections'] = true;
-            $values['enabledSectionIds'] = [];
+        if (isset($values['enabledSectionIds'])) {
+            if (empty($values['enabledSectionIds'])) {
+                $values['allowAllSections'] = false;
+                $values['enabledSectionIds'] = [];
+            }
+            elseif ($values['enabledSectionIds'][0] === '*') {
+                $values['allowAllSections'] = true;
+                $values['enabledSectionIds'] = [];
+            }
+        }
+
+        if (!isset($values['enable'])) {
+            $values['enable'] = false;
         }
 
         parent::setAttributes($values, $safeOnly);
     }
+
     /**
      * @return Collection<int,Section>
      */

@@ -10,7 +10,6 @@
   @var settings \zaengle\neverstale\models\Settings
 #}
 
-
 {%- import '_includes/forms.twig' as forms %}
 
 {%- macro configOverrideWarning(setting, fileConfig) -%}
@@ -23,7 +22,7 @@
   {%- endif -%}
 {%- endmacro %}
 
-<h2>Neverstale Credentials</h2>
+<h2>{{ 'Neverstale Credentials'| t('neverstale') }}</h2>
 
 {{ forms.autosuggestField({
   label: 'API Key' | t('neverstale'),
@@ -49,7 +48,7 @@
   disabled: craft.neverstale.config.isOverriddenByFile('webhookSecret'),
 }) }}
 
-<h2>Content settings</h2>
+<h2>{{ 'Content settings'| t('neverstale') }}</h2>
 
 {{ forms.lightswitchField({
   first: true,
@@ -66,6 +65,7 @@
   name: 'enabledSectionIds',
   showAllOption: true,
   warning: _self.configOverrideWarning('sections'),
+  required: true,
   instructions: 'Choose which sections you want to sync with Neverstale.'|t('neverstale'),
   options: craft.app.entries.allSections() | map(section => {
     label: section.name,

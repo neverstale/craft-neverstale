@@ -152,6 +152,10 @@ class Plugin extends BasePlugin
                     'label' => self::t('Neverstale'),
                     'icon' => '@neverstale/resources/icon.svg',
                     'subnav' => [
+                        'dashboard' => [
+                            'label' => self::t('Dashboard'),
+                            'url' => 'neverstale',
+                        ],
                         'content' => [
                             'label' => self::t('Content'),
                             'url' => 'neverstale/content',
@@ -178,8 +182,11 @@ class Plugin extends BasePlugin
                 $variable = $e->sender;
                 $variable->set('neverstale', [
                     'class' => NeverstaleVariable::class,
-                    'viteService' => $this->vite,
                     'config' => $this->config,
+                    'format' => $this->format,
+                    'settings' => $this->getSettings(),
+                    'setup' => $this->setup,
+                    'viteService' => $this->vite,
                 ]);
             }
         );
@@ -381,7 +388,7 @@ class Plugin extends BasePlugin
     {
         Event::on(UrlManager::class, UrlManager::EVENT_REGISTER_CP_URL_RULES, function(RegisterUrlRulesEvent $event) {
             $event->rules = array_merge($event->rules, [
-                'neverstale' => ['template' => 'neverstale/content/_index'],
+                'neverstale' => ['template' => 'neverstale/_dashboard'],
                 'neverstale/content' => ['template' => 'neverstale/content/_index'],
                 'neverstale/content/<contentId:\\d+>' => 'neverstale/content/show',
             ]);

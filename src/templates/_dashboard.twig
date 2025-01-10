@@ -1,0 +1,152 @@
+{#
+  Neverstale Plugin index template
+
+  @author Zaengle
+  @package zaengle/craft-neverstale
+  @since 1.0.0
+  @see https://github.com/zaengle/craft-neverstale
+
+#}
+
+{%- extends '_layouts/cp' %}
+{%- import '_includes/forms' as forms %}
+{%- set ns = craft.neverstale %}
+{%- set crumbs = [
+  { label: 'Neverstale' | t('neverstale'), url: url('neverstale') },
+  { label: 'Dashboard' | t('neverstale'), url: url('neverstale') },
+] %}
+
+{%- set title = 'Neverstale Dashboard' %}
+
+{%- block actionButton %}
+  {{ tag('a', {
+    class: 'btn',
+    href: ns.setup.docsUrl,
+    text: 'Plugin documentation'|t('neverstale'),
+  }) }}
+  {{ tag('a', {
+    class: 'btn',
+    href: ns.setup.neverstaleAppUrl,
+    text: 'Neverstale web app'|t('neverstale'),
+  }) }}
+{%- endblock %}
+
+{%- block main %}
+  <div id="neverstale-container">
+    <div id="content" class="content-pane">
+      <h2 class="h3">{{ 'Welcome to Neverstale' | t('neverstale') }}</h2>
+{#      @todo real copy #}
+      <p>Introduction message here. Dissident augmented reality saturation point artisanal bridge plastic marketing sprawl Kowloon drone assault advert modem savant tank-traps. Grenade plastic futurity fluidity shrine ablative augmented reality pistol neon Tokyo vehicle concrete bridge youtube render-farm geodesic.</p>
+
+      <h2 class="h3">{{ 'Plugin setup' | t('neverstale') }}</h2>
+
+      {%- if not ns.setup.isComplete or not ns.setup.isSyncEnabled %}
+          <ol class="readable warning">
+            {%- if not ns.setup.isComplete %}
+              <li>{{ 'Before you can manage your Neverstale content, you need to complete the plugin setup.' | t('neverstale') }}</li>
+            {%- endif %}
+            {%- if not ns.setup.isSyncEnabled %}
+              <li>{{ 'Automatic sync of content on save has been disabled for this environment' | t('neverstale') }}</li>
+            {%- endif %}
+          </ol>
+      {%- endif %}
+      {%- if ns.setup.isComplete %}
+        <p>Setup is complete and Neverstale is monitoring your content</p>
+      {%- else %}
+        <p>Complete the plugin setup process to start monitoring your content.</p>
+      {%- endif %}
+      <ol>
+        <li>
+          {%- if not ns.setup.hasCredentials %}
+            {{ tag('span', {
+              'data-icon': 'xmark',
+              'data-icon-size': 'small',
+              'role': 'img',
+            }) }}
+            <span>No Neverstale credentials have been configured yet</span>
+          {% else %}
+            {{ tag('span', {
+              'data-icon': 'check',
+              'data-icon-size': 'small',
+              'role': 'img',
+            }) }}
+            <span>Neverstale credentials are configured</span>
+          {% endif %}
+        </li>
+        <li>
+          {%- if not ns.setup.canConnect %}
+            {{ tag('span', {
+              'data-icon': 'xmark',
+              'data-icon-size': 'small',
+              'role': 'img',
+            }) }}
+            <span>Cannot connect to the Neverstale API</span>
+          {% else %}
+            {{ tag('span', {
+              'data-icon': 'check',
+              'data-icon-size': 'small',
+              'role': 'img',
+            }) }}
+            <span>Connection to the Neverstale API is healthy</span>
+          {% endif %}
+        </li>
+        <li>
+          {%- if not ns.setup.isContentConfigured %}
+            {{ tag('span', {
+              'data-icon': 'xmark',
+              'data-icon-size': 'small',
+              'role': 'img',
+            }) }}
+            <span>Neverstale is not yet configured to monitor any Craft sections</span>
+          {% else %}
+            {{ tag('span', {
+              'data-icon': 'check',
+              'data-icon-size': 'small',
+              'role': 'img',
+            }) }}
+            <span>Neverstale is configured to monitor content from {{  ns.settings.enabledSections | length }} sections</span>
+          {% endif %}
+        </li>
+
+        <li>
+          {%- if not ns.setup.hasSentContent %}
+            {{ tag('span', {
+              'data-icon': 'clock',
+              'data-icon-size': 'small',
+              'role': 'img',
+            }) }}
+            <span>No content has yet been sent to Neverstale. Save an entry in an enabled section or trigger a batch submission.</span>
+          {% else %}
+            {{ tag('span', {
+              'data-icon': 'check',
+              'data-icon-size': 'small',
+              'role': 'img',
+            }) }}
+            <span>Content has been sent to Neverstale</span>
+          {% endif %}
+        </li>
+      </ol>
+      <p>You can configure Neverstale via the <a href="{{ url('settings/plugins/neverstale') }}">plugin settings page</a> , or by editing the plugin config file at <code>config/neverstale.php</code>.</p>
+      <hr>
+      <h2>Next steps</h2>
+
+      <div class="btngroup">
+        {{ tag('a', {
+          class: 'btn submit',
+          href: url('utilities/scan-neverstale-content'),
+          text: 'Batch submit content'|t('neverstale'),
+        }) }}
+        {{ tag('a', {
+          class: 'btn',
+          href: url('neverstale/content'),
+          text: 'Show synced content'|t('neverstale'),
+        }) }}
+        {{ tag('a', {
+          class: 'btn',
+          href: url('utilities/preview-neverstale-content'),
+          text: 'Preview what will be sent'|t('neverstale'),
+        }) }}
+      </div>
+    </div>
+  </div>
+{% endblock %}
