@@ -149,24 +149,32 @@ class Plugin extends BasePlugin
             CpVariable::class,
             CpVariable::EVENT_REGISTER_CP_NAV_ITEMS,
             function(RegisterCpNavItemsEvent $event) {
+                $navItems  = [
+                    'dashboard' => [
+                        'label' => self::t('Dashboard'),
+                        'url' => 'neverstale',
+                    ],
+                    'content' => [
+                        'label' => self::t('Content'),
+                        'url' => 'neverstale/content',
+                    ],
+                ];
+                if (
+                    Craft::$app->getUser()->getIsAdmin() &&
+                    Craft::$app->getConfig()->getGeneral()->allowAdminChanges
+                ) {
+                    $navItems['settings'] = [
+                        'label' => self::t('Settings'),
+                        'url' => 'settings/plugins/neverstale',
+                    ];
+                }
+
+
                 $event->navItems[] = [
                     'url' => 'neverstale',
                     'label' => self::t('Neverstale'),
                     'icon' => '@neverstale/resources/icon.svg',
-                    'subnav' => [
-                        'dashboard' => [
-                            'label' => self::t('Dashboard'),
-                            'url' => 'neverstale',
-                        ],
-                        'content' => [
-                            'label' => self::t('Content'),
-                            'url' => 'neverstale/content',
-                        ],
-                        'settings' => [
-                            'label' => self::t('Settings'),
-                            'url' => 'settings/plugins/neverstale',
-                        ],
-                    ],
+                    'subnav' => $navItems,
                 ];
             }
         );
