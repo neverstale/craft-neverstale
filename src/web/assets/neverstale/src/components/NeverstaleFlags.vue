@@ -1,11 +1,39 @@
 <template>
   <div class="ns-flags-wrapper">
     <header class="ns-flags-header">
-      <h2 v-text="'Neverstale'" />
+      <h2 v-text="title" />
     </header>
 
+    <div v-if="isPendingProcessingOrStale || isStale">
+      <blockquote>
+        <svg
+          aria-hidden="true"
+          xmlns="http://www.w3.org/2000/svg"
+          viewBox="0 0 24 24"
+          fill="currentColor"
+        >
+          <path
+            fill-rule="evenodd"
+            d="M9.401 3.003c1.155-2 4.043-2 5.197 0l7.355 12.748c1.154 2-.29 4.5-2.599 4.5H4.645c-2.309 0-3.752-2.5-2.598-4.5L9.4 3.003ZM12 8.25a.75.75 0 0 1 .75.75v3.75a.75.75 0 0 1-1.5 0V9a.75.75 0 0 1 .75-.75Zm0 8.25a.75.75 0 1 0 0-1.5.75.75 0 0 0 0 1.5Z"
+            clip-rule="evenodd"
+          />
+        </svg>
+
+        <div>
+          <p v-text="i18n.IS_STALE_NOTICE" />
+
+          <button
+            type="button"
+            class="ns-flags-reload-button"
+            @click="handleReloadPage"
+            v-text="i18n.RELOAD_PAGE"
+          />
+        </div>
+      </blockquote>
+    </div>
+
     <template v-if="flagData">
-      <dl>
+      <dl v-if="showContentSummary">
         <div class="ns-flags-data-item">
           <dt v-text="i18n.CONTENT_STATUS" />
           <dd>
@@ -34,33 +62,7 @@
         </div>
       </dl>
 
-      <div v-if="isPendingProcessingOrStale || isStale">
-        <blockquote>
-          <svg
-            aria-hidden="true"
-            xmlns="http://www.w3.org/2000/svg"
-            viewBox="0 0 24 24"
-            fill="currentColor"
-          >
-            <path
-              fill-rule="evenodd"
-              d="M9.401 3.003c1.155-2 4.043-2 5.197 0l7.355 12.748c1.154 2-.29 4.5-2.599 4.5H4.645c-2.309 0-3.752-2.5-2.598-4.5L9.4 3.003ZM12 8.25a.75.75 0 0 1 .75.75v3.75a.75.75 0 0 1-1.5 0V9a.75.75 0 0 1 .75-.75Zm0 8.25a.75.75 0 1 0 0-1.5.75.75 0 0 0 0 1.5Z"
-              clip-rule="evenodd"
-            />
-          </svg>
 
-          <div>
-            <p v-text="i18n.IS_STALE_NOTICE" />
-
-            <button
-              type="button"
-              class="ns-flags-reload-button"
-              @click="handleReloadPage"
-              v-text="i18n.RELOAD_PAGE"
-            />
-          </div>
-        </blockquote>
-      </div>
 
       <div
         v-if="flagData.flags.length > 0"
@@ -120,6 +122,7 @@ defineOptions({
 
 const props = withDefaults(
   defineProps<{
+    title: string,
     contentId: string
     csrfToken: CsrfToken
     endpoints: Endpoints
@@ -127,9 +130,12 @@ const props = withDefaults(
     contentStatus: string
     contentStatusColor: string
     isPendingProcessingOrStale: boolean
+    showContentSummary: boolean
   }>(),
   {
     i18n: () => defaultI18nDictionary,
+    title: 'Neverstale',
+    showContentSummary: true,
   },
 )
 
@@ -209,16 +215,12 @@ const handleReloadPage = (): void => {
   flex-direction: column;
   gap: 1rem;
   margin-bottom: 1rem;
-  padding: 1rem 0;
   overflow: visible;
   background-color: var(--ns-flags-background-color);
-  border: var(--ns-flags-border);
-  border-radius: var(--ns-flags-border-radius);
-  box-shadow: var(--ns-flags-box-shadow);
+
 
   & > * {
     padding-block: 0;
-    padding-inline: 1.5rem;
     padding-bottom: 1rem;
     border-bottom: 1px solid #e5e7eb;
   }

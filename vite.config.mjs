@@ -1,25 +1,46 @@
 import path from 'node:path'
 import { defineConfig } from 'vite'
 import vue from '@vitejs/plugin-vue'
+import autoprefixer from 'autoprefixer'
+import tailwindcss from 'tailwindcss'
+import postcssImport from 'postcss-import'
+import tailwindNesting from 'tailwindcss/nesting';
+
+const outDir = './src/web/assets/neverstale/dist'
+const inputPath = path => `./src/web/assets/neverstale/src/${path}`
 
 const NEVERSTALE_VITE_DEV_PORT = 3333
 // https://vite.dev/config/
+
+
 export default defineConfig(({ command }) => ({
   base: command === 'serve' ? '' : '/dist/',
   build: {
     emptyOutDir: true,
     manifest: true,
-    outDir: './src/web/assets/neverstale/dist',
+    outDir: outDir,
+    sourcemap: true,
     rollupOptions: {
       input: {
-        app: './src/web/assets/neverstale/src/main.ts',
-      },
-      output: {
-        sourcemap: true,
+        app: inputPath('main.ts'),
       },
     },
   },
-  plugins: [vue()],
+  css: {
+    postcss: {
+      to: 'dist',
+      from: inputPath('styles/neverstale.css'),
+      plugins: [
+        postcssImport,
+        tailwindNesting,
+        tailwindcss('./tailwind.config.mjs'),
+        autoprefixer,
+      ],
+    },
+  },
+  plugins: [
+    vue()
+  ],
   resolve: {
     alias: {
       '~': path.resolve(__dirname, 'node_modules'),

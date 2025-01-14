@@ -19,38 +19,13 @@
 
 {%- set title = "Neverstale: #{content.entry.title}" %}
 
+{%- do craft.neverstale.viteService.register('src/web/assets/neverstale/src/main.ts', false, {
+  'depends': [
+    'zaengle\\neverstale\\web\\assets\\neverstale\\NeverstaleAsset',
+  ],
+}) %}
+
 {%- block actionButton %}
-  {{ tag('a', {
-    class: 'btn',
-    href: url('utilities/preview-neverstale-content', {
-      entryId: content.entry.id,
-    }),
-    text: 'Preview Data'|t('neverstale'),
-  }) }}
-  <form method="post">
-    {{ hiddenInput('contentId', content.id) }}
-    {{ actionInput('neverstale/content/reset-logs') }}
-    {{ csrfInput() }}
-    {{ tag('button', {
-      type: 'submit',
-      class: 'btn',
-      text: 'Reset Logs'|t('neverstale'),
-    }) }}
-  </form>
-  <form method="post">
-    {{ hiddenInput('contentId', content.id) }}
-    {{ actionInput('neverstale/content/refresh') }}
-    {{ redirectInput(craft.app.request.url) }}
-    {{ csrfInput() }}
-    <button type="submit" class="btn icon">
-      {{ tag('span', {
-        'data-icon': 'arrows-rotate',
-        'data-icon-size': 'small',
-        'role': 'img',
-      }) }}
-      <span>{{ 'Refresh Neverstale Data'|t('neverstale') }}</span>
-    </button>
-  </form>
   <form method="post">
     {{ hiddenInput('contentId', content.id) }}
     {{ actionInput('neverstale/content/ingest') }}
@@ -62,260 +37,35 @@
         'data-icon-size': 'small',
         'role': 'img',
       }) }}
-      <span>{{ 'Resubmit Content'|t('neverstale') }}</span>
+      <span>{{ 'Resubmit Content to Neverstale'|t('neverstale') }}</span>
     </button>
   </form>
-  {%- if flagData %}
-    <a href="{{ flagData.permalink }}" target="_blank" class="btn submit icon external">{{ 'View in Neverstale'|t('neverstale') }}</a>
-  {%- endif %}
 {%- endblock %}
+
+
+
 {%- block main %}
-<div id="neverstale-container">
-  <div id="content" class="content-pane">
+  <div class="ns-grid ns-grid-cols-1 lg:ns-grid-cols-3 ns-gap-4 ns-ms-1 ns-me-1">
     {%- if content.isPendingProcessingOrStale %}
-      <div id="isPendingProcessingOrStale-tip" class="readable">
-        <blockquote class="note warning"><p>{{ 'This content is currently pending processing by Neverstale, and as such
-        some values may be out of date'|t('neverstale') }}</p>
+        <blockquote class="note warning lg:ns-col-span-3">
+          <p>{{ 'This content is currently pending processing by Neverstale, and as such
+      some values may be out of date'|t('neverstale') }}
+          </p>
         </blockquote>
-      </div>
     {%- endif %}
-
-    <h2>{{ 'Submission Details'| t('neverstale') }}</h2>
-    <dl id="meta-details" class="meta ns-meta">
-      <div class="data ns-data ns-data-2">
-        <dt class="heading">{{ 'Entry' | t('app') }}</dt>
-        <dd class="value">
-          {% if content.entry %}
-            {{ elementChip(content.entry) }}
-          {% else %}
-            {{ '[Deleted element]' | t('app') }}
-          {% endif %}
-        </dd>
-      </div>
-      <div class="data ns-data ns-data-2">
-        {% if craft.app.getIsMultiSite() %}
-          <dt class="heading">{{ 'Site' | t('app') }}</dt>
-          <dd class="value">
-            {{ content.site }}
-          </dd>
-        {%-endif  %}
-      </div>
-      <div class="data ns-data ns-data-2">
-        <dt class="heading">{{ 'Content Status' | t('neverstale') }}</dt>
-        <dd class="value">
-          <span class="status {{ content.statusColor }}"></span>
-          <span>{{ content.statusAsEnum.label | t('neverstale') }}</span>
-        </dd>
-      </div>
-      <div class="data ns-data ns-data-2">
-        <dt class="heading">{{ 'Date Updated' | t('app') }}</dt>
-        <dd class="value">
-          <span>{{ content.dateUpdated | timestamp }}</span>
-        </dd>
-      </div>
-      <div class="data ns-data ns-data-2">
-        <dt class="heading">{{ 'Flag Count' | t('neverstale') }}</dt>
-        <dd class="value">
-          <span>{{ content.flagCount }}</span>
-          {% if content.isPendingProcessingOrStale %}
-            &nbsp;({{ 'Provisional' | t('neverstale') }})
-          {% endif %}
-        </dd>
-      </div>
-
-      <div class="data ns-data ns-data-2">
-        <dt class="heading">{{ 'Last updated at' | t('neverstale') }}</dt>
-        <dd id="date-updated-value" class="value">{{ content.dateUpdated | timestamp }}</dd>
-      </div>
-      <div class="data ns-data ns-data-2">
-        <dt class="heading">{{ 'Created at' | t('neverstale') }}</dt>
-        <dd id="date-created-value" class="value">{{ content.dateCreated | timestamp }}</dd>
-      </div>
-      <div class="data ns-data ns-data-2">
-        <dt class="heading">{{ 'Last analyzed at' | t('neverstale') }}</dt>
-        <dd id="date-updated-value" class="value">
-          {{ content.dateAnalyzed | timestamp }}
-          {% if content.isPendingProcessingOrStale %}
-            &nbsp;({{ 'Provisional' | t('neverstale') }})
-          {% endif %}
-        </dd>
-      </div>
-      <div class="data ns-data ns-data-2">
-        <dt class="heading">{{ 'Content expired at' | t('neverstale') }}</dt>
-        <dd id="date-created-value" class="value">
-          {{ content.dateExpired | timestamp }}
-          {% if content.isPendingProcessingOrStale %}
-            &nbsp;({{ 'Provisional' | t('neverstale') }})
-          {% endif %}
-        </dd>
-      </div>
-      <div class="data ns-data ns-data-2">
-        <dt class="heading">{{ 'Content ID' | t('neverstale') }}</dt>
-        <dd class="value"><code>{{ content.customId }}</code></dd>
-      </div>
-    </dl>
-    <hr>
-    <h2>{{ 'Content Flags'| t('neverstale') }}</h2>
-
-    <!-- START TWIG FLAGS WIDGET #-->
-    <hr>
-    <strong>TWIG FLAGS WIDGET</strong>
-    {% if flagData and flagData.flags is not empty %}
-      {# @todo i18n #}
-      <p class="readable">{{ content.flagCount }} Content flag{{ content.flagCount > 1 ? 's' }} found</p>
-      <ol class="data" style="padding-left:16px">
-        {% for item in flagData.flags %}
-          <li class="ns-flag-list-item">
-            <h4>{{ item.flag | title }} ({{ item.expired_at | timestamp }})</h4>
-            <div>
-              <dl>
-                <dt class="h6">Expired at:</dt>
-                <dd>{{ item.expired_at | timestamp }}</dd>
-                <dt class="h6">Reason:</dt>
-                <dd>{{ item.reason }}</dd>
-                <dt class="h6">Snippet:</dt>
-                <dd><code>{{ item.snippet }}</code></dd>
-              </dl>
-
-              <hr>
-              <div class="flex flex-nowrap">
-                <form {{ attr({
-                  id: 'neverstale-flag-ignore-' ~ item.id,
-                  method: 'POST',
-                }) }}
-                  onsubmit="return confirm('Are you sure you want to ignore this flag? There is no undo')">
-                  {{ csrfInput() }}
-                  {{ actionInput("neverstale/flag/ignore") }}
-                  {{ redirectInput(craft.app.request.url) }}
-                  {{ hiddenInput("flagId", item.id) }}
-                  {{ hiddenInput("contentId", content.id) }}
-                  <button type="submit" class="btn btn-primary">
-                    {{ tag('span', {
-                      'data-icon': 'xmark',
-                      'data-icon-size': 'puny',
-                      'role': 'img',
-                    }) }}
-                    {{ 'Ignore'|t('neverstale') }}</button>
-                </form>
-                <form {{ attr({
-                  id: 'neverstale-flag-reschedule-' ~ item.id,
-                  method: 'POST',
-                }) }}>
-                  {{ csrfInput() }}
-                  {{ actionInput("neverstale/flag/reschedule") }}
-                  {{ redirectInput(craft.app.request.url) }}
-                  {{ hiddenInput("flagId", item.id) }}
-                  {{ hiddenInput("contentId", content.id) }}
-                  <button type="submit" class="btn icon">
-                    {{ tag('span', {
-                      'data-icon': 'calendar-days',
-                      'data-icon-size': 'puny',
-                      'role': 'img',
-                    }) }}{{ "Reschedule"|t('neverstale') }}
-                  </button>
-                  {{ tag('label', {
-                    for: 'ns-expired-at-' ~ item.id,
-                    class: 'sr-only',
-                  }) }}
-                  {{ input('date', 'expiredAt', null, {
-                    id: 'ns-expired-at-' ~ item.id,
-                  }) }}
-                </form>
-              </div>
-            </div>
-            {% if not loop.last %}
-              <hr>
-            {% endif %}
-          </li>
-        {% else %}
-          <li>{{ 'No flags found' | t('neverstale') }}</li>
-        {% endfor %}
-      </ol>
-    {% else %}
-      <p>{{ 'No flag data found' | t('neverstale') }}</p>
-    {% endif %}
-    <hr>
-    <h2>{{ 'Transaction Log'|t('neverstale') }}</h2>
-    <div class="table-responsive">
-      <table class="ns-table table data table-condensed table-bordered table-striped fullwidth">
-        <thead>
-          <tr>
-            <th scope="col">{{ 'When'|t('neverstale') }}</th>
-            <th scope="col">{{ 'Analysis Status'|t('neverstale') }}</th>
-            <th scope="col">{{ 'Message'|t('neverstale') }}</th>
-          </tr>
-        </thead>
-        <tbody>
-        {% for transaction in content.transactionLogs.orderBy('dateCreated DESC').collect() %}
-          {% set status = neverstaleToAnalysisStatus(transaction.status) %}
-          <tr>
-            <td class="ns-td-fixed-200">{{ transaction.dateCreated | datetime("Y-m-d H:i:s") }}</td>
-            <td class="ns-td-fixed-200">
-              {%- if status -%}
-                <span class="status {{ status.color.value }}" aria-hidden="true"></span>
-                {{ status.label }}
-              {%- else %}
-                {{ transaction.status | title }}
-              {%- endif -%}
-            </td>
-            <td>
-              <details>
-                <summary>{{ transaction.message }}</summary>
-                <div class="ns-overflow-h-scroll">
-                  <pre>
-                    {{- transaction.debugTransaction | json_decode | json_encode(constant('JSON_PRETTY_PRINT')) | raw }}
-                  </pre>
-                </div>
-              </details>
-            </td>
-          </tr>
-        {% else %}
-          <tr>
-            <td colspan="3">{{ 'No transaction log entries yet' | t('neverstale') }}</td>
-          </tr>
-        {% endfor %}
-        </tbody>
-      </table>
+    <div class="content-pane ns-px-4 lg:ns-col-span-2">
+      {% include 'neverstale/_components/content/submission-details' with { content: content } only %}
+      <hr class="ns-ms-0 ns-me-0">
+      {% include 'neverstale/_components/content/transaction-log' with { content: content } only %}
+    </div>
+    <div class="content-pane lg:ns-col-span-1">
+      {% include 'neverstale/_components/flags-widget' with {
+        content: content,
+        title: 'Content Flags'|t('neverstale'),
+        opts: {
+          showContentSummary: false,
+        },
+      } only %}
     </div>
   </div>
-  <!-- END TWIG FLAGS WIDGET #-->
-  {% set scriptTagOptions = {
-    'depends': [
-      'zaengle\\neverstale\\web\\assets\\neverstale\\NeverstaleAsset',
-    ],
-  } %}
-  {{ craft.neverstale.viteService.register('src/web/assets/neverstale/src/main.ts', false, scriptTagOptions) }}
-</div>
 {% endblock %}
-{% css %}
-.ns-meta {
-  border: 1px solid #e5e7eb;
-  border-radius: 4px;
-  @media (min-width: 1024px) {
-    display: flex;
-    flex-wrap: wrap;
-    justify-content: stretch;
-  }
-}
-.ns-table thead th {
-  border-bottom: 1px solid #e5e7eb;
-}
-.ns-data {
-  @media (min-width: 1024px) {
-    flex-grow: 1;
-    flex-shrink: 0;
-  }
-}
-.ns-data-2 {
-  @media (min-width: 1024px) {
-    width: 50%;
-  }
-}
-.ns-td-fixed-200 {
-  width: 200px;
-}
-.ns-overflow-h-scroll {
-  overflow-x: scroll;
-  max-width: 100%;
-}
-{% endcss %}

@@ -42,6 +42,7 @@ use zaengle\neverstale\services\Entry as EntryService;
 use zaengle\neverstale\services\Flag;
 use zaengle\neverstale\services\Format as FormatService;
 use zaengle\neverstale\services\Setup;
+use zaengle\neverstale\services\Template;
 use zaengle\neverstale\services\TransactionLog;
 use zaengle\neverstale\support\ApiClient;
 use zaengle\neverstale\traits\HasPluginLogfile;
@@ -122,6 +123,7 @@ class Plugin extends BasePlugin
                 'format' => FormatService::class,
                 'setup' => Setup::class,
                 'transactionLog' => TransactionLog::class,
+                'template' => Template::class,
                 'vite' => [
                     'class' => VitePluginService::class,
                     'assetClass' => NeverstaleAsset::class,
@@ -186,6 +188,7 @@ class Plugin extends BasePlugin
                     'format' => $this->format,
                     'settings' => $this->getSettings(),
                     'setup' => $this->setup,
+                    'template' => $this->template,
                     'viteService' => $this->vite,
                 ]);
             }
@@ -232,28 +235,8 @@ class Plugin extends BasePlugin
             Entry::class,
             Element::EVENT_DEFINE_SIDEBAR_HTML,
             static function(DefineHtmlEvent $event) {
-                $entry = $event->sender;
-                $content = $entry->getNeverstaleContent();
-
-                if (!$content) {
-                    return;
-                }
-
-                // @todo register asset bundle
-                $plugin = Plugin::getInstance();
-                $customId = $plugin->format->forIngest($content)->customId;
-
-                try {
-                    $flagData = Plugin::getInstance()->content->fetchByCustomId($content->customId)['data'];
-                } catch (\Exception $e) {
-                    Plugin::error($e->getMessage());
-                    $flagData = null;
-                }
-
                 $event->html .= Craft::$app->view->renderTemplate('neverstale/entry/_sidebar', [
-                    'content' => $content,
-                    'flagData' => $flagData,
-                    'customId' => $customId,
+                    'content' => $event->sender->getNeverstaleContent(),
                 ]);
             });
     }

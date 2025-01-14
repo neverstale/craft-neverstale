@@ -1,8 +1,11 @@
 {
   "src/web/assets/neverstale/src/main.ts": {
-    "file": "assets/app-DTS8xvrC.js",
+    "file": "assets/app-_EJMauBq.js",
     "name": "app",
     "src": "src/web/assets/neverstale/src/main.ts",
-    "isEntry": true
+    "isEntry": true,
+    "css": [
+      "assets/app-DN3WseIF.css"
+    ]
   }
 }

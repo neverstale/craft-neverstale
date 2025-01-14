@@ -7,8 +7,8 @@
     "lib": ["esnext", "DOM", "DOM.Iterable"],
     "skipLibCheck": true,
     "paths": {
-      "~/*": ["node_modules/*"],
-      "@/*": ["src/web/assets/neverstale/src/*"]
+      "~/*": ["./node_modules/*"],
+      "@/*": ["./src/web/assets/neverstale/src/*"]
     },
 
     /* Bundler mode */
@@ -26,5 +26,8 @@
     "noFallthroughCasesInSwitch": true,
     "noUncheckedSideEffectImports": true
   },
-  "include": ["src/web/assets/**/*.ts", "src/web/assets/**/*.vue"]
+  "include": [
+    "src/web/assets/**/*.ts",
+    "src/web/assets/**/*.vue"
+  ]
 }
