@@ -7,12 +7,14 @@
   false,
   {
     'depends': [
-      'zaengle\\neverstale\\web\\assets\\neverstale\\NeverstaleAsset',
+      'neverstale\\craft\\web\\assets\\neverstale\\NeverstaleAsset',
     ],
   }
 ) %}
 
-<div class="content-pane ns-mb-4 ns-ms-[-1.5rem] ns-me-[-1.5rem]">
+<div class="content-pane ns-mb-4
+  ns-ms-[-0.5rem] sm:ns-ms-[-1.5rem]
+  ns-me-[-0.5rem] sm:ns-me-[-1.5rem]">
   {%- if content %}
     {% include 'neverstale/_components/flags-widget' with { content: content } only %}
   {%- else %}

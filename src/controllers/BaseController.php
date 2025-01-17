@@ -1,11 +1,11 @@
 <?php
 
-namespace zaengle\neverstale\controllers;
+namespace neverstale\craft\controllers;
 
 use Craft;
 use craft\web\Controller;
 use yii\web\Response;
-use zaengle\neverstale\Plugin;
+use neverstale\craft\Plugin;
 
 /**
  * Base controller

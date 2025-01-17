@@ -1,11 +1,11 @@
 <?php
 
-namespace zaengle\neverstale\services;
+namespace neverstale\craft\services;
 
 use yii\base\Component;
-use zaengle\neverstale\elements\NeverstaleContent;
-use zaengle\neverstale\Plugin;
-use zaengle\neverstale\support\ApiClient;
+use neverstale\craft\elements\NeverstaleContent;
+use neverstale\craft\Plugin;
+use neverstale\craft\support\ApiClient;
 
 /**
  * Flag service

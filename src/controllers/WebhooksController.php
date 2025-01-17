@@ -1,13 +1,14 @@
 <?php
 
-namespace zaengle\neverstale\controllers;
+namespace neverstale\craft\controllers;
 
 use craft\helpers\Json;
-use craft\web\Controller;
+use neverstale\api\models\Content;
+use neverstale\api\models\TransactionResult;
 use yii\web\Response;
-use zaengle\neverstale\elements\NeverstaleContent;
-use zaengle\neverstale\models\ApiTransaction;
-use zaengle\neverstale\Plugin;
+use neverstale\craft\elements\NeverstaleContent;
+use neverstale\craft\models\TransactionLogItem;
+use neverstale\craft\Plugin;
 
 /**
  * Webhooks controller
@@ -39,14 +40,15 @@ class WebhooksController extends BaseController
         }
         // Decode the webhook data
         try {
-            $data = Json::decode($this->request->getRawBody());
+            $payload = Json::decode($this->request->getRawBody());
         } catch (\Exception $e) {
             Plugin::error('Could not decode webhook data: ' . $e->getMessage());
             return $this->asFailure('Could not decode webhook body');
         }
         // Update the content item based on the webhook data
         try {
-            $transaction = ApiTransaction::fromWebhookPayload($data);
+
+            $transaction = TransactionLogItem::fromWebhookPayload($payload);
             /** @var NeverstaleContent $content */
             $content = Plugin::getInstance()->content->findOrCreateByCustomId($transaction->customId);
 

@@ -1,12 +1,12 @@
 <?php
 
-namespace zaengle\neverstale\services;
+namespace neverstale\craft\services;
 
 use craft\elements\Entry as EntryElement;
 use craft\helpers\ElementHelper;
 use craft\models\Section;
 use yii\base\Component;
-use zaengle\neverstale\Plugin;
+use neverstale\craft\Plugin;
 
 /**
  * Neverstale Entry Service

@@ -1,6 +1,6 @@
 @layer components {
   #neverstale-container {
-    --ns-flags-background-color: #F1F6FB;
+    --ns-flags-background-color: #fff;
     --ns-flags-padding: 1rem;
     --ns-flags-border: 1px solid #e5e7eb;
     --ns-flags-border-radius: 5px;

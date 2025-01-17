@@ -1,12 +1,13 @@
 {% set opts = {
-  showContentSummary: true
+  showContentSummary: true,
+  showLocalDetailsLink: true,
 }|merge(opts ?? {}) %}
 
 <div data-neverstale-flags>
   <neverstale-flags
     title="{{ title ?? 'Neverstale'|t('neverstale') }}"
     content-id="{{ content.id }}"
-    content-status="{{ content.statusAsEnum.label }}"
+    content-status="{{ content.statusModel.label }}"
     content-status-color="{{ content.statusColor }}"
     :show-content-summary="{{ opts.showContentSummary | json_encode }}"
     :is-pending-processing-or-stale="{{ content.isPendingProcessingOrStale | json_encode }}"
@@ -14,7 +15,7 @@
       FETCH_API_CONTENT: actionUrl('neverstale/content/fetch', {
         customId: content.customId,
       }),
-      VIEW_LOCAL_CONTENT: url("neverstale/content/#{content.id}"),
+      VIEW_LOCAL_CONTENT: opts.showLocalDetailsLink ? url("neverstale/content/#{content.id}"),
       IGNORE_FLAG: actionUrl('neverstale/flag/ignore'),
       RESCHEDULE_FLAG: actionUrl('neverstale/flag/reschedule'),
     } | json_encode(constant('JSON_PRETTY_PRINT')) }}"

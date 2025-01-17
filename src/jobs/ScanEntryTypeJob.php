@@ -1,8 +1,7 @@
 <?php
 
-namespace zaengle\neverstale\jobs;
+namespace neverstale\craft\jobs;
 
-use Craft;
 use craft\queue\BaseJob;
 
 /**

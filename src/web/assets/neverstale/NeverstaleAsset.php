@@ -1,6 +1,6 @@
 <?php
 
-namespace zaengle\neverstale\web\assets\neverstale;
+namespace neverstale\craft\web\assets\neverstale;
 
 use craft\web\AssetBundle;
 use craft\web\assets\cp\CpAsset;
@@ -13,7 +13,7 @@ class NeverstaleAsset extends AssetBundle
     public function init()
     {
         parent::init();
-        $this->sourcePath = '@zaengle/neverstale/web/assets/neverstale/dist';
+        $this->sourcePath = '@neverstale/craft/web/assets/neverstale/dist';
 
         $this->depends = [
             CpAsset::class,

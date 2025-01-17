@@ -1,6 +1,6 @@
 <?php
 
-namespace zaengle\neverstale\support;
+namespace neverstale\craft\support;
 
 use GuzzleHttp\Client;
 use Psr\Http\Message\ResponseInterface;
@@ -51,6 +51,20 @@ class ApiClient
             'json' => array_merge($data, $callbackConfig),
         ]);
     }
+
+    /**
+     * @param array<int,string> $customIds
+     * @throws \GuzzleHttp\Exception\GuzzleException
+     */
+    public function batchDelete(array $customIds): ResponseInterface
+    {
+        return $this->client->delete('content/batch', [
+            'json' => [
+                'custom_ids' => $customIds,
+            ],
+        ]);
+    }
+
     public function getByCustomId(string $customId): ResponseInterface
     {
         return $this->client->get("content/$customId");

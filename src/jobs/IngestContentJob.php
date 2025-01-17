@@ -1,11 +1,11 @@
 <?php
 
-namespace zaengle\neverstale\jobs;
+namespace neverstale\craft\jobs;
 
 use craft\errors\ElementNotFoundException;
 use craft\queue\BaseJob;
-use zaengle\neverstale\elements\NeverstaleContent;
-use zaengle\neverstale\Plugin;
+use neverstale\craft\elements\NeverstaleContent;
+use neverstale\craft\Plugin;
 
 /**
  *  Neverstale Ingest Content Job

@@ -14,8 +14,8 @@
       </tr>
     </thead>
     <tbody class="ns-block lg:ns-table-row-group">
-    {% for transaction in content.transactionLogs.orderBy('dateCreated DESC').collect() %}
-      {% set status = neverstaleToAnalysisStatus(transaction.status) %}
+    {%- for transaction in content.transactionLogs.orderBy('dateCreated DESC').collect() %}
+      {%- set status = neverstaleToAnalysisStatus(transaction.status) %}
       <tr class="ns-border-b {{ loop.index % 2 ? 'ns-bg-gray-200' : 'ns-bg-white' }} ns-block lg:ns-table-row">
         <td class="{{ opts.cellClasses }} ns-items-center lg:ns-w-[15%] lg:ns-min-w-[150px]">
           <div class="ns-text-sm lg:ns-hidden ns-font-bold ns-min-w-[100px]" aria-hidden="true">{{ 'Date'|t('neverstale') }}</div>
@@ -43,11 +43,11 @@
           </details>
         </td>
       </tr>
-    {% else %}
+    {%- else %}
       <tr>
         <td colspan="3">{{ 'No transaction log entries yet' | t('neverstale') }}</td>
       </tr>
-    {% endfor %}
+    {%- endfor %}
     </tbody>
   </table>
   <footer class="ns-flex ns-justify-end ns-pt-4 ns-border-t">

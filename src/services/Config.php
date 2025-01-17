@@ -1,6 +1,6 @@
 <?php
 
-namespace zaengle\neverstale\services;
+namespace neverstale\craft\services;
 
 use Craft;
 use craft\helpers\App;

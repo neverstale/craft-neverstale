@@ -1,6 +1,6 @@
 <?php
 
-namespace zaengle\neverstale\records;
+namespace neverstale\craft\records;
 
 use craft\db\ActiveRecord;
 use yii\db\ActiveQueryInterface;

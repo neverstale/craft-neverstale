@@ -5,7 +5,7 @@
   @package zaengle/craft-neverstale
   @since 1.0.0
   @see https://github.com/zaengle/craft-neverstale
-  @var content \zaengle\neverstale\elements\NeverstaleContent
+  @var content \neverstale\elements\NeverstaleContent
 #}
 
 {%- extends '_layouts/cp' %}
@@ -13,7 +13,7 @@
 
 {%- set crumbs = [
   { label: 'Neverstale' | t('neverstale'), url: url('neverstale') },
-  { label: 'Content' | t('neverstale'), url: url('neverstale') },
+  { label: 'Content' | t('neverstale'), url: url('neverstale/content') },
   { label: "##{content.id}", url: content.cpEditUrl },
 ] %}
 
@@ -21,7 +21,7 @@
 
 {%- do craft.neverstale.viteService.register('src/web/assets/neverstale/src/main.ts', false, {
   'depends': [
-    'zaengle\\neverstale\\web\\assets\\neverstale\\NeverstaleAsset',
+    'neverstale\\craft\\web\\assets\\neverstale\\NeverstaleAsset',
   ],
 }) %}
 
@@ -47,7 +47,7 @@
 {%- block main %}
   <div class="ns-grid ns-grid-cols-1 lg:ns-grid-cols-3 ns-gap-4 ns-ms-1 ns-me-1">
     {%- if content.isPendingProcessingOrStale %}
-        <blockquote class="note warning lg:ns-col-span-3">
+        <blockquote class="note warning lg:ns-col-span-3 ns-mb-4">
           <p>{{ 'This content is currently pending processing by Neverstale, and as such
       some values may be out of date'|t('neverstale') }}
           </p>
@@ -64,6 +64,7 @@
         title: 'Content Flags'|t('neverstale'),
         opts: {
           showContentSummary: false,
+          showLocalDetailsLink: false,
         },
       } only %}
     </div>

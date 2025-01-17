@@ -46,19 +46,19 @@
         </div>
 
         <div
-          v-if="flagData.analyzed_at"
+          v-if="flagData.analyzed_at?.date"
           class="ns-flags-data-item"
         >
           <dt v-text="i18n.LAST_ANALYZED" />
-          <dd v-text="formatDate(flagData.analyzed_at, { showTime: true })" />
+          <dd v-text="formatDate(flagData.analyzed_at.date, { showTime: true })" />
         </div>
 
         <div
-          v-if="flagData.analyzed_at && flagData.expired_at"
+          v-if="flagData.analyzed_at && flagData.expired_at?.date"
           class="ns-flags-data-item"
         >
           <dt v-text="i18n.CONTENT_EXPIRED" />
-          <dd v-text="formatDate(flagData.expired_at)" />
+          <dd v-text="formatDate(flagData.expired_at.date)" />
         </div>
       </dl>
 
@@ -85,7 +85,7 @@
         </ul>
       </div>
 
-      <footer>
+      <footer class="ns-actions">
         <a
           :href="flagData.permalink"
           class="ns-flags-view-link"
@@ -93,6 +93,13 @@
           rel="noopener noreferrer"
           v-text="i18n.VIEW_IN_NEVERSTALE"
         />
+        <a
+          v-if="endpoints.VIEW_LOCAL_CONTENT"
+          :href="endpoints.VIEW_LOCAL_CONTENT"
+          class="ns-flags-view-link"
+          v-text="i18n.VIEW_LOCAL_DETAILS"
+        />
+
       </footer>
     </template>
 
@@ -157,9 +164,9 @@ onBeforeMount(async () => {
   const response = await fetchApiContent(props.endpoints.FETCH_API_CONTENT)
 
   if (response.ok) {
-    const data: { success: boolean, data: FetchApiContentResponse } = await response.json()
+    const payload: { success: boolean, data: FetchApiContentResponse } = await response.json()
 
-    flagData.value = data.success ? data.data : null
+    flagData.value = payload.success ? payload.data : null
   }
 
   // TODO: Add error handling
@@ -190,7 +197,7 @@ const handleReloadPage = (): void => {
 
 <style>
 :root {
-  --ns-flags-background-color: #F1F6FB;
+  --ns-flags-background-color: #fff;
   --ns-flags-padding: 1rem;
   --ns-flags-border: 1px solid #e5e7eb;
   --ns-flags-border-radius: 5px;
@@ -313,4 +320,9 @@ blockquote svg {
   text-decoration: none;
   border-radius: var(--ns-flags-button-border-radius);
 }
+.ns-actions {
+  display: flex;
+  gap: 1rem;
+}
+
 </style>

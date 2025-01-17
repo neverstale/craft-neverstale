@@ -1,10 +1,10 @@
 <?php
 
-namespace zaengle\neverstale\web\twig;
+namespace neverstale\craft\web\twig;
 
+use neverstale\craft\models\Status;
 use Twig\Extension\AbstractExtension;
 use Twig\TwigFunction;
-use zaengle\neverstale\enums\AnalysisStatus;
 
 /**
  * Twig extension
@@ -19,7 +19,7 @@ class Neverstale extends AbstractExtension
     public function getFunctions()
     {
         return [
-            new TwigFunction('neverstaleToAnalysisStatus', fn(string $status): ?AnalysisStatus => AnalysisStatus::tryFrom($status)),
+            new TwigFunction('neverstaleToAnalysisStatus', fn(string $status): ?Status => Status::from($status)),
         ];
     }
 

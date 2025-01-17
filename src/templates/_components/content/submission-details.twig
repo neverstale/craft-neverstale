@@ -22,7 +22,7 @@
 
     {%- set status %}
       <span class="status {{ content.statusColor }}"></span>
-      <span>{{ content.statusAsEnum.label | t('neverstale') }}</span>
+      <span>{{ content.statusModel.label | t('neverstale') }}</span>
     {%- endset  %}
 
     {{ _self.summaryItem( 'Content Status', status) }}

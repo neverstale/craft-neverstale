@@ -1,9 +1,9 @@
 <?php
 
-namespace zaengle\neverstale\enums;
+namespace neverstale\craft\enums;
 
 use craft\enums\Color;
-use zaengle\neverstale\Plugin;
+use neverstale\craft\Plugin;
 
 /**
  * Neverstale Analysis Status Enum

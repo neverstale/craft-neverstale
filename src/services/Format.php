@@ -1,12 +1,12 @@
 <?php
 
-namespace zaengle\neverstale\services;
+namespace neverstale\craft\services;
 
 use Craft;
 use yii\base\Component;
-use zaengle\neverstale\elements\NeverstaleContent;
-use zaengle\neverstale\models\IngestContent;
-use zaengle\neverstale\Plugin;
+use neverstale\craft\elements\NeverstaleContent;
+use neverstale\craft\models\IngestContent;
+use neverstale\craft\Plugin;
 
 /**
  * Neverstale Format service

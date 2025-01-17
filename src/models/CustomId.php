@@ -1,11 +1,11 @@
 <?php
 
-namespace zaengle\neverstale\models;
+namespace neverstale\craft\models;
 
 use craft\base\Model;
 use Illuminate\Support\Collection;
-use zaengle\neverstale\elements\NeverstaleContent;
-use zaengle\neverstale\Plugin;
+use neverstale\craft\elements\NeverstaleContent;
+use neverstale\craft\Plugin;
 
 /**
  * Custom Id model

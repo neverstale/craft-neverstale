@@ -1,6 +1,6 @@
 <?php
 
-namespace zaengle\neverstale\traits;
+namespace neverstale\craft\traits;
 
 use Craft;
 use craft\base\Plugin;

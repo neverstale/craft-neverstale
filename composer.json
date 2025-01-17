@@ -1,5 +1,5 @@
 {
-  "name": "zaengle/craft-neverstale",
+  "name": "neverstale/craft-plugin",
   "description": "Neverstale integration for CraftCMS",
   "type": "craft-plugin",
   "require": {
@@ -10,13 +10,14 @@
     "craftcms/ecs": "dev-main",
     "craftcms/phpstan": "dev-main",
     "markhuot/craft-pest-core": "dev-main",
+    "neverstale/api": "dev-main",
     "nystudio107/craft-plugin-vite": "5.0.2",
     "roave/security-advisories": "dev-latest"
   },
   "license": "proprietary",
   "autoload": {
     "psr-4": {
-      "zaengle\\neverstale\\": "src/"
+      "neverstale\\craft\\": "src/"
     }
   },
   "minimum-stability": "dev",
@@ -32,7 +33,7 @@
     "handle": "neverstale",
     "name": "Neverstale",
     "developer": "Zaengle",
-    "documentationUrl": ""
+    "documentationUrl": "https://neverstale.io/docs/"
   },
   "scripts": {
     "check-cs": "ecs check --ansi",

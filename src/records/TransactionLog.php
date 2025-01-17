@@ -1,10 +1,10 @@
 <?php
 
-namespace zaengle\neverstale\records;
+namespace neverstale\craft\records;
 
 use craft\db\ActiveRecord;
 use yii\db\ActiveQueryInterface;
-use zaengle\neverstale\elements\NeverstaleContent;
+use neverstale\craft\elements\NeverstaleContent;
 
 /**
  * Transaction record

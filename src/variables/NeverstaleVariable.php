@@ -1,15 +1,15 @@
 <?php
 
-namespace zaengle\neverstale\variables;
+namespace neverstale\craft\variables;
 
 use nystudio107\pluginvite\variables\ViteVariableInterface;
 use nystudio107\pluginvite\variables\ViteVariableTrait;
 
-use zaengle\neverstale\models\Settings;
-use zaengle\neverstale\services\Config;
-use zaengle\neverstale\services\Format;
-use zaengle\neverstale\services\Setup;
-use zaengle\neverstale\services\Template;
+use neverstale\craft\models\Settings;
+use neverstale\craft\services\Config;
+use neverstale\craft\services\Format;
+use neverstale\craft\services\Setup;
+use neverstale\craft\services\Template;
 
 class NeverstaleVariable implements ViteVariableInterface
 {

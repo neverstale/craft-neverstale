@@ -1,8 +1,7 @@
 <?php
 
-namespace zaengle\neverstale\elements\conditions;
+namespace neverstale\craft\elements\conditions;
 
-use Craft;
 use craft\elements\conditions\ElementCondition;
 
 /**

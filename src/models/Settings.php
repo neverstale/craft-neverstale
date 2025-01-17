@@ -1,13 +1,13 @@
 <?php
 
-namespace zaengle\neverstale\models;
+namespace neverstale\craft\models;
 
 use Craft;
 use craft\base\Model;
 use craft\helpers\Typecast;
 use craft\models\Section;
 use Illuminate\Support\Collection;
-use zaengle\neverstale\Plugin;
+use neverstale\craft\Plugin;
 
 /**
  * Neverstale Plugin Settings

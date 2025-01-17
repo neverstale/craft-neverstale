@@ -1,6 +1,6 @@
 <?php
 
-namespace zaengle\neverstale;
+namespace neverstale\craft;
 
 use Craft;
 use craft\base\Element;
@@ -31,26 +31,27 @@ use nystudio107\pluginvite\services\VitePluginService;
 use yii\base\Event;
 use yii\base\InvalidConfigException;
 
-use zaengle\neverstale\behaviors\HasNeverstaleContentBehavior;
-use zaengle\neverstale\elements\NeverstaleContent;
-use zaengle\neverstale\enums\AnalysisStatus;
-use zaengle\neverstale\enums\Permission;
-use zaengle\neverstale\models\Settings;
-use zaengle\neverstale\services\Config;
-use zaengle\neverstale\services\Content;
-use zaengle\neverstale\services\Entry as EntryService;
-use zaengle\neverstale\services\Flag;
-use zaengle\neverstale\services\Format as FormatService;
-use zaengle\neverstale\services\Setup;
-use zaengle\neverstale\services\Template;
-use zaengle\neverstale\services\TransactionLog;
-use zaengle\neverstale\support\ApiClient;
-use zaengle\neverstale\traits\HasPluginLogfile;
-use zaengle\neverstale\utilities\PreviewContent;
-use zaengle\neverstale\utilities\ScanUtility;
-use zaengle\neverstale\variables\NeverstaleVariable;
-use zaengle\neverstale\web\assets\neverstale\NeverstaleAsset;
-use zaengle\neverstale\web\twig\Neverstale as NeverstaleTwigExtension;
+use neverstale\api\Client as ApiClient;
+
+use neverstale\craft\behaviors\HasNeverstaleContentBehavior;
+use neverstale\craft\elements\NeverstaleContent;
+use neverstale\craft\enums\Permission;
+use neverstale\craft\models\Settings;
+use neverstale\craft\models\Status;
+use neverstale\craft\services\Config;
+use neverstale\craft\services\Content;
+use neverstale\craft\services\Entry as EntryService;
+use neverstale\craft\services\Flag;
+use neverstale\craft\services\Format as FormatService;
+use neverstale\craft\services\Setup;
+use neverstale\craft\services\Template;
+use neverstale\craft\services\TransactionLog;
+use neverstale\craft\traits\HasPluginLogfile;
+use neverstale\craft\utilities\PreviewContent;
+use neverstale\craft\utilities\ScanUtility;
+use neverstale\craft\variables\NeverstaleVariable;
+use neverstale\craft\web\assets\neverstale\NeverstaleAsset;
+use neverstale\craft\web\twig\Neverstale as NeverstaleTwigExtension;
 
 /**
  * Neverstale Craft Plugin
@@ -295,12 +296,12 @@ class Plugin extends BasePlugin
             return '';
         }
 
-        $status = AnalysisStatus::from($content->status);
+        $status = Status::from($content->status);
 
         return CpHelper::statusLabelHtml([
-            'color' => $status->color(),
-            'icon' => $status->icon(),
-            'label' => $status->label(),
+            'color' => $status->color,
+            'icon' => $status->icon,
+            'label' => $status->label,
         ]);
     }
 
@@ -320,7 +321,7 @@ class Plugin extends BasePlugin
         return $content->{$contentAttr} ? Craft::$app->formatter->asTimestamp($content->{$contentAttr}) : '--';
     }
     /**
-     * @see \zaengle\neverstale\services\Entry
+     * @see \neverstale\craft\services\Entry
      */
     protected function registerOnElementSaveHandler(): void
     {

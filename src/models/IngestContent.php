@@ -1,12 +1,12 @@
 <?php
 
-namespace zaengle\neverstale\models;
+namespace neverstale\craft\models;
 
 use craft\base\Model;
 use craft\elements\Entry;
 use Illuminate\Contracts\Support\Arrayable;
-use zaengle\neverstale\elements\NeverstaleContent;
-use zaengle\neverstale\Plugin;
+use neverstale\craft\elements\NeverstaleContent;
+use neverstale\craft\Plugin;
 
 /**
  * Neverstale ApiData model

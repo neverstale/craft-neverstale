@@ -1,12 +1,12 @@
 <?php
 
-namespace zaengle\neverstale\traits;
+namespace neverstale\craft\traits;
 
 use craft\helpers\UrlHelper;
-use zaengle\neverstale\enums\AnalysisStatus;
-use zaengle\neverstale\models\CustomId;
-use zaengle\neverstale\Plugin;
-use zaengle\neverstale\records\Content as ContentRecord;
+use neverstale\api\enums\AnalysisStatus;
+use neverstale\craft\models\CustomId;
+use neverstale\craft\Plugin;
+use neverstale\craft\records\Content as ContentRecord;
 
 /**
  * Has Neverstale Content Trait
@@ -23,7 +23,7 @@ use zaengle\neverstale\records\Content as ContentRecord;
  */
 trait HasNeverstaleContent
 {
-    use LogsApiTransactions, HasEntry;
+    use LogsTransactions, HasEntry;
 
     public ?string $neverstaleId = null;
     protected ?string $analysisStatus = null;

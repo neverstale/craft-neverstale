@@ -1,11 +1,11 @@
 <?php
 
-namespace zaengle\neverstale\controllers;
+namespace neverstale\craft\controllers;
 
 use yii\web\Response;
-use zaengle\neverstale\elements\NeverstaleContent;
-use zaengle\neverstale\enums\AnalysisStatus;
-use zaengle\neverstale\Plugin;
+use neverstale\craft\elements\NeverstaleContent;
+use neverstale\api\enums\AnalysisStatus;
+use neverstale\craft\Plugin;
 
 /**
  * Flag controller

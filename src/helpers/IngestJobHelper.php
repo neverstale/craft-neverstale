@@ -1,8 +1,8 @@
 <?php
 
-namespace zaengle\neverstale\helpers;
+namespace neverstale\craft\helpers;
 
-use zaengle\neverstale\Plugin;
+use neverstale\craft\Plugin;
 
 class IngestJobHelper
 {

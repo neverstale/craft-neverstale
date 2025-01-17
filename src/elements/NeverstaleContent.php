@@ -1,6 +1,6 @@
 <?php
 
-namespace zaengle\neverstale\elements;
+namespace neverstale\craft\elements;
 
 use Craft;
 use craft\base\Element;
@@ -17,16 +17,17 @@ use craft\helpers\Cp;
 use craft\helpers\UrlHelper;
 
 use craft\web\CpScreenResponseBehavior;
+use neverstale\craft\models\Status;
 use yii\base\Exception;
 use yii\base\InvalidConfigException;
 use yii\web\Response;
 
-use zaengle\neverstale\elements\conditions\NeverstaleContentCondition;
-use zaengle\neverstale\elements\db\NeverstaleContentQuery;
-use zaengle\neverstale\enums\AnalysisStatus;
-use zaengle\neverstale\enums\Permission;
-use zaengle\neverstale\Plugin;
-use zaengle\neverstale\traits\HasNeverstaleContent;
+use neverstale\craft\elements\conditions\NeverstaleContentCondition;
+use neverstale\craft\elements\db\NeverstaleContentQuery;
+use neverstale\api\enums\AnalysisStatus;
+use neverstale\craft\enums\Permission;
+use neverstale\craft\Plugin;
+use neverstale\craft\traits\HasNeverstaleContent;
 
 /**
  * Neverstale Content Custom Element Type
@@ -79,11 +80,11 @@ class NeverstaleContent extends Element
      */
     public static function statuses(): array
     {
-        return collect(AnalysisStatus::cases())
-            ->reduce(function($statuses, $status): array {
+        return Status::all()
+            ->reduce(function(array $statuses, Status $status): array {
                 $statuses[$status->value] = [
-                    'label' => $status->label(),
-                    'color' => $status->color(),
+                    'label' => $status->label,
+                    'color' => $status->color,
                 ];
                 return $statuses;
             }, []);
@@ -148,18 +149,29 @@ class NeverstaleContent extends Element
 
     public function getStatusColor(): string
     {
-        return $this->getStatusAsEnum()->color()->value;
+        return $this->getStatusModel()->color->value;
     }
 
-    public function getStatusAsEnum(): AnalysisStatus
+    public function getStatusModel(): Status
     {
-        return AnalysisStatus::from($this->getStatus());
+        return Status::from($this->getStatus());
     }
 
 
     public function getUiLabel(): string
     {
         return (string) $this->id;
+    }
+
+    public function beforeDelete(): bool
+    {
+        $deleted =  Plugin::getInstance()->content->delete($this);
+
+        if (!$deleted) {
+            $this->addError('status', Plugin::t('Failed to delete content from Neverstale'));
+        }
+
+        return $deleted;
     }
 
     /**

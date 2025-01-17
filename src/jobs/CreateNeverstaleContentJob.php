@@ -1,14 +1,14 @@
 <?php
 
-namespace zaengle\neverstale\jobs;
+namespace neverstale\craft\jobs;
 
 use Craft;
 use craft\errors\ElementNotFoundException;
 use craft\errors\InvalidElementException;
 use craft\helpers\Queue;
 use craft\queue\BaseJob;
-use zaengle\neverstale\elements\NeverstaleContent;
-use zaengle\neverstale\Plugin;
+use neverstale\craft\elements\NeverstaleContent;
+use neverstale\craft\Plugin;
 
 /**
  * Create NeverstaleContent Job

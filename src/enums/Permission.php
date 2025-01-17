@@ -1,6 +1,6 @@
 <?php
 
-namespace zaengle\neverstale\enums;
+namespace neverstale\craft\enums;
 
 /**
  * Neverstale Permission Enum

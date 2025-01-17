@@ -1,11 +1,11 @@
 <?php
 
-namespace zaengle\neverstale\elements\db;
+namespace neverstale\craft\elements\db;
 
 use craft\elements\db\ElementQuery;
 use craft\elements\Entry;
 use craft\helpers\Db;
-use zaengle\neverstale\enums\AnalysisStatus;
+use neverstale\api\enums\AnalysisStatus;
 
 /**
  * Neverstale Content Query

@@ -1,19 +1,20 @@
 <?php
 
-namespace zaengle\neverstale\services;
+namespace neverstale\craft\services;
 
 use Craft;
 use craft\elements\Entry;
 use craft\helpers\Json;
 use craft\helpers\Queue;
 use GuzzleHttp\Exception\GuzzleException;
+use neverstale\api\exceptions\ApiException;
 use yii\base\Component;
-use zaengle\neverstale\elements\NeverstaleContent;
-use zaengle\neverstale\jobs\CreateNeverstaleContentJob;
-use zaengle\neverstale\models\ApiTransaction;
-use zaengle\neverstale\models\CustomId;
-use zaengle\neverstale\Plugin;
-use zaengle\neverstale\support\ApiClient;
+use neverstale\craft\elements\NeverstaleContent;
+use neverstale\craft\jobs\CreateNeverstaleContentJob;
+use neverstale\craft\models\TransactionLogItem;
+use neverstale\craft\models\CustomId;
+use neverstale\craft\Plugin;
+use neverstale\api\Client as ApiClient;
 
 /**
  * Neverstale API Service
@@ -31,8 +32,7 @@ class Content extends Component
     public function ingest(NeverstaleContent $content): bool
     {
         try {
-            /** @var NeverstaleContent $content */
-            $response = $this->client->ingest(
+            $result = $this->client->ingest(
                 $content->forApi(),
                 [
                     'webhook' => [
@@ -41,9 +41,7 @@ class Content extends Component
                 ]
             );
 
-            $responseBody = Json::decode($response->getBody()->getContents());
-
-            $transaction = ApiTransaction::fromContentResponse($responseBody, 'api.ingest');
+            $transaction = TransactionLogItem::fromContentResponse($result, 'api.ingest');
             Plugin::info("Ingest for content #{$content->id}: status {$transaction->transactionStatus}");
 
             // update the content element based on the response
@@ -57,23 +55,25 @@ class Content extends Component
                     Plugin::error("Unknown transaction status: {$transaction->transactionStatus}");
                     return false;
             }
-        } catch (GuzzleException $e) {
+        } catch (ApiException $e) {
             Plugin::error("Failed to ingest content #{$content->id}: {$e->getMessage()}");
-            $transaction = ApiTransaction::fromGuzzleException($e, 'api.error');
+            $transaction = TransactionLogItem::fromException($e, 'api.error');
             return $this->onIngestError($content, $transaction);
         } catch (\Exception $e) {
 //            @todo handle other exceptions
             Plugin::error("Failed to ingest content #{$content->id}: {$e->getMessage()}");
-            dd($e);
+            return false;
         }
     }
 
-    public function fetchByCustomId(string $customId): mixed
+    public function retrieveByCustomId(string $customId): ?\neverstale\api\models\Content
     {
-        $response = $this->client->getByCustomId($customId);
-
-        //        @todo return an object, handle errors
-        return Json::decode($response->getBody()->getContents());
+        try {
+            return $this->client->retrieve($customId);
+        } catch (ApiException $e) {
+            Plugin::error("Failed to fetch content by custom ID {$customId}: {$e->getMessage()}");
+            return null;
+        }
     }
 
     public function validateSignature(string $payload, string $userSignature): bool
@@ -86,14 +86,14 @@ class Content extends Component
 
         return hash_hmac($this->hashAlgorithm, $payload, $secret);
     }
-    public function onIngestError(NeverstaleContent $content, ApiTransaction $transaction): bool
+    public function onIngestError(NeverstaleContent $content, TransactionLogItem $transaction): bool
     {
         $content->setAnalysisStatus($transaction->getAnalysisStatus());
         $content->logTransaction($transaction);
 
         return Plugin::getInstance()->content->save($content);
     }
-    public function onIngestSuccess(NeverstaleContent $content, ApiTransaction $transaction): bool
+    public function onIngestSuccess(NeverstaleContent $content, TransactionLogItem $transaction): bool
     {
         $content->neverstaleId = $transaction->neverstaleId;
         $content->setAnalysisStatus($transaction->getAnalysisStatus());
@@ -102,7 +102,7 @@ class Content extends Component
         return Plugin::getInstance()->content->save($content);
     }
 
-    public function onWebhook(NeverstaleContent $content, ApiTransaction $transaction): bool
+    public function onWebhook(NeverstaleContent $content, TransactionLogItem $transaction): bool
     {
         $content->setAnalysisStatus($transaction->getAnalysisStatus());
         $content->flagCount = $transaction->getFlagCount();
@@ -177,6 +177,22 @@ class Content extends Component
             'siteId' => $entry->siteId,
         ]);
     }
+
+    public function delete(NeverstaleContent $content): bool
+    {
+        try {
+            $result = $this->client->batchDelete([$content->customId]);
+
+            if ($result->getWasError()) {
+                Plugin::error("Failed to delete content #{$content->id}: {$result->message}");
+            }
+        } catch (ApiException $e) {
+            Plugin::error("Failed to delete content #{$content->id}: {$e->getMessage()}");
+        }
+
+        return true;
+    }
+
     public function save(NeverstaleContent $content): bool
     {
         $saved = Craft::$app->getElements()->saveElement($content);
@@ -188,18 +204,24 @@ class Content extends Component
         return $saved;
     }
 
-    public function refresh(NeverstaleContent $content)
+
+    public function refresh(NeverstaleContent $content): bool
     {
         Plugin::info("Refreshing content #{$content->id} from Neverstale");
 
-        $data = $this->fetchByCustomId($content->customId);
+        try {
+            $data = $this->retrieveByCustomId($content->customId);
 
-        $data['message'] = Plugin::t('Content refreshed from Neverstale');
-        $transaction = ApiTransaction::fromContentResponse($data, 'api.refreshContent');
+            $data['message'] = Plugin::t('Content refreshed from Neverstale');
+            $transaction = TransactionLogItem::fromContentResponse($data, 'api.refreshContent');
 
-        $content->setAnalysisStatus($transaction->analysisStatus);
-        $content->logTransaction($transaction);
+            $content->setAnalysisStatus($transaction->analysisStatus);
+            $content->logTransaction($transaction);
 
-        return Plugin::getInstance()->content->save($content);
+            return Plugin::getInstance()->content->save($content);
+        } catch (ApiException $e) {
+            Plugin::error("Failed to refresh content #{$content->id}: {$e->getMessage()}");
+            return false;
+        }
     }
 }

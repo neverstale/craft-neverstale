@@ -1,15 +1,15 @@
 <?php
 
-namespace zaengle\neverstale\traits;
+namespace neverstale\craft\traits;
 
 use yii\db\ActiveQueryInterface;
-use zaengle\neverstale\models\ApiTransaction;
-use zaengle\neverstale\Plugin;
-use zaengle\neverstale\records\Content;
+use neverstale\craft\models\TransactionLogItem;
+use neverstale\craft\Plugin;
+use neverstale\craft\records\Content;
 
-trait LogsApiTransactions
+trait LogsTransactions
 {
-    public function logTransaction(ApiTransaction $transaction): bool
+    public function logTransaction(TransactionLogItem $transaction): bool
     {
         return Plugin::getInstance()->transactionLog->logTo($this, $transaction);
     }

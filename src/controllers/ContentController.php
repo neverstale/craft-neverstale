@@ -1,6 +1,6 @@
 <?php
 
-namespace zaengle\neverstale\controllers;
+namespace neverstale\craft\controllers;
 
 use Craft;
 use yii\web\BadRequestHttpException;
@@ -8,10 +8,10 @@ use yii\web\ForbiddenHttpException;
 use yii\web\MethodNotAllowedHttpException;
 use yii\web\NotFoundHttpException;
 use yii\web\Response;
-use zaengle\neverstale\elements\NeverstaleContent;
-use zaengle\neverstale\enums\Permission;
-use zaengle\neverstale\Plugin;
-use zaengle\neverstale\web\assets\neverstale\NeverstaleAsset;
+use neverstale\craft\elements\NeverstaleContent;
+use neverstale\craft\enums\Permission;
+use neverstale\craft\Plugin;
+use neverstale\craft\web\assets\neverstale\NeverstaleAsset;
 
 /**
  * Neverstale Content Controller
@@ -54,19 +54,10 @@ class ContentController extends BaseController
             }
         }
 
-        // @todo remove this once Twig rendering is removed
-        try {
-            $flagData = $this->plugin->content->fetchByCustomId($content->customId)['data'];
-        } catch (\Exception $e) {
-            Plugin::error($e->getMessage());
-            $flagData = null;
-        }
-
         $this->view->registerAssetBundle(NeverstaleAsset::class);
 
         return $this->renderTemplate('neverstale/content/_show', [
             'content' => $content,
-            'flagData' => $flagData, // @todo remove this once Twig rendering is removed
             'title' => $content->title,
         ]);
     }
@@ -91,15 +82,16 @@ class ContentController extends BaseController
 
         $customId = $this->request->getRequiredParam('customId');
 
-        try {
-            $content = $this->plugin->content->fetchByCustomId($customId);
+        $content = $this->plugin->content->retrieveByCustomId($customId);
 
-            return $this->asJson(array_merge($content, [
-                'success' => true,
-            ]));
-        } catch (\Exception $e) {
-            return $this->asFailure($e->getMessage());
+        if (!$content) {
+            return $this->asFailure('Could not fetch content for customId: ' . $customId);
         }
+
+        return $this->asJson([
+            'success' => true,
+            'data' => $content->toArray(),
+        ]);
     }
 
     /**
@@ -119,15 +111,19 @@ class ContentController extends BaseController
         if (!$content) {
             return $this->respondWithError(Plugin::t('Content not found'));
         }
-
-        $this->plugin->content->refresh($content);
+        if (!$this->plugin->content->refresh($content)) {
+            return $this->respondWithError(Plugin::t('Could not refresh content'));
+        }
 
         return $this->respondWithSuccess(Plugin::t('Content refreshed'));
     }
 
     /**
      * Delete a content item in Craft + the Neverstale API
-     * @return Response
+     *
+     * @see https://neverstale.io/docs/content.html#deleting-content
+     * @see NeverstaleContent::beforeDelete()
+     *
      * @throws ForbiddenHttpException
      * @throws MethodNotAllowedHttpException
      * @throws \Throwable
@@ -139,8 +135,6 @@ class ContentController extends BaseController
 
         $contentId = $this->request->getParam('contentId');
 
-        // @todo delete the item in NS
-
         if (!Craft::$app->getElements()->deleteElementById($contentId)) {
             return $this->respondWithError(Plugin::t('Could not delete content'));
         }
@@ -151,11 +145,10 @@ class ContentController extends BaseController
     /**
      * (Re-)ingest content to the Neverstale API
      *
-     * @return Response|null
      * @throws MethodNotAllowedHttpException
      * @throws ForbiddenHttpException
      */
-    public function actionIngest()
+    public function actionIngest(): Response
     {
         $this->requirePostRequest();
         $this->requirePermission(Permission::Ingest->value);
@@ -178,7 +171,7 @@ class ContentController extends BaseController
      * @throws ForbiddenHttpException
      * @throws MethodNotAllowedHttpException
      */
-    public function actionResetLogs()
+    public function actionResetLogs(): Response
     {
         $this->requirePostRequest();
         $this->requirePermission(Permission::ClearLogs->value);

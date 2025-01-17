@@ -1,9 +1,9 @@
 <?php
 
-namespace zaengle\neverstale\utilities;
+namespace neverstale\craft\utilities;
 
 use craft\base\Utility;
-use zaengle\neverstale\Plugin;
+use neverstale\craft\Plugin;
 
 /**
  * Scan utility

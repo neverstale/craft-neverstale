@@ -1,11 +1,10 @@
 <?php
 
-namespace zaengle\neverstale\migrations;
+namespace neverstale\craft\migrations;
 
-use Craft;
 use craft\db\Migration;
 use craft\helpers\Db;
-use zaengle\neverstale\enums\AnalysisStatus;
+use neverstale\api\enums\AnalysisStatus;
 
 /**
  * Neverstale Install Migration

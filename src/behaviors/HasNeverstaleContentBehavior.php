@@ -1,12 +1,12 @@
 <?php
 
-namespace zaengle\neverstale\behaviors;
+namespace neverstale\craft\behaviors;
 
 use craft\base\ElementInterface;
 use craft\elements\Entry;
 use yii\base\Behavior;
-use zaengle\neverstale\elements\db\NeverstaleContentQuery;
-use zaengle\neverstale\elements\NeverstaleContent;
+use neverstale\craft\elements\db\NeverstaleContentQuery;
+use neverstale\craft\elements\NeverstaleContent;
 
 /**
  * Has Neverstale Content Behavior

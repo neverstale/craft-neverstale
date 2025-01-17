@@ -1,6 +1,6 @@
 <?php
 
-namespace zaengle\neverstale\errors;
+namespace neverstale\craft\errors;
 
 use yii\base\Exception;
 

@@ -1,11 +1,11 @@
 <?php
 
-namespace zaengle\neverstale\utilities;
+namespace neverstale\craft\utilities;
 
 use Craft;
 use craft\base\Utility;
 use craft\elements\Entry;
-use zaengle\neverstale\models\IngestContent;
+use neverstale\craft\models\IngestContent;
 
 /**
  * Preview Content utility
