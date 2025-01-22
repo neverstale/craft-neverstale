@@ -328,6 +328,7 @@ class Plugin extends BasePlugin
     {
         // Clean up elements
         collect(NeverstaleContent::findAll())->each(function(NeverstaleContent $content) {
+            $this->content->delete($content);
             Craft::$app->getElements()->deleteElement($content, true);
         });
     }

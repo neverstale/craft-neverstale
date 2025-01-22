@@ -42,7 +42,7 @@
 
 {%- block main %}
   <div id="neverstale-container">
-    <form id="content" class="content-pane" method="post">
+    <form id="content" class="content-pane" method="post" data-saveshortcut>
       {{ csrfInput() }}
       {{ actionInput('plugins/save-plugin-settings') }}
       {{ hiddenInput('pluginHandle', 'neverstale') }}
@@ -51,7 +51,7 @@
       {%- if ns.setup.isComplete %}
         <p>Setup is complete and Neverstale is monitoring your content for anything outdated</p>
       {%- else %}
-        <p>Complete the plugin setup process below to start monitoring your content. You can optionally configure all the plugin's settings via the config file at <code>config/neverstale.php</code>.</p>
+        <p>Complete the three-step setup process to start monitoring your content with Neverstale. You can optionally configure all the plugin's settings via the config file at <code>config/neverstale.php</code>.</p>
       {%- endif %}
         <ol class="ns-list-none ns-pl-0 ns-flex ns-flex-col ns-gap-4">
           <li>
@@ -206,7 +206,6 @@
             </details>
           </li>
         </ol>
-        <p>You can also configure Neverstale via the <a href="{{ url('settings/plugins/neverstale') }}">plugin settings page</a>, or by editing the plugin config file at <code>config/neverstale.php</code>.</p>
         <hr>
         <h2>Next steps</h2>
 
