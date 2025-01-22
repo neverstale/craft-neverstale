@@ -84,7 +84,7 @@ class Content extends Component
     }
     public function sign(string $payload): string
     {
-        $secret = App::parseEnv(Plugin::getInstance()->config->get('webhookSecret'));
+        $secret = App::parseEnv(Plugin::getInstance()->settings->webhookSecret);
 
         return hash_hmac($this->hashAlgorithm, $payload, $secret);
     }
