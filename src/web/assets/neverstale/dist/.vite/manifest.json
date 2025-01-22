@@ -1,11 +1,11 @@
 {
-  "src/web/assets/neverstale/src/main.ts": {
-    "file": "assets/app-D6bj0luy.js",
-    "name": "app",
-    "src": "src/web/assets/neverstale/src/main.ts",
+  "src/web/assets/neverstale/src/neverstale.ts": {
+    "file": "assets/neverstale-DGOGiwzV.js",
+    "name": "neverstale",
+    "src": "src/web/assets/neverstale/src/neverstale.ts",
     "isEntry": true,
     "css": [
-      "assets/app-TROkEzC1.css"
+      "assets/neverstale-TROkEzC1.css"
     ]
   }
 }
