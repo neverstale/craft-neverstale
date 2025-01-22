@@ -16,5 +16,6 @@ export const defaultI18nDictionary: I18nDictionary = {
   NO_FLAGS_FOUND: 'No flags found.',
   CONTENT_EXPIRED: 'Content Expired',
   VIEW_IN_NEVERSTALE: 'View in Neverstale',
+  VIEW_LOCAL_DETAILS: 'View Local Details',
   IS_STALE_NOTICE: 'This content is currently pending processing by Neverstale, and, as such, some values may be out of date.',
 }

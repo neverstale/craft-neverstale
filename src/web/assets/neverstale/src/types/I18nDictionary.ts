@@ -15,4 +15,5 @@ export interface I18nDictionary {
   CONTENT_EXPIRED: string
   IS_STALE_NOTICE: string
   VIEW_IN_NEVERSTALE: string
+  VIEW_LOCAL_DETAILS: string
 }
