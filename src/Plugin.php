@@ -26,7 +26,6 @@ use craft\web\twig\variables\Cp as CpVariable;
 use craft\web\twig\variables\CraftVariable;
 use craft\web\UrlManager;
 
-use nystudio107\pluginvite\services\VitePluginService;
 
 use yii\base\Event;
 use yii\base\InvalidConfigException;
@@ -36,8 +35,10 @@ use neverstale\api\Client as ApiClient;
 use neverstale\craft\behaviors\HasNeverstaleContentBehavior;
 use neverstale\craft\elements\NeverstaleContent;
 use neverstale\craft\enums\Permission;
+
 use neverstale\craft\models\Settings;
 use neverstale\craft\models\Status;
+
 use neverstale\craft\services\Config;
 use neverstale\craft\services\Content;
 use neverstale\craft\services\Entry as EntryService;
@@ -46,6 +47,8 @@ use neverstale\craft\services\Format as FormatService;
 use neverstale\craft\services\Setup;
 use neverstale\craft\services\Template;
 use neverstale\craft\services\TransactionLog;
+use neverstale\craft\services\VitePluginService;
+
 use neverstale\craft\traits\HasPluginLogfile;
 use neverstale\craft\utilities\PreviewContent;
 use neverstale\craft\utilities\ScanUtility;

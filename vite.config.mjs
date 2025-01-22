@@ -22,7 +22,7 @@ export default defineConfig(({ command }) => ({
     sourcemap: true,
     rollupOptions: {
       input: {
-        app: inputPath('main.ts'),
+        neverstale: inputPath('neverstale.ts'),
       },
     },
   },
