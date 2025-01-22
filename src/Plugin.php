@@ -323,6 +323,14 @@ class Plugin extends BasePlugin
 
         return $content->{$contentAttr} ? Craft::$app->formatter->asTimestamp($content->{$contentAttr}) : '--';
     }
+
+    public function beforeUninstall(): void
+    {
+        // Clean up elements
+        collect(NeverstaleContent::findAll())->each(function(NeverstaleContent $content) {
+            Craft::$app->getElements()->deleteElement($content, true);
+        });
+    }
     /**
      * @see \neverstale\craft\services\Entry
      */
@@ -371,7 +379,6 @@ class Plugin extends BasePlugin
             $event->types[] = PreviewContent::class;
             $event->types[] = ScanUtility::class;
         });
-        ;
     }
     protected function registerElementTypes(): void
     {
