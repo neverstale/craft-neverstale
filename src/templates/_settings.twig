@@ -10,17 +10,8 @@
   @var settings \neverstale\models\Settings
 #}
 
-{%- import '_includes/forms.twig' as forms %}
-
-{%- macro configOverrideWarning(setting, fileConfig) -%}
-  {%- if craft.neverstale.config.get(setting) is not null -%}
-    {{- 'This setting is being overridden by the `{setting}` value in the `config/neverstale.php` file.'|t('neverstale', params = {
-      setting: setting,
-    }) }}
-  {%- else -%}
-    {{ false }}
-  {%- endif -%}
-{%- endmacro %}
+{%- import '_includes/forms' as forms %}
+{%- import 'neverstale/_macros' as helpers %}
 
 <h2>{{ 'Neverstale Credentials'| t('neverstale') }}</h2>
 
@@ -32,7 +23,7 @@
   value: settings.apiKey,
   suggestEnvVars: true,
   errors: settings.getErrors('apiKey'),
-  warning: _self.configOverrideWarning('apiKey'),
+  warning: helpers.configOverrideWarning('apiKey'),
   disabled: craft.neverstale.config.isOverriddenByFile('apiKey'),
 }) }}
 
@@ -44,7 +35,7 @@
   value: settings.webhookSecret,
   suggestEnvVars: true,
   errors: settings.getErrors('webhookSecret'),
-  warning: _self.configOverrideWarning('webhookSecret'),
+  warning: helpers.configOverrideWarning('webhookSecret'),
   disabled: craft.neverstale.config.isOverriddenByFile('webhookSecret'),
 }) }}
 
@@ -55,7 +46,7 @@
   label: 'Enable Neverstale sync' | t('neverstale'),
   name: 'enable',
   on: settings.enable,
-  warning: _self.configOverrideWarning('enable'),
+  warning: helpers.configOverrideWarning('enable'),
   disabled: craft.neverstale.config.isOverriddenByFile('enable'),
 }) }}
 
@@ -64,7 +55,7 @@
   label: 'Which Sections should be enabled for Neverstale sync?' | t('neverstale'),
   name: 'enabledSectionIds',
   showAllOption: true,
-  warning: _self.configOverrideWarning('sections'),
+  warning: helpers.configOverrideWarning('sections'),
   required: true,
   instructions: 'Choose which sections you want to sync with Neverstale.'|t('neverstale'),
   options: craft.app.entries.allSections() | map(section => {

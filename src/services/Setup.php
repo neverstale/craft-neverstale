@@ -19,7 +19,9 @@ class Setup extends Component
     }
     public function hasCredentials(): bool
     {
-        return Plugin::getInstance()->config->get('apiKey') && Plugin::getInstance()->config->get('webhookSecret');
+        return Plugin::getInstance()->settings->apiKey
+            &&
+            Plugin::getInstance()->settings->webhookSecret;
     }
     public function isContentConfigured(): bool
     {
@@ -27,11 +29,11 @@ class Setup extends Component
     }
     public function isSyncEnabled(): bool
     {
-        return (bool) Plugin::getInstance()->config->get('enable');
+        return Plugin::getInstance()->settings->enable;
     }
     public function canConnect(): bool
     {
-        return true;
+        return Plugin::getInstance()->content->canConnect();
     }
     public function hasSentContent(): string
     {

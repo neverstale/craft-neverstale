@@ -71,6 +71,7 @@ import { CsrfToken } from '@/types/CsrfToken'
 import { Endpoints } from '@/types/Endpoints'
 import { ContentFlag } from '@/types/ContentFlag'
 import { I18nDictionary } from '@/types/I18nDictionary'
+import { RescheduleFlagEvent } from '@/types/events/RescheduleFlagEvent.ts';
 
 defineOptions({
   name: 'FlagItem',
@@ -86,7 +87,7 @@ const props = defineProps<{
 
 const emit = defineEmits<{
   ignoreFlag: [flagId: string]
-  rescheduleFlag: [flagId: string]
+  rescheduleFlag: [ev: RescheduleFlagEvent]
 }>()
 
 const rescheduleDate = ref('')
@@ -104,9 +105,11 @@ const handleIgnore = async (): Promise<void> => {
 
     if (response.ok) {
       emit('ignoreFlag', props.flag.id)
-    }
+    } else {
+      // @TODO better error handling
 
-    // TODO: Add error handling
+      console.error('Error rescheduling flag:', response)
+    }
   }
 }
 
@@ -129,12 +132,15 @@ const handleReschedule = async (): Promise<void> => {
     })
 
     if (response.ok) {
+      emit('rescheduleFlag', {
+        flagId: props.flag.id,
+        rescheduleDate: new Date(rescheduleDate.value)
+      })
       rescheduleDate.value = ''
-
-      emit('rescheduleFlag', props.flag.id)
+    } else {
+      // @TODO better error handling
+      console.error('Error rescheduling flag:', response)
     }
-
-    // TODO: Add error handling
   }
 }
 </script>

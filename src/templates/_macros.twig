@@ -1,0 +1,9 @@
+{%- macro configOverrideWarning(setting, fileConfig) -%}
+  {%- if craft.neverstale.config.get(setting) is not null -%}
+    {{- 'This setting is being overridden by the `{setting}` value in the `config/neverstale.php` file.'|t('neverstale', params = {
+      setting: setting,
+    }) }}
+  {%- else -%}
+    {{ false }}
+  {%- endif -%}
+{%- endmacro -%}

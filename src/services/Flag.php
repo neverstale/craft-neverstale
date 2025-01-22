@@ -5,14 +5,14 @@ namespace neverstale\craft\services;
 use yii\base\Component;
 use neverstale\craft\elements\NeverstaleContent;
 use neverstale\craft\Plugin;
-use neverstale\craft\support\ApiClient;
+use neverstale\api\Client;
 
 /**
  * Flag service
  */
 class Flag extends Component
 {
-    public ApiClient $client;
+    public Client $client;
 
     public function ignore(NeverstaleContent $content, string $flagId): bool
     {

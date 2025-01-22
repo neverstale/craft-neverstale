@@ -69,7 +69,9 @@ class Settings extends Model
         }
         // Use the value from the Craft CP
         return $this->collectAllSections()->filter(
-            fn($section) => in_array($section->id, $this->enabledSectionIds, true)
+            function(Section $section): bool {
+                return in_array($section->id, $this->getEnabledSectionIds(), true);
+            }
         )->toArray();
     }
 
@@ -77,6 +79,17 @@ class Settings extends Model
     {
         return Plugin::getInstance()->config->isOverriddenByFile('sections');
     }
+
+    /**
+     * Get the enabled section IDs
+     *
+     * @return int[]
+     */
+    public function getEnabledSectionIds(): array
+    {
+        return collect($this->enabledSectionIds)->map(fn($id) => (int)$id)->toArray();
+    }
+
     public function getAllowAllSections(): bool
     {
         return !$this->sectionsIsOverridden()

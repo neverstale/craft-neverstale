@@ -4,10 +4,11 @@ namespace neverstale\craft\services;
 
 use Craft;
 use craft\elements\Entry;
-use craft\helpers\Json;
+use craft\helpers\App;
 use craft\helpers\Queue;
-use GuzzleHttp\Exception\GuzzleException;
+use neverstale\api\Client;
 use neverstale\api\exceptions\ApiException;
+use neverstale\api\models\TransactionResult;
 use yii\base\Component;
 use neverstale\craft\elements\NeverstaleContent;
 use neverstale\craft\jobs\CreateNeverstaleContentJob;
@@ -43,6 +44,7 @@ class Content extends Component
 
             $transaction = TransactionLogItem::fromContentResponse($result, 'api.ingest');
             Plugin::info("Ingest for content #{$content->id}: status {$transaction->transactionStatus}");
+
 
             // update the content element based on the response
             switch ($transaction->transactionStatus) {
@@ -82,7 +84,7 @@ class Content extends Component
     }
     public function sign(string $payload): string
     {
-        $secret = Plugin::getInstance()->config->get('webhookSecret');
+        $secret = App::parseEnv(Plugin::getInstance()->config->get('webhookSecret'));
 
         return hash_hmac($this->hashAlgorithm, $payload, $secret);
     }
@@ -210,18 +212,29 @@ class Content extends Component
         Plugin::info("Refreshing content #{$content->id} from Neverstale");
 
         try {
-            $data = $this->retrieveByCustomId($content->customId);
+            if ($data = $this->retrieveByCustomId($content->customId)) {
+                $transaction = TransactionLogItem::fromContentResponse(new TransactionResult([
+                    'status' => Client::STATUS_SUCCESS,
+                    'message' => Plugin::t('Content refreshed from Neverstale'),
+                    'data' => $data,
+                ]), 'api.refreshContent');
 
-            $data['message'] = Plugin::t('Content refreshed from Neverstale');
-            $transaction = TransactionLogItem::fromContentResponse($data, 'api.refreshContent');
+                $content->setAnalysisStatus($transaction->analysisStatus);
+                $content->logTransaction($transaction);
 
-            $content->setAnalysisStatus($transaction->analysisStatus);
-            $content->logTransaction($transaction);
+                return Plugin::getInstance()->content->save($content);
+            }
+            Plugin::error("Failed to refresh content #{$content->id}");
+            return false;
 
-            return Plugin::getInstance()->content->save($content);
         } catch (ApiException $e) {
             Plugin::error("Failed to refresh content #{$content->id}: {$e->getMessage()}");
             return false;
         }
+    }
+
+    public function canConnect(): bool
+    {
+        return $this->client->health();
     }
 }

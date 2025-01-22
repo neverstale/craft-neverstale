@@ -122,6 +122,7 @@ import { CsrfToken } from '@/types/CsrfToken'
 import { Endpoints } from '@/types/Endpoints'
 import { I18nDictionary } from '@/types/I18nDictionary'
 import { FetchApiContentResponse } from '@/types/FetchApiContentResponse'
+import { RescheduleFlagEvent } from '@/types/events/RescheduleFlagEvent.ts';
 
 defineOptions({
   name: 'NeverstaleFlags',
@@ -148,7 +149,7 @@ const props = withDefaults(
 
 const emit = defineEmits<{
   ignoreFlag: [flagId: string]
-  rescheduleFlag: [flagId: string]
+  rescheduleFlag: [ev: RescheduleFlagEvent]
 }>()
 
 const isStale = ref(false)
@@ -184,10 +185,17 @@ const handleIgnoreFlag = (flagId: string): void => {
   emit('ignoreFlag', flagId)
 }
 
-const handleRescheduleFlag = (flagId: string): void => {
+const handleRescheduleFlag = (ev: RescheduleFlagEvent): void => {
+  const rescheduledFlag = flagData.value?.flags.find(flag => flag.id === ev.flagId)
+
+  if (!rescheduledFlag) {
+    return
+  }
+
+  rescheduledFlag.expired_at = ev.rescheduleDate.toISOString()
   isStale.value = true
 
-  emit('rescheduleFlag', flagId)
+  emit('rescheduleFlag', ev)
 }
 
 const handleReloadPage = (): void => {

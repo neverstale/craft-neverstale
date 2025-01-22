@@ -109,7 +109,7 @@ class Plugin extends BasePlugin
 
         $this->client = new ApiClient([
             'baseUri' => App::env('NEVERSTALE_API_BASE_URI'),
-            'apiKey' => $this->getSettings()->apiKey,
+            'apiKey' => App::parseEnv($this->getSettings()->apiKey),
         ]);
 
         Craft::$app->onInit(function() {
@@ -383,7 +383,7 @@ class Plugin extends BasePlugin
     {
         Event::on(UrlManager::class, UrlManager::EVENT_REGISTER_CP_URL_RULES, function(RegisterUrlRulesEvent $event) {
             $event->rules = array_merge($event->rules, [
-                'neverstale' => ['template' => 'neverstale/_dashboard'],
+                'neverstale' => 'neverstale/dashboard/index',
                 'neverstale/content' => ['template' => 'neverstale/content/_index'],
                 'neverstale/content/<contentId:\\d+>' => 'neverstale/content/show',
             ]);

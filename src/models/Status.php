@@ -35,7 +35,7 @@ class Status extends Model
     public function getLabel(): string
     {
         return match ($this->analysisStatus) {
-            AnalysisStatus::UNSENT, AnalysisStatus::STALE => Plugin::t('Pending'),
+            AnalysisStatus::UNSENT => Plugin::t('Pending'),
             AnalysisStatus::PENDING_INITIAL_ANALYSIS => Plugin::t('Pending Initial Analysis'),
             AnalysisStatus::PENDING_REANALYSIS => Plugin::t('Pending Reanalysis'),
             AnalysisStatus::PROCESSING_REANALYSIS, AnalysisStatus::PROCESSING_INITIAL_ANALYSIS => Plugin::t('Processing'),
@@ -43,7 +43,7 @@ class Status extends Model
             AnalysisStatus::ANALYZED_FLAGGED => Plugin::t('Flagged'),
             AnalysisStatus::ANALYZED_ERROR => Plugin::t('Error'),
             AnalysisStatus::API_ERROR => Plugin::t('API Error'),
-            default => Plugin::t('Unknown'),
+            default => $this->analysisStatus->label(),
         };
     }
 
