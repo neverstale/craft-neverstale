@@ -1,27 +1,38 @@
-# NeverStale
+# Neverstale plugin for Craft CMS
 
-NeverStale <=> Craft integration
+> Note, this plugin requires an active account on https://nevertale.io 
 
 ## Requirements
 
 This plugin requires Craft CMS 5.4.0 or later, and PHP 8.2 or later.
 
-## FE dev
+## Installation
 
-Assets reside in `src/web/assets/neverstale/src`. FE build uses Vite.
+You can install this plugin from the Plugin Store or with Composer.
 
-One time setup
-
-```bash
-cp .env.example .env
-# from host craft install
-ddev npm --prefix path/to/plugin/dir install
+```shell
+composer require neverstale/craft
+craft plugin/install neverstale
 ```
 
-daily dev
+## Configuration
+
+After installing the plugin, go to the plugin dashboard page in the Craft control panel to configure it.
+
+All plugin settings can also be set via in the `config/nevertale.php` file. Settings in the config file will take precedence over those set via the Control Panel.
+
+## Usage
+
+See the full documentation at https://nevertale.io/docs/integrations/craft-cms
+
+## Plugin development
+
+The plugin uses Vite for front end development. To get started:
 
 ```bash
-ddev npm --prefix path/to/plugin/dir run dev
+npm install
+npm run dev # runs Vite devServer
+npm run build # builds for production
 ```
 
-From the craft-test-content project you can use the ddev command `ddev nsv` (NeverStaleVite) to run commands in the plugin directory.
+Tailwind CSS is used for styling using a class prefix of `ns-`.
