@@ -19,9 +19,8 @@ class Flag extends Component
         Plugin::info("Ignoring flag $flagId for content #{$content->id}");
         try {
             $this->client->ignoreFlag($flagId);
-//          @todo this may not be needed as we may get another webhook
             $content->flagCount -= 1;
-//          @todo how to handle dateExpired?
+            $content->dateExpired = null;
             $content->save();
             return true;
         } catch (\Exception $e) {

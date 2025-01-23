@@ -19,26 +19,19 @@ use craft\events\RegisterUrlRulesEvent;
 use craft\events\RegisterUserPermissionsEvent;
 use craft\helpers\App;
 use craft\helpers\Cp as CpHelper;
+use craft\services\Dashboard;
 use craft\services\Elements;
 use craft\services\UserPermissions;
 use craft\services\Utilities;
+use craft\web\UrlManager;
 use craft\web\twig\variables\Cp as CpVariable;
 use craft\web\twig\variables\CraftVariable;
-use craft\web\UrlManager;
-
-
-use yii\base\Event;
-use yii\base\InvalidConfigException;
-
 use neverstale\api\Client as ApiClient;
-
 use neverstale\craft\behaviors\HasNeverstaleContentBehavior;
 use neverstale\craft\elements\NeverstaleContent;
 use neverstale\craft\enums\Permission;
-
 use neverstale\craft\models\Settings;
 use neverstale\craft\models\Status;
-
 use neverstale\craft\services\Config;
 use neverstale\craft\services\Content;
 use neverstale\craft\services\Entry as EntryService;
@@ -48,13 +41,16 @@ use neverstale\craft\services\Setup;
 use neverstale\craft\services\Template;
 use neverstale\craft\services\TransactionLog;
 use neverstale\craft\services\VitePluginService;
-
 use neverstale\craft\traits\HasPluginLogfile;
 use neverstale\craft\utilities\PreviewContent;
 use neverstale\craft\utilities\ScanUtility;
 use neverstale\craft\variables\NeverstaleVariable;
 use neverstale\craft\web\assets\neverstale\NeverstaleAsset;
 use neverstale\craft\web\twig\Neverstale as NeverstaleTwigExtension;
+use neverstale\craft\widgets\ConnectionStatus;
+use neverstale\craft\widgets\FlaggedContent;
+use yii\base\Event;
+use yii\base\InvalidConfigException;
 
 /**
  * Neverstale Craft Plugin
@@ -106,6 +102,8 @@ class Plugin extends BasePlugin
         $this->registerCpNavItems();
         $this->registerEntryTableAttributes();
         $this->registerEntrySidebarHtml();
+        $this->registerDashboardWidgets();
+        $this->registerSettingsSaveHandler();
 
         $this->client = new ApiClient([
             'baseUri' => App::env('NEVERSTALE_API_BASE_URI'),
@@ -172,7 +170,6 @@ class Plugin extends BasePlugin
                         'url' => 'settings/plugins/neverstale',
                     ];
                 }
-
 
                 $event->navItems[] = [
                     'url' => 'neverstale',
@@ -392,9 +389,31 @@ class Plugin extends BasePlugin
         Event::on(UrlManager::class, UrlManager::EVENT_REGISTER_CP_URL_RULES, function(RegisterUrlRulesEvent $event) {
             $event->rules = array_merge($event->rules, [
                 'neverstale' => 'neverstale/dashboard/index',
+                'neverstale/refresh-connection-health' => 'neverstale/dashboard/health',
                 'neverstale/content' => ['template' => 'neverstale/content/_index'],
                 'neverstale/content/<contentId:\\d+>' => 'neverstale/content/show',
             ]);
         });
+    }
+
+    protected function registerDashboardWidgets(): void
+    {
+        Event::on(Dashboard::class, Dashboard::EVENT_REGISTER_WIDGET_TYPES, function (RegisterComponentTypesEvent $event) {
+            $event->types[] = ConnectionStatus::class;
+            $event->types[] = FlaggedContent::class;
+        });
+
+    }
+
+    private function registerSettingsSaveHandler()
+    {
+        /* Clear the health cache when the plugin settings are saved */
+        Event::on(
+            self::class,
+            BasePlugin::EVENT_BEFORE_SAVE_SETTINGS,
+            function () {
+                $this->content->clearConnectionStatusCache();
+            }
+        );
     }
 }

@@ -7,11 +7,12 @@ use craft\elements\Entry;
 use craft\helpers\App;
 use craft\helpers\Queue;
 use neverstale\api\Client;
+use neverstale\api\enums\AnalysisStatus;
 use neverstale\api\exceptions\ApiException;
 use neverstale\api\models\TransactionResult;
+use neverstale\craft\jobs\IngestContentJob;
 use yii\base\Component;
 use neverstale\craft\elements\NeverstaleContent;
-use neverstale\craft\jobs\CreateNeverstaleContentJob;
 use neverstale\craft\models\TransactionLogItem;
 use neverstale\craft\models\CustomId;
 use neverstale\craft\Plugin;
@@ -29,6 +30,9 @@ class Content extends Component
 {
     public ApiClient $client;
     public string $hashAlgorithm = 'sha256';
+
+    public int $cacheHealthDuration = 60;
+    protected const HEALTH_CACHE_KEY = 'neverstale:health';
 
     public function ingest(NeverstaleContent $content): bool
     {
@@ -120,13 +124,22 @@ class Content extends Component
         return Plugin::getInstance()->content->save($content);
     }
 
-    public function queue(Entry $entry): ?string
+    public function queue(Entry $entry): void
     {
-        return Queue::push(new CreateNeverstaleContentJob([
-            'entryId' => $entry->id,
+        $content = Plugin::getInstance()->content->findOrCreateContentFor($entry);
+
+        if (!$content->isUnsent()) {
+            $content->setAnalysisStatus(AnalysisStatus::STALE);
+            $content->flagCount = null;
+            $content->dateExpired = null;
+            $content->save();
+        }
+
+        Queue::push(new IngestContentJob([
+            'contentId' => $content->id,
         ]));
     }
-    public function findOrCreate(Entry $entry): ?NeverstaleContent
+    public function findOrCreateContentFor(Entry $entry): NeverstaleContent
     {
         $content = $this->find($entry);
 
@@ -233,8 +246,29 @@ class Content extends Component
         }
     }
 
-    public function canConnect(): bool
+    public function checkCanConnect($forceFresh = false): bool
     {
-        return $this->client->health();
+        if ($forceFresh || !Craft::$app->cache->exists(self::HEALTH_CACHE_KEY)) {
+            Craft::$app->cache->set(
+                self::HEALTH_CACHE_KEY,
+                $this->client->health(),
+                $this->cacheHealthDuration
+            );
+        }
+        return Craft::$app->cache->get(self::HEALTH_CACHE_KEY);
+    }
+
+    public function clearConnectionStatusCache(): void
+    {
+        Craft::$app->cache->delete(self::HEALTH_CACHE_KEY);
+    }
+
+    public function getLastSync(): ?\DateTime
+    {
+        return NeverstaleContent::find()
+            ->select('dateUpdated')
+            ->orderBy('dateUpdated DESC')
+            ->one()
+            ?->dateUpdated;
     }
 }

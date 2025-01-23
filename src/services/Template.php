@@ -20,7 +20,7 @@ class Template extends Component
             'RESCHEDULE' => Plugin::t('Reschedule'),
             'LAST_ANALYZED' => Plugin::t('Last Analyzed'),
             'CONTENT_EXPIRED' => Plugin::t('Content Expired'),
-            'RELOAD_PAGE' => Plugin::t('Reload Page'),
+            'RELOAD_PAGE' => Plugin::t('Refresh the page to fetch the latest data.'),
             'VIEW_IN_NEVERSTALE' => Plugin::t('View in Neverstale'),
             'VIEW_LOCAL_DETAILS' => Plugin::t('Show logs'),
             'EXPIRED_AT' => Plugin::t('Expired at'),
@@ -29,7 +29,7 @@ class Template extends Component
             'CONTENT' => Plugin::t('Content'),
             'FLAG' => Plugin::t('Flag'),
             'FLAGS' => Plugin::t('Flags'),
-            'IS_STALE_NOTICE' => Plugin::t("This content is currently pending processing by Neverstale, and as such, some values may be out of date."),
+            'IS_STALE_NOTICE' => Plugin::t('Pending analysis by Neverstale, some values may be out of sync.'),
         ];
     }
 }

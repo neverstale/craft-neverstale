@@ -1,0 +1,66 @@
+{#
+  Neverstale Flagged Content Dashboard widget
+
+  @var \neverstale\craft\Services\Setup setup
+  @var Collection<\neverstale\craft\elements\NeverstaleContent> flaggedContent
+  @var ?\DateTime lastSync
+#}
+
+{%- import 'neverstale/_macros' as helpers %}
+{%- do craft.neverstale.viteService.register('src/web/assets/neverstale/src/neverstale.ts', false, {
+  'depends': [
+    'neverstale\\craft\\web\\assets\\neverstale\\NeverstaleAsset',
+  ],
+}) %}
+{%- if not setup.isSyncEnabled %}
+  {{ helpers.alert('Neverstale sync is disabled for this environment.', 'info') }}
+{%- elseif not setup.hasCredentials or not setup.isContentConfigured %}
+  {%- set message %}
+  Neverstale is not yet set up to work with Craft. Visit the <a href="{{ url('neverstale') }}">dashboard to complete the process</a>.
+  {%- endset %}
+  {{- helpers.alert(message, 'warning') }}
+{%- elseif not setup.canConnect %}
+  {%- set message %}
+    <div class="ns-flex ns-flex-col">
+      <h3 class="ns-mb-0">Cannot connect</h3>
+      <p>Please <a href="{{ url('neverstale') }}">check your credentials are correct</a> or visit the <a href="https://status.neverstale.io">Neverstale Status page</a>.</p>
+    </div>
+  {%- endset %}
+  {{- helpers.alert(message, 'error') }}
+{%- elseif flaggedContent.isEmpty() %}
+  {%- set message %}
+    <div class="ns-flex ns-flex-col">
+      <h3 class="ns-mb-0">You are all up-to-date!</h3>
+      <p>Neverstale did not find any expired content.</p>
+    </div>
+  {%- endset %}
+  {{ helpers.alert(message, 'success') }}
+{%- else %}
+  {%- set message %}
+    <div class="ns-flex ns-flex-col">
+      <h3 class="ns-mb-0">Content has been flagged</h3>
+      <p>Neverstale flagged {{ flaggedContent.count() }} {{ flaggedContent.count() > 1 ?  'entries' : 'entry' }} for your attention</p>
+    </div>
+  {%- endset %}
+  {{ helpers.alert(message, 'warning') }}
+{%- endif %}
+{% if flaggedContent.count() %}
+<table class="ns-text-sm">
+  <thead>
+    <tr>
+      <th>Entry</th>
+      <th>Flags</th>
+      <th>Expired</th>
+    </tr>
+  </thead>
+  {% for content in flaggedContent %}
+    <tr>
+      <td>
+        <a href="{{ content.entry.cpEditUrl }}">{{ content.entry.title }}</a>
+      </td>
+      <td>{{ content.flagCount }}</td>
+      <td>{{ content.dateExpired|date('Y-m-d') }}</td>
+    </tr>
+  {% endfor %}
+</table>
+{% endif %}

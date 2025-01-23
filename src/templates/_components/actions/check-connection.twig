@@ -1,0 +1,14 @@
+{% set message = message ?? 'Refresh connection status'|t('neverstale') %}
+<a {{ attr({
+  href: url('neverstale/refresh-connection-health', {
+    redirect: craft.app.request.url,
+  }),
+  class: 'btn icon ' ~ (classes ?? ''),
+}) }}>
+  {{ tag('span', {
+    'data-icon': 'arrows-rotate',
+    'data-icon-size': 'small',
+    'role': 'img',
+  }) }}
+  <span>{{ message|raw }}</span>
+</a>

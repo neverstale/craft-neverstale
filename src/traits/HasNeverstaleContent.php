@@ -52,6 +52,10 @@ trait HasNeverstaleContent
 
     public function getAnalysisStatus(): AnalysisStatus
     {
+        if (!$this->analysisStatus) {
+            return AnalysisStatus::UNSENT;
+        }
+
         return AnalysisStatus::tryFrom($this->analysisStatus) ?? AnalysisStatus::UNKNOWN;
     }
     public function updateNeverStaleRecord(bool $isNew = true): void
@@ -90,17 +94,16 @@ trait HasNeverstaleContent
     }
     public function isFlagged(): bool
     {
-        return match ($this->getAnalysisStatus()) {
-            AnalysisStatus::ANALYZED_FLAGGED => true,
-            default => false,
-        };
+        return $this->getAnalysisStatus() === AnalysisStatus::ANALYZED_FLAGGED;
     }
     public function isStale(): bool
     {
-        return match ($this->getAnalysisStatus()) {
-            AnalysisStatus::STALE => true,
-            default => false,
-        };
+        return $this->getAnalysisStatus() === AnalysisStatus::STALE;
+    }
+
+    public function isUnsent(): bool
+    {
+        return $this->getAnalysisStatus() === AnalysisStatus::UNSENT;
     }
 
     public function isPendingProcessingOrStale(): bool

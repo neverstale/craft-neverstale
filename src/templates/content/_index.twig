@@ -11,3 +11,7 @@
 {% set title = 'Neverstale Content'|t('neverstale') %}
 {% set elementType = 'neverstale\\craft\\elements\\NeverstaleContent' %}
 {% set canHaveDrafts = false %}
+{%- set crumbs = [
+  { label: 'Neverstale' | t('neverstale'), url: url('neverstale') },
+  { label: 'Content' | t('neverstale'), url: url('neverstale/content') },
+] %}

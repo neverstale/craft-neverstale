@@ -1,0 +1,55 @@
+{#
+  Neverstale Connection Status Dashboard widget
+
+  @var \neverstale\craft\Services\Setup setup
+  @var ?\DateTime lastSync
+#}
+
+{%- import 'neverstale/_macros' as helpers %}
+{%- do craft.neverstale.viteService.register('src/web/assets/neverstale/src/neverstale.ts', false, {
+  'depends': [
+    'neverstale\\craft\\web\\assets\\neverstale\\NeverstaleAsset',
+  ],
+}) %}
+<div class="ns-flex ns-flex-col ns-gap-4">
+  {%- if not setup.isSyncEnabled %}
+    {{ helpers.alert('Neverstale sync is disabled for this environment.', 'info') }}
+  {%- elseif not setup.hasCredentials or not setup.isContentConfigured %}
+    {% set message %}
+      Neverstale is not yet set up to work with Craft. Visit the <a href="{{ url('neverstale') }}">dashboard to complete the process</a>.
+    {% endset %}
+    {{ helpers.alert(message, 'warning') }}
+  {%- elseif not setup.canConnect %}
+    {% set message %}
+      <div class="ns-flex ns-flex-col">
+        <h3 class="ns-mb-0">Cannot connect to the Neverstale API.</h3>
+        <p>Please <a href="{{ url('neverstale') }}">check your credentials are correct</a> or visit the <a href="https://status.neverstale.io">Neverstale Status page</a>.</p>
+      </div>
+    {%- endset %}
+    {{ helpers.alert(message, 'error') }}
+  {%- else %}
+    <ul class="ns-flex ns-flex-col ns-gap-2">
+      <li class="ns-inline-flex ns-gap-2">{{ tag('span', {
+          'data-icon': 'check',
+          'data-icon-size': 'small',
+          'role': 'img',
+        }) }} <span>Connection to the Neverstale API is healthy</span></li>
+      {%- if lastSync %}
+        <li class="ns-inline-flex ns-gap-2">{{ tag('span', {
+            'data-icon': 'check',
+            'data-icon-size': 'small',
+            'role': 'img',
+          }) }} <span>Neverstale last synced content at {{ lastSync|date('Y-m-d H:i:s') }}</span></li>
+      {%- else %}
+        <li class="ns-inline-flex ns-gap-2">{{ tag('span', {
+            'data-icon': 'xmark',
+            'data-icon-size': 'small',
+            'role': 'img',
+          }) }} <span>Neverstale has not yet synced any content</span></li>
+      {%- endif %}
+    </ul>
+  {% endif %}
+  <footer class="ns-self-end">
+    {% include 'neverstale/_components/actions/check-connection' %}
+  </footer>
+</div>

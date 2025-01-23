@@ -33,7 +33,7 @@ class Setup extends Component
     }
     public function canConnect(): bool
     {
-        return Plugin::getInstance()->content->canConnect();
+        return Plugin::getInstance()->content->checkCanConnect();
     }
     public function hasSentContent(): string
     {

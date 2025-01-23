@@ -22,7 +22,6 @@
 {%- set ns = craft.neverstale %}
 {%- set crumbs = [
   { label: 'Neverstale' | t('neverstale'), url: url('neverstale') },
-  { label: 'Dashboard' | t('neverstale'), url: url('neverstale') },
 ] %}
 
 {%- set title = 'Neverstale Dashboard' %}
@@ -31,7 +30,7 @@
   {{ tag('a', {
     class: 'btn',
     href: ns.setup.docsUrl,
-    text: 'Plugin documentation'|t('neverstale'),
+    text: 'Documentation'|t('neverstale'),
   }) }}
   {{ tag('a', {
     class: 'btn',
@@ -62,25 +61,34 @@
               }) }}>
               <summary class="ns-text-lg ns-font-bold mb-2">
                 Step 1:
-                {{ (ns.setup.hasCredentials ? 'Neverstale credentials are configured 🥳' : 'Add credentials')|t('neverstale') }}
+                {{ (ns.setup.hasCredentials ? 'Neverstale credentials are configured 🥳' : 'Add credentials ⚠️')|t('neverstale') }}
               </summary>
                 {% if ns.setup.hasCredentials %}
                   {% if ns.setup.canConnect %}
-                    <div class="ns-flex ns-gap-2 ns-mt-2 ns-p-2 ns-border ns-rounded ns-bg-blue-100">
+                    {%- set message %}
                       {{ tag('span', {
                         'data-icon': 'check',
                         'data-icon-size': 'small',
                         'role': 'img',
                       }) }}<span>Credentials are valid and the connection to the Neverstale API is healthy</span>
-                    </div>
+                      {% include 'neverstale/_components/actions/check-connection' with {
+                        classes: 'ns-justify-self-end',
+                        message: 'Refresh'|t('neverstale'),
+                      } %}
+                    {%- endset %}
+                    {{ helpers.alert(message, 'success') }}
                   {% else %}
-                    <div class="ns-flex ns-gap-2 ns-mt-2 ns-p-2 ns-border ns-rounded ns-bg-orange-100">
+                    {%- set message %}
                       {{ tag('span', {
                         'data-icon': 'xmark',
                         'data-icon-size': 'small',
                         'role': 'img',
                       }) }}<span>Could not connect to the Neverstale API with the provided credentials. Please check the values you entered are correct.</span>
-                    </div>
+                      {% include 'neverstale/_components/actions/check-connection' with {
+                        classes: 'ns-justify-self-end',
+                      } %}
+                    {%- endset %}
+                    {{ helpers.alert(message, 'error') }}
                   {% endif %}
                 {% endif %}
                 {{ forms.autosuggestField({
@@ -120,28 +128,31 @@
                 Step 2:
                 {%- if ns.setup.isContentConfigured %}
                   <span>Neverstale is configured to monitor content 💪</span>
-                {% else %}
-                  <span>Configure Neverstale to monitor content</span>
+                {%- else %}
+                  <span>Configure Neverstale to monitor content ⚠️</span>
                 {%- endif %}
               </summary>
               <div
-              {% if ns.setup.isContentConfigured %}
-                <div class="ns-flex ns-gap-2 ns-mt-2 ns-p-2 ns-border ns-rounded ns-bg-blue-100 ns-mb-4">
+              {%- if ns.setup.isContentConfigured %}
+                {%- set message %}
                   {{ tag('span', {
                     'data-icon': 'check',
                     'data-icon-size': 'small',
                     'role': 'img',
                   }) }}<span>Neverstale is configured to monitor content from {{  ns.settings.enabledSections | length }} section(s) </span>
-                </div>
-              {% else %}
-                <div class="ns-flex ns-gap-2 ns-mt-2 ns-p-2 ns-border ns-rounded ns-bg-orange-100 ns-mb-4">
+                {%- endset %}
+                {{ helpers.alert(message, classes = 'ns-mb-4') }}
+              {%- else %}
+                {%- set message %}
                   {{ tag('span', {
                     'data-icon': 'xmark',
                     'data-icon-size': 'small',
                     'role': 'img',
                   }) }}<span>Neverstale is not currently configured to monitor content from any section(s) </span>
-                </div>
-              {% endif %}
+                {%- endset %}
+                {{ helpers.alert(message, 'warning', classes = 'ns-mb-4') }}
+              {%- endif %}
+
               {{ forms.lightswitchField({
                 first: true,
                 label: 'Enable Neverstale sync' | t('neverstale'),
@@ -182,26 +193,28 @@
                 {%- if ns.setup.hasSentContent %}
                   <span>Content has been sent to Neverstale 🚀</span>
                 {% else %}
-                  <span>Send some content to Neverstale</span>
+                  <span>Send some content to Neverstale ⚠️</span>
                 {%- endif %}
               </summary>
               <div
-              {% if ns.setup.hasSentContent %}
-                <div class="ns-flex ns-gap-2 ns-mt-2 ns-p-2 ns-border ns-rounded ns-bg-blue-100 ns-mb-4">
+              {%- if ns.setup.hasSentContent %}
+                {%- set message %}
                   {{ tag('span', {
                     'data-icon': 'check',
                     'data-icon-size': 'small',
                     'role': 'img',
                   }) }}<span>Neverstale has been sent content. <a href="{{ url('neverstale/content') }}">See details.</a></span>
-                </div>
-              {% else %}
-                <div class="ns-flex ns-gap-2 ns-mt-2 ns-p-2 ns-border ns-rounded ns-bg-orange-100 ns-mb-4">
+                {%- endset %}
+                {{ helpers.alert(message) }}
+              {%- else %}
+                {%- set message %}
                   {{ tag('span', {
                     'data-icon': 'xmark',
                     'data-icon-size': 'small',
                     'role': 'img',
                   }) }}<span>No content has yet been sent to Neverstale. <a href="{{ url('entries') }}">Save an entry in an enabled section</a> to trigger a send</span>
-                </div>
+                {%- endset %}
+                {{ helpers.alert(message, 'warning') }}
               {% endif %}
             </details>
           </li>

@@ -17,5 +17,5 @@ export const defaultI18nDictionary: I18nDictionary = {
   CONTENT_EXPIRED: 'Content Expired',
   VIEW_IN_NEVERSTALE: 'View in Neverstale',
   VIEW_LOCAL_DETAILS: 'View Local Details',
-  IS_STALE_NOTICE: 'This content is currently pending processing by Neverstale, and, as such, some values may be out of date.',
+  IS_STALE_NOTICE: 'This content is pending analysis by Neverstale, and, as such, some values may be out of date.',
 }

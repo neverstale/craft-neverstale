@@ -1,9 +1,8 @@
 <template>
   <div class="ns-flags-wrapper">
     <header class="ns-flags-header">
-      <h2 v-text="title" />
+      <h2 class="ns-flags-title" v-text="title" />
     </header>
-
     <div v-if="isPendingProcessingOrStale || isStale">
       <blockquote>
         <svg
@@ -20,18 +19,16 @@
         </svg>
 
         <div>
-          <p v-text="i18n.IS_STALE_NOTICE" />
-
-          <button
-            type="button"
-            class="ns-flags-reload-button"
+          <p>
+            <span v-text="i18n.IS_STALE_NOTICE" /> <a
+            href="#"
             @click="handleReloadPage"
             v-text="i18n.RELOAD_PAGE"
           />
+          </p>
         </div>
       </blockquote>
     </div>
-
     <template v-if="flagData">
       <dl v-if="showContentSummary">
         <div class="ns-flags-data-item">
@@ -54,7 +51,7 @@
         </div>
 
         <div
-          v-if="flagData.analyzed_at && flagData.expired_at?.date"
+          v-if="!isPendingProcessingOrStale && flagData.analyzed_at && flagData.expired_at?.date"
           class="ns-flags-data-item"
         >
           <dt v-text="i18n.CONTENT_EXPIRED" />
@@ -102,10 +99,6 @@
 
       </footer>
     </template>
-
-    <div v-else>
-      <p v-text="props.i18n.NO_FLAGS_FOUND" />
-    </div>
   </div>
 </template>
 
@@ -229,14 +222,13 @@ const handleReloadPage = (): void => {
   display: flex;
   flex-direction: column;
   gap: 1rem;
-  margin-bottom: 1rem;
   overflow: visible;
   background-color: var(--ns-flags-background-color);
 
 
   & > * {
     padding-block: 0;
-    padding-bottom: 1rem;
+    padding-bottom: .5rem;
     border-bottom: 1px solid #e5e7eb;
   }
 
@@ -250,9 +242,11 @@ header {
   display: flex;
   justify-content: space-between;
   align-items: center;
+  padding-bottom: 0.25rem;
 }
 
-h2 {
+h2.ns-flags-title {
+  font-size: 1rem;
   margin: 0 !important;
 }
 
@@ -282,13 +276,19 @@ dd {
 }
 
 blockquote {
+  font-size: 0.8em;
   display: flex;
   align-items: flex-start;
   gap: 0.5rem;
-  padding: 1rem;
+  padding: .5rem;
   border: 1px solid #b45309;
   border-radius: 5px;
   color: #b45309;
+}
+
+blockquote a {
+  color: #b45309;
+  text-decoration: underline;
 }
 
 blockquote svg {
@@ -296,13 +296,6 @@ blockquote svg {
   width: 1.5rem;
   height: 1.5rem;
   margin-top: 0.2rem;
-}
-
-.ns-flags-reload-button {
-  padding: var(--ns-flags-button-padding);
-  background-color: var(--ns-flags-secondary-button-color);
-  color: var(--ns-flags-secondary-button-text);
-  border-radius: var(--ns-flags-button-border-radius);
 }
 
 .ns-flags-flag-items {
@@ -323,13 +316,16 @@ blockquote svg {
 
 .ns-flags-view-link {
   padding: var(--ns-flags-button-padding);
-  background-color: var(--ns-flags-primary-button-color);
-  color: var(--ns-flags-primary-button-text);
+  background-color: var(--ns-flags-secondary-button-color);
+  color: var(--ns-flags-secondary-button-text);
   text-decoration: none;
   border-radius: var(--ns-flags-button-border-radius);
+  flex-grow: 1;
+  text-align: center;
 }
 .ns-actions {
   display: flex;
+  justify-content: stretch;
   gap: 1rem;
 }
 
