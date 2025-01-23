@@ -323,11 +323,15 @@ class Plugin extends BasePlugin
 
     public function beforeUninstall(): void
     {
+        $customIds = collect();
+
         // Clean up elements
-        collect(NeverstaleContent::findAll())->each(function(NeverstaleContent $content) {
-            $this->content->delete($content);
+        collect(NeverstaleContent::findAll())->each(function(NeverstaleContent $content) use ($customIds) {
+            $customIds->push($content->getCustomId());
             Craft::$app->getElements()->deleteElement($content, true);
         });
+
+        $this->client->batchDelete($customIds->all());
     }
     /**
      * @see \neverstale\craft\services\Entry
