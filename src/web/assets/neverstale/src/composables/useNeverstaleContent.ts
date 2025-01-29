@@ -40,6 +40,7 @@ export async function updateContent() {
     console.error('Error fetching content')
   }
   state.isLoading = false
+  state.isStale = false
 }
 
 const displayStatus = computed(() => {
