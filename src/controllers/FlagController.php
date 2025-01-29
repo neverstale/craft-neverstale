@@ -3,7 +3,6 @@
 namespace neverstale\craft\controllers;
 
 use yii\web\Response;
-use neverstale\craft\elements\NeverstaleContent;
 use neverstale\api\enums\AnalysisStatus;
 use neverstale\craft\Plugin;
 
@@ -27,12 +26,12 @@ class FlagController extends BaseController
         $this->requirePostRequest();
         $this->requireCpRequest();
         $flagId = $this->request->getRequiredBodyParam('flagId');
-        $contentId = $this->request->getRequiredBodyParam('contentId');
+        $customId = $this->request->getRequiredBodyParam('customId');
 
-        $content = NeverstaleContent::findOne($contentId);
+        $content = $this->plugin->content->getByCustomId($customId);
 
         if (!$content) {
-            return $this->respondWithError(Plugin::t("Content #{id} not found", ['id' => $contentId]));
+            return $this->respondWithError(Plugin::t("Content #{id} not found", ['id' => $customId]));
         }
         try {
             $this->plugin->flag->ignore($content, $flagId);
@@ -59,22 +58,22 @@ class FlagController extends BaseController
         $this->requirePostRequest();
         $this->requireCpRequest();
         $flagId = $this->request->getRequiredBodyParam('flagId');
-        $contentId = $this->request->getRequiredBodyParam('contentId');
+        $customId = $this->request->getRequiredBodyParam('customId');
         $expiredAt = $this->request->getRequiredBodyParam('expiredAt');
 
         if (empty($expiredAt)) {
             return $this->respondWithError(Plugin::t('An expired at date is required'));
         }
 
-        $expiredAt = new \DateTime($expiredAt);
-
-        $content = NeverstaleContent::findOne($contentId);
+        $content = $this->plugin->content->getByCustomId($customId);
 
         if (!$content) {
-            return $this->respondWithError(Plugin::t("Content #{id} not found", ['id' => $contentId]));
+            return $this->respondWithError(Plugin::t("Content #{id} not found", ['id' => $customId]));
         }
 
         try {
+            $expiredAt = new \DateTime($expiredAt);
+
             $expiredAt = $expiredAt->setTimezone(new \DateTimeZone('UTC'));
             $this->plugin->flag->reschedule($content, $flagId, $expiredAt);
 

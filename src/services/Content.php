@@ -159,9 +159,7 @@ class Content extends Component
 
     public function findOrCreateByCustomId(?string $strId): ?NeverstaleContent
     {
-        $customId = CustomId::parse($strId);
-
-        if ($content = NeverstaleContent::findOne($customId->id)) {
+        if ($content = $this->getByCustomId($strId)) {
             return $content;
         }
 
@@ -270,5 +268,14 @@ class Content extends Component
             ->orderBy('dateUpdated DESC')
             ->one()
             ?->dateUpdated;
+    }
+
+    public function getByCustomId(string|CustomId $customId): ?NeverstaleContent
+    {
+        if (!$customId instanceof CustomId) {
+            $customId = CustomId::parse($customId);
+        }
+
+        return NeverstaleContent::findOne($customId->id);
     }
 }

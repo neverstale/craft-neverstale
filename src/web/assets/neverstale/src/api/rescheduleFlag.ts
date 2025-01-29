@@ -2,7 +2,7 @@ interface RescheduleFlagPayload {
   flagId: string
   endpoint: string
   csrfToken: string
-  contentId: string
+  customId: string
   expiredAt: string
 }
 
@@ -17,7 +17,7 @@ export async function rescheduleFlag(payload: RescheduleFlagPayload): Promise<Re
     },
     body: JSON.stringify({
       flagId: payload.flagId,
-      contentId: payload.contentId,
+      customId: payload.customId,
       expiredAt: payload.expiredAt,
     }),
   })
