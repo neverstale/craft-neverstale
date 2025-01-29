@@ -149,7 +149,7 @@ const handleReschedule = async (): Promise<void> => {
   if (await rescheduleFlag(props.item.id, new Date(rescheduleDate.value))) {
     emit('rescheduleFlag', {
       flagId: props.item.id,
-      rescheduleDate: rescheduleDate,
+      rescheduleDate: new Date(rescheduleDate.value),
     })
     isRescheduleFlyoutOpen.value = false
   }

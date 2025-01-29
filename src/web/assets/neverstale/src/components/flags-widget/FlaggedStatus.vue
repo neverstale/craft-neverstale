@@ -45,7 +45,7 @@ const title = computed((): string => {
     return `${flagCount.value} ${i18n.CONTENT} ${flagWord}`
   }
   if (content.value?.analysis_status) {
-    return i18n.statusLabel(content.value?.analysis_status)
+    return i18n.statusLabel(content.value?.analysis_status) ?? (i18n.ANALYSIS_STATUS_UNKNOWN as string)
   }
   return i18n.ANALYSIS_STATUS_UNKNOWN as string
 })

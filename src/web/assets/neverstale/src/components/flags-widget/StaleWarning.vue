@@ -17,10 +17,6 @@ import { I18nDictionary } from '@/types/I18nDictionary'
 
 const i18n = inject('i18n') as I18nDictionary
 
-const handleRefresh = () => {
-  updateContent()
-}
-
 </script>
 
 <style>

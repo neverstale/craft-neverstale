@@ -35,5 +35,5 @@ export interface I18nDictionary {
   SUBMIT?: string
   VIEW_IN_NEVERSTALE?: string
   VIEW_LOCAL_DETAILS?: string
-  statusLabel(status: AnalysisStatus): string|undefined
+  statusLabel(status?: AnalysisStatus): string|undefined
 }
