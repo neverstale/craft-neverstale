@@ -156,9 +156,9 @@ const menuItems = computed(() =>  [{
   --ns-color-status-alert: var(--ns-color-status-alert, #CC3E2D);
   --ns-flags-bg-color: var(--ns-flags-bg-color, #fff);
   --ns-flags-text-color: var(--ns-flags-bg-color, var(--ns-color-neutral-700));
-
+}
+.ns-flags {
   background-color: var(--ns-flags-bg-color);
   color: var(--ns-flags-text-color);
 }
-
 </style>
