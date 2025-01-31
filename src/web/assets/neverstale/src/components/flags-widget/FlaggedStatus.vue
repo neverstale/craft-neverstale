@@ -4,16 +4,18 @@
       backgroundColor: statusColor,
     }"
     :title="title"
-    class="ns-rounded-full ns-inline-flex ns-text-white ns-justify-center ns-items-center ns-w-5 ns-h-5">
+    class="ns-inline-flex ns-size-5 ns-items-center ns-justify-center ns-rounded-full ns-text-white"
+  >
     <component
       :is="val"
       :count="flagCount"
-      class="ns-text-xs ns-text-white" />
+      class="ns-text-xs ns-text-white"
+    />
   </span>
 </template>
 
 <script setup lang="ts">
-import type {Component, FunctionalComponent} from 'vue'
+import type { Component, FunctionalComponent } from 'vue'
 import { computed, h, inject } from 'vue'
 import { I18nDictionary } from '@/types/I18nDictionary.ts'
 import useNeverstaleContent from '@/composables/useNeverstaleContent.ts'
@@ -37,7 +39,7 @@ type CountComponentProps = {
   count: number
 }
 const CountComponent: FunctionalComponent<CountComponentProps> =
-  (props) =>  h('span', props.count)
+  props =>  h('span', props.count)
 
 const title = computed((): string => {
   if (!isPendingProcessingOrStale && flagCount.value > 0) {

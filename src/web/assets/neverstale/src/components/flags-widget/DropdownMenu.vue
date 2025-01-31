@@ -1,12 +1,16 @@
 <template>
-  <Menu as="div" v-if="items">
+  <Menu
+    v-if="items"
+    as="div"
+  >
     <MenuButton :class="btnClasses">
       <IconDots
         :class="[
           dotsClasses,
-          'ns-w-3 ns-h-3',
+          'ns-size-3',
         ]"
-        aria-hidden="true"/>
+        aria-hidden="true"
+      />
       <span class="ns-sr-only">More</span>
     </MenuButton>
     <transition
@@ -18,23 +22,28 @@
       leave-to-class="ns-transform ns-scale-95 ns-opacity-0"
     >
       <MenuItems
-        class="ns-absolute ns-right-1 ns-mt-2 ns-w-48 ns-origin-top-right ns-divide-y
-         ns-border ns-border-gray-300 ns-z-50
-         ns-divide-gray-100 ns-rounded-md ns-bg-white ns-shadow-lg ns-ring-1 ns-ring-black/5 ns-focus:outline-none"
+        class="ns-absolute ns-right-1 ns-z-50 ns-mt-2 ns-w-48 ns-origin-top-right
+         ns-divide-y ns-divide-gray-100 ns-rounded-md
+         ns-border ns-border-gray-300 ns-bg-white ns-shadow-lg ns-ring-1 ns-ring-black/5 focus:ns-outline-none"
       >
         <div class="ns-p-1 ">
-          <UiMenuItem v-for="item in items"
-            :key="item.label">
+          <UiMenuItem
+            v-for="item in items"
+            :key="item.label"
+          >
             <button
-               @click="doAction(item)"
-               type="button"
-               class="ns-w-full ns-flex ns-flex-nowrap ns-items-center ns-justify-between ns-p-2 ns-text-sm ns-text-gray-700 ns-hover:bg-gray-100 ns-rounded-md hover:ns-bg-neutral-200"
-               >
-              <span v-text="item.label"/>
-              <component :is="item.icon" class="ns-w-4 ns-h-4 ns-text-gray-600"/>
+              type="button"
+              class="ns-flex ns-w-full ns-flex-nowrap ns-items-center ns-justify-between ns-rounded-md ns-p-2 ns-text-sm ns-text-gray-700 hover:ns-bg-neutral-200"
+              @click="doAction(item)"
+            >
+              <span v-text="item.label" />
+              <component
+                :is="item.icon"
+                class="ns-size-4 ns-text-gray-600"
+              />
             </button>
           </UiMenuItem>
-          <slot name="expand"/>
+          <slot name="expand" />
         </div>
       </MenuItems>
     </transition>
@@ -53,7 +62,7 @@ withDefaults(
   }>(),{
     btnClasses: 'ns-inline-flex ns-focus-visible:ring-2 ns-focus-visible:ring-white/75 ns-btn ns-px-1',
     dotsClasses: '',
-  }
+  },
 )
 
 const doAction = (item: MenuItem): void => {

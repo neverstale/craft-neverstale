@@ -3,18 +3,21 @@
     :class="[
       'ns-flags ns-flex ns-flex-col ns-gap-3 ns-divide-y ns-divide-neutral-200 ns-transition-opacity ns-duration-200',
       {
-      'ns-opacity-0': isLoading,
-    }]">
-    <header :class="[
-      'ns-flex ns-flex-nowrap ns-justify-between ns-items-baseline',
-    ]">
-      <h2 class="ns-mb-0 ns-inline-flex ns-gap-1 ns-relative">
+        'ns-opacity-0': isLoading,
+      }]"
+  >
+    <header
+      :class="[
+        'ns-flex ns-flex-nowrap ns-items-baseline ns-justify-between',
+      ]"
+    >
+      <h2 class="ns-relative ns-mb-0 ns-inline-flex ns-gap-1">
         <span>{{ title }}</span>
         <FlaggedStatus />
       </h2>
       <DropdownMenu
         :items="menuItems"
-        btnClasses="ns-btn ns-px-3 ns-py-2.5 ns-bg-neutral-300 ns-rounded-md"
+        btn-classes="ns-btn ns-px-3 ns-py-2.5 ns-bg-neutral-300 ns-rounded-md"
       />
     </header>
     <StaleWarning
@@ -23,30 +26,34 @@
     />
 
     <template v-if="content">
-      <dl v-if="showContentSummary" class="ns-flags ns-flex ns-flex-col ns-gap-3 ns-pt-3">
+      <dl
+        v-if="showContentSummary"
+        class="ns-flags ns-flex ns-flex-col ns-gap-3 ns-pt-3"
+      >
         <div
           v-if="content.analyzed_at?.date"
-          class="ns-flex ns-flex-nowrap ns-gap-x-1.5 ns-justify-between"
+          class="ns-flex ns-flex-nowrap ns-justify-between ns-gap-x-1.5"
         >
           <dt v-text="`${i18n.LAST_ANALYZED}:`" />
           <dd v-text="formatDate(content.analyzed_at.date, { showTime: true })" />
         </div>
         <div
           v-if="!isPendingProcessingOrStale && content.analyzed_at && content.expired_at?.date"
-          class="ns-flex ns-flex-nowrap ns-gap-x-1.5 ns-justify-between"
+          class="ns-flex ns-flex-nowrap ns-justify-between ns-gap-x-1.5"
         >
           <dt v-text="`${i18n.PROPOSED_EXPIRATION}:`" />
           <dd v-text="formatDate(content.expired_at.date)" />
         </div>
       </dl>
       <ul
-        v-if="content?.flags"
-        class="ns-flex ns-flex-col ns-isolate ns-relative ns-divide-y ns-divide-neutral-200"
+        v-if="content?.flags.length"
+        class="ns-relative ns-isolate ns-flex ns-flex-col ns-divide-y ns-divide-neutral-200"
       >
         <li
           v-for="flag in content?.flags"
           :key="flag.id"
-          class=" ns-py-1">
+          class=" ns-py-1"
+        >
           <FlagItem
             :item="flag"
             @ignore-flag="(flagId: string) => emit('ignoreFlag', flagId)"
@@ -80,7 +87,7 @@ import FlaggedStatus from '@/components/flags-widget/FlaggedStatus.vue'
 
 import IconExternalLink from '@/components/icons/IconExternalLink.vue'
 import IconList from '@/components/icons/IconList.vue'
-import IconRefresh from "@/components/icons/IconRefresh.vue";
+import IconRefresh from '@/components/icons/IconRefresh.vue'
 
 defineOptions({
   name: 'NeverstaleFlags',

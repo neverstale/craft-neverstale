@@ -3,9 +3,9 @@
     <span v-text="i18n.IS_STALE_NOTICE" />&nbsp;
     <a
       href="#"
+      class="ns-underline ns-underline-offset-2 hover:ns-decoration-dashed"
       @click.prevent="updateContent"
       v-text="i18n.REFRESH_DATA"
-      class="ns-underline hover:ns-decoration-dashed ns-underline-offset-2"
     />
   </blockquote>
 </template>
