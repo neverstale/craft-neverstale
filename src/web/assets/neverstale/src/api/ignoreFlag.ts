@@ -2,7 +2,7 @@ interface IgnoreFlagPayload {
   flagId: string
   endpoint: string
   csrfToken: string
-  contentId: string
+  customId: string
 }
 
 export async function ignoreFlag(payload: IgnoreFlagPayload): Promise<Response> {
@@ -16,7 +16,7 @@ export async function ignoreFlag(payload: IgnoreFlagPayload): Promise<Response> 
     },
     body: JSON.stringify({
       flagId: payload.flagId,
-      contentId: payload.contentId,
+      customId: payload.customId,
     }),
   })
 }

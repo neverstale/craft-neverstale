@@ -47,8 +47,8 @@ class Content extends Component
             );
 
             $transaction = TransactionLogItem::fromContentResponse($result, 'api.ingest');
-            Plugin::info("Ingest for content #{$content->id}: status {$transaction->transactionStatus}");
 
+            Plugin::info("Ingest for content #{$content->id}: status {$transaction->transactionStatus}");
 
             // update the content element based on the response
             switch ($transaction->transactionStatus) {
@@ -66,7 +66,7 @@ class Content extends Component
             $transaction = TransactionLogItem::fromException($e, 'api.error');
             return $this->onIngestError($content, $transaction);
         } catch (\Exception $e) {
-//            @todo handle other exceptions
+            //  @TODO handle other exceptions
             Plugin::error("Failed to ingest content #{$content->id}: {$e->getMessage()}");
             return false;
         }
@@ -86,12 +86,14 @@ class Content extends Component
     {
         return hash_equals($this->sign($payload), $userSignature);
     }
+
     public function sign(string $payload): string
     {
         $secret = App::parseEnv(Plugin::getInstance()->settings->webhookSecret);
 
         return hash_hmac($this->hashAlgorithm, $payload, $secret);
     }
+
     public function onIngestError(NeverstaleContent $content, TransactionLogItem $transaction): bool
     {
         $content->setAnalysisStatus($transaction->getAnalysisStatus());
@@ -99,6 +101,7 @@ class Content extends Component
 
         return Plugin::getInstance()->content->save($content);
     }
+
     public function onIngestSuccess(NeverstaleContent $content, TransactionLogItem $transaction): bool
     {
         $content->neverstaleId = $transaction->neverstaleId;
@@ -139,6 +142,7 @@ class Content extends Component
             'contentId' => $content->id,
         ]));
     }
+
     public function findOrCreateContentFor(Entry $entry): NeverstaleContent
     {
         $content = $this->find($entry);
@@ -156,12 +160,9 @@ class Content extends Component
         return $content;
     }
 
-
     public function findOrCreateByCustomId(?string $strId): ?NeverstaleContent
     {
-        $customId = CustomId::parse($strId);
-
-        if ($content = NeverstaleContent::findOne($customId->id)) {
+        if ($content = $this->getByCustomId($strId)) {
             return $content;
         }
 
@@ -185,6 +186,7 @@ class Content extends Component
             'siteId' => $entry->siteId,
         ]);
     }
+
     public function create(Entry $entry): NeverstaleContent
     {
         return new NeverstaleContent([
@@ -270,5 +272,14 @@ class Content extends Component
             ->orderBy('dateUpdated DESC')
             ->one()
             ?->dateUpdated;
+    }
+
+    public function getByCustomId(string|CustomId $customId): ?NeverstaleContent
+    {
+        if (!$customId instanceof CustomId) {
+            $customId = CustomId::parse($customId);
+        }
+
+        return NeverstaleContent::findOne($customId->id);
     }
 }

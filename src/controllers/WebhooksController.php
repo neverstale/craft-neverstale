@@ -15,7 +15,6 @@ use neverstale\craft\Plugin;
  */
 class WebhooksController extends BaseController
 {
-    public $defaultAction = 'index';
     protected array|int|bool $allowAnonymous = self::ALLOW_ANONYMOUS_LIVE | self::ALLOW_ANONYMOUS_OFFLINE;
     public $enableCsrfValidation = false;
     /**

@@ -1,4 +1,5 @@
 import { ContentFlag } from '@/types/ContentFlag.ts'
+import AnalysisStatus from "@/enums/AnalysisStatus.ts";
 
 interface DateObject {
   date: string
@@ -7,7 +8,7 @@ interface DateObject {
 }
 
 export interface FetchApiContentResponse {
-  analysis_status: string
+  analysis_status: AnalysisStatus
   analyzed_at: DateObject
   custom_id: string
   expired_at: DateObject
@@ -15,3 +16,4 @@ export interface FetchApiContentResponse {
   id: string
   permalink: string
 }
+

@@ -6,15 +6,22 @@
   "scripts": {
     "dev": "./node_modules/.bin/dotenvx run -- vite",
     "build": "./node_modules/.bin/dotenvx run -- vue-tsc -b && ./node_modules/.bin/dotenvx run -- vite build",
-    "preview": "./node_modules/.bin/dotenvx run -- vite preview"
+    "preview": "./node_modules/.bin/dotenvx run -- vite preview",
+    "eslint": "./node_modules/.bin/dotenvx run -- eslint  --ext .js,.vue ./src/web/assets/neverstale/src --fix"
   },
   "dependencies": {
     "@dotenvx/dotenvx": "^1.29.0",
+    "@headlessui/vue": "^1.7.23",
     "vue": "^3.5.13"
   },
   "devDependencies": {
     "@vitejs/plugin-vue": "^5.2.1",
+    "@zaengle/eslint-config-vue-ts": "^1.0.0",
     "autoprefixer": "^10.4.20",
+    "eslint": "^8.0.0",
+    "eslint-plugin-tailwindcss": "^3.18.0",
+    "eslint-plugin-vitest-globals": "^1.5.0",
+    "eslint-plugin-vue": "^9.26.0",
     "postcss": "^8.5.1",
     "tailwindcss": "^3.4.17",
     "typescript": "~5.6.2",
