@@ -2,12 +2,12 @@
   <Disclosure v-slot="{ open }">
     <div
       class="ns-flex ns-w-full ns-flex-nowrap ns-items-center
-      ns-justify-between ns-gap-x-2 ns-py-2"
+      ns-justify-between ns-gap-x-2 ns-py-3"
     >
       <DisclosureButton class="ns-inline-flex ns-gap-x-2">
         <IconChevron
           :class="[
-            'ns-mt-0.5 ns-size-3 ns-text-gray-600',
+            'ns-mt-0.5 ns-size-3 ns-text-neutral-600',
             open && 'ns-rotate-90 ns-transform',
           ]"
           aria-hidden="true"
@@ -24,13 +24,13 @@
         <template #expand>
           <div
             :class="[
-              'ns-relative -ns-mx-1 -ns-mb-1 ns-rounded-b-md ns-p-1',
-              { 'ns-bg-neutral-200': isRescheduleFlyoutOpen,}
+              'ns-relative  ns-rounded-b-md',
+              { 'ns-bg-neutral-100 -ns-mb-2': isRescheduleFlyoutOpen,}
             ]"
           >
             <Disclosure v-slot="{ open: innerOpen }">
               <DisclosureButton
-                class="ns-flex ns-w-full ns-flex-nowrap ns-items-center ns-justify-between ns-rounded-md ns-p-2 ns-text-sm hover:ns-bg-gray-100"
+                class="ns-flex ns-w-full ns-flex-nowrap ns-items-center ns-justify-between ns-rounded-md ns-p-3 ns-text-sm hover:ns-bg-neutral-100"
                 @click="isRescheduleFlyoutOpen = !isRescheduleFlyoutOpen"
               >
                 <span>{{ i18n.RESCHEDULE }}</span>
@@ -39,7 +39,7 @@
               <div v-show="isRescheduleFlyoutOpen">
                 <DisclosurePanel static>
                   <form
-                    class="ns-my-2 ns-flex ns-flex-col ns-gap-2 ns-px-2"
+                    class="ns-my-2 ns-flex ns-pb-2 ns-flex-col ns-gap-2 ns-px-2"
                     @submit.prevent="handleReschedule"
                   >
                     <div>
@@ -51,12 +51,12 @@
                       <input
                         :id="`reschedule-date-${item.id}`"
                         v-model="rescheduleDate"
-                        class="ns-w-full  ns-rounded-md ns-border ns-border-gray-300 ns-px-2 ns-py-1"
+                        class="ns-w-full  ns-rounded-md ns-border ns-border-neutral-300 ns-px-2 ns-py-1"
                         type="date"
                       >
                     </div>
                     <button
-                      class="ns-btn ns-w-full ns-rounded-md ns-bg-neutral-300 ns-px-2 ns-py-1"
+                      class="ns-btn ns-w-full ns-rounded-md ns-bg-neutral-300 ns-px-2 ns-py-2"
                       type="submit"
                     >
                       {{ i18n.SUBMIT }}
@@ -78,14 +78,14 @@
       leave-to-class="ns-transform ns-max-h-0"
     >
       <DisclosurePanel>
-        <dl class="ns-flex ns-flex-col ns-gap-3 ns-py-1.5">
+        <dl class="ns-flex ns-flex-col ns-gap-3 ns-pt-1.5 ns-pb-3">
           <div>
             <dt
               class="ns-sr-only"
               v-text="`${i18n.SNIPPET}:`"
             />
             <dd
-              class="ns-rounded-md ns-bg-neutral-200 ns-px-3 ns-py-2 ns-italic"
+              class="ns-rounded-md ns-bg-neutral-100 ns-px-3 ns-py-2 ns-italic"
             >
               <blockquote>{{ item.snippet }}</blockquote>
             </dd>

@@ -1,23 +1,23 @@
 <template>
   <div
     :class="[
-      'ns-flags ns-flex ns-flex-col ns-gap-3 ns-divide-y ns-divide-neutral-200 ns-transition-opacity ns-duration-200',
+      'ns-flags ns-flex ns-flex-col ns-gap-3 ns-divide-y ns-divide-neutral-200 ns-transition-opacity ns-duration-200 -ns-mb-2',
       {
         'ns-opacity-0': isLoading,
       }]"
   >
     <header
       :class="[
-        'ns-flex ns-flex-nowrap ns-items-baseline ns-justify-between',
+        'ns-flex ns-flex-nowrap ns-items-baseline ns-justify-between ns-relative',
       ]"
     >
-      <h2 class="ns-relative ns-mb-0 ns-inline-flex ns-gap-1">
+      <h2 class="ns-relative ns-mb-0 ns-inline-flex ns-gap-2">
         <span>{{ title }}</span>
         <FlaggedStatus />
       </h2>
       <DropdownMenu
         :items="menuItems"
-        btn-classes="ns-btn ns-px-3 ns-py-2.5 ns-bg-neutral-300 ns-rounded-md"
+        btn-classes="ns-btn ns-px-5 ns-py-2.5 ns-bg-neutral-200 ns-rounded-md"
       />
     </header>
     <StaleWarning

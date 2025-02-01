@@ -22,24 +22,24 @@
       leave-to-class="ns-transform ns-scale-95 ns-opacity-0"
     >
       <MenuItems
-        class="ns-absolute ns-right-1 ns-z-50 ns-mt-2 ns-w-48 ns-origin-top-right
-         ns-divide-y ns-divide-gray-100 ns-rounded-md
-         ns-border ns-border-gray-300 ns-bg-white ns-shadow-lg ns-ring-1 ns-ring-black/5 focus:ns-outline-none"
+        class="ns-absolute ns-right-0 ns-z-50 ns-mt-2 ns-w-48 ns-origin-top-right
+         ns-divide-y ns-divide-neutral-100 ns-rounded-md
+         ns-border ns-border-neutral-300 ns-bg-white ns-shadow-lg ns-ring-1 ns-ring-black/5 focus:ns-outline-none"
       >
-        <div class="ns-p-1 ">
+        <div>
           <UiMenuItem
             v-for="item in items"
             :key="item.label"
           >
             <button
               type="button"
-              class="ns-flex ns-w-full ns-flex-nowrap ns-items-center ns-justify-between ns-rounded-md ns-p-2 ns-text-sm ns-text-gray-700 hover:ns-bg-neutral-200"
+              class="ns-flex ns-w-full ns-flex-nowrap ns-items-center ns-justify-between ns-p-2.5 ns-text-sm ns-text-neutral-600 hover:ns-bg-neutral-100"
               @click="doAction(item)"
             >
               <span v-text="item.label" />
               <component
                 :is="item.icon"
-                class="ns-size-4 ns-text-gray-600"
+                class="ns-size-3.5 ns-text-neutral-600"
               />
             </button>
           </UiMenuItem>
