@@ -9,9 +9,10 @@
           ]"
           aria-hidden="true"
         />
-        <h3 class="ns-m-0">
-          {{ capitalize(item.flag) }}
-        </h3>
+        <h3
+          class="ns-m-0"
+          v-text="capitalize(item.flag)"
+        />
       </DisclosureButton>
       <DropdownMenu
         :items="menuItems"
@@ -30,7 +31,7 @@
                 class="ns-flex ns-w-full ns-flex-nowrap ns-items-center ns-justify-between ns-rounded-md ns-p-3 ns-text-sm hover:ns-bg-neutral-100"
                 @click="isRescheduleFlyoutOpen = !isRescheduleFlyoutOpen"
               >
-                <span>{{ i18n.RESCHEDULE }}</span>
+                <span v-text="i18n.RESCHEDULE" />
                 <IconChevron :class="innerOpen && 'ns-rotate-90 ns-transform '"/>
               </DisclosureButton>
               <div v-show="isRescheduleFlyoutOpen">
@@ -55,9 +56,8 @@
                     <button
                       class="ns-btn ns-w-full ns-rounded-md ns-bg-neutral-300 ns-px-2 ns-py-2"
                       type="submit"
-                    >
-                      {{ i18n.SUBMIT }}
-                    </button>
+                      v-text="i18n.SUBMIT"
+                    />
                   </form>
                 </DisclosurePanel>
               </div>
@@ -84,7 +84,7 @@
             <dd
               class="ns-rounded-md ns-bg-neutral-100 ns-px-3 ns-py-2 ns-italic"
             >
-              <blockquote>{{ item.snippet }}</blockquote>
+              <blockquote v-text="item.snippet" />
             </dd>
           </div>
           <div>

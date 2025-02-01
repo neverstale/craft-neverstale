@@ -12,7 +12,7 @@
       ]"
     >
       <h2 class="ns-relative ns-mb-0 ns-inline-flex ns-gap-2">
-        <span>{{ title }}</span>
+        <span v-text="title" />
         <FlaggedStatus />
       </h2>
       <DropdownMenu
