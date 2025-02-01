@@ -23,7 +23,7 @@ All plugin settings can also be set via in the `config/nevertale.php` file. Sett
 
 ## Usage
 
-See the full documentation at https://nevertale.io/docs/integrations/craft-cms
+See the full documentation at https://neverstale.io/docs/integrations/craft-cms
 
 ## Plugin development
 
