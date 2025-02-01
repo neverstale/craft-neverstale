@@ -1,6 +1,6 @@
 # Neverstale plugin for Craft CMS
 
-> Note, this plugin requires an active account on https://nevertale.io 
+> Note, this plugin requires an active account on https://neverstale.io 
 
 ## Requirements
 
