@@ -1,9 +1,6 @@
 <template>
   <Disclosure v-slot="{ open }">
-    <div
-      class="ns-flex ns-w-full ns-flex-nowrap ns-items-center
-      ns-justify-between ns-gap-x-2 ns-py-3"
-    >
+    <div class="ns-flex ns-w-full ns-flex-nowrap ns-items-center ns-justify-between ns-gap-x-2 ns-py-3">
       <DisclosureButton class="ns-inline-flex ns-gap-x-2">
         <IconChevron
           :class="[
@@ -34,7 +31,7 @@
                 @click="isRescheduleFlyoutOpen = !isRescheduleFlyoutOpen"
               >
                 <span>{{ i18n.RESCHEDULE }}</span>
-                <IconChevron :class="innerOpen && 'ns-rotate-90 ns-transform '" />
+                <IconChevron :class="innerOpen && 'ns-rotate-90 ns-transform '"/>
               </DisclosureButton>
               <div v-show="isRescheduleFlyoutOpen">
                 <DisclosurePanel static>
@@ -95,14 +92,14 @@
               class="ns-sr-only"
               v-text="`${i18n.REASON}:`"
             />
-            <dd v-text="item.reason" />
+            <dd v-text="item.reason"/>
           </div>
           <div class="ns-flex ns-flex-nowrap ns-gap-x-1 ns-text-xs">
             <dt
               class="ns-font-bold"
               v-text="`${i18n.PROPOSED_EXPIRATION}:`"
             />
-            <dd v-text="formatDate(item.expired_at)" />
+            <dd v-text="formatDate(item.expired_at)"/>
           </div>
         </dl>
       </DisclosurePanel>
@@ -111,7 +108,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, inject } from 'vue'
+import {ref, inject} from 'vue'
 
 import {
   Disclosure,
@@ -119,18 +116,18 @@ import {
   DisclosurePanel,
 } from '@headlessui/vue'
 
-import { formatDate } from '@/utils/formatDate'
+import {formatDate} from '@/utils/formatDate'
 
-import { capitalize } from '@/utils/stringHelper'
+import {capitalize} from '@/utils/stringHelper'
 
-import { ContentFlag } from '@/types/ContentFlag'
-import { I18nDictionary } from '@/types/I18nDictionary'
-import { RescheduleFlagEvent } from '@/types/events/RescheduleFlagEvent.ts'
+import {ContentFlag} from '@/types/ContentFlag'
+import {I18nDictionary} from '@/types/I18nDictionary'
+import {RescheduleFlagEvent} from '@/types/events/RescheduleFlagEvent.ts'
 import useNeverstaleContent from '@/composables/useNeverstaleContent.ts'
 import DropdownMenu from '@/components/flags-widget/DropdownMenu.vue'
 import IconChevron from '@/components/icons/IconChevron.vue'
 import IconIgnore from '@/components/icons/IconIgnore.vue'
-import { MenuItem } from '@/types/MenuItem.ts'
+import {MenuItem} from '@/types/MenuItem.ts'
 
 const i18n = inject('i18n') as I18nDictionary
 
