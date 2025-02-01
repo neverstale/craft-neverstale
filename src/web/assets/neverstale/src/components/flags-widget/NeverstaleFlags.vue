@@ -52,7 +52,7 @@
         <li
           v-for="flag in content?.flags"
           :key="flag.id"
-          class=" ns-py-1"
+          class=" ns-py-2"
         >
           <FlagItem
             :item="flag"
