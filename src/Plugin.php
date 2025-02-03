@@ -95,6 +95,7 @@ class Plugin extends BasePlugin
         $this->exposeTwigVariable();
         $this->registerElementTypes();
         $this->registerOnElementSaveHandler();
+        $this->registerOnElementDeleteHandler();
         $this->registerUtilities();
         $this->registerUserPermissions();
         $this->registerEntryBehaviors();
@@ -352,6 +353,33 @@ class Plugin extends BasePlugin
             }
         );
     }
+
+    protected function registerOnElementDeleteHandler(): void
+    {
+        Event::on(
+            Entry::class,
+            Element::EVENT_AFTER_DELETE,
+            function(Event $event) {
+                /**
+                 * @var Entry $entry
+                 */
+                $entry = $event->sender;
+
+                $content = NeverstaleContent::find()
+                    ->entryId($entry->canonicalId)
+                    ->siteId($entry->siteId)
+                    ->trashed(null)
+                    ->one();
+
+                if ($content) {
+                    if (! Craft::$app->elements->deleteElement($content)) {
+                        Plugin::error("Failed to delete content #{$content->id} from Craft");
+                    }
+                }
+            }
+        );
+    }
+
     protected function registerUserPermissions(): void
     {
         Event::on(

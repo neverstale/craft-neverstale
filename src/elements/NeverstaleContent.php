@@ -290,9 +290,11 @@ class NeverstaleContent extends Element
 
     protected function attributeHtml(string $attribute): string
     {
+        $entry = $this->getEntry();
+
         return match ($attribute) {
-            'entry' => Cp::elementChipHtml($this->getEntry()) ?? '',
-            default => parent::attributeHtml($attribute) ?? '',
+            'entry' => $entry ? Cp::elementChipHtml($this->getEntry()) : '',
+            default => $entry ? parent::attributeHtml($attribute) : '',
         };
     }
 
