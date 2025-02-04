@@ -52,22 +52,30 @@
         </dl>
       {%- endfor %}
     {% elseif value is instance of('craft\\elements\\db\\ElementQuery') %}
-      <!--  Relationship fields -->
-
+{#      <!--  Relationship fields -->#}
       {{ _self.renderRelationSummary(value) }}
+    {%- elseif field is instance of('craft\\fields\\Assets') -%}
+      {{ value.title }}
     {%- elseif field is instance of('craft\\fields\\Money') -%}
-      <!--  Money fields  -->
+{#      <!--  Money fields  -->#}
 {{ value | money -}}
     {%- elseif field is instance of('craft\\fields\\Date') -%}
 {{ value | datetime('full') -}}
     {%- elseif value is instance of('craft\\fields\\data\\SingleOptionFieldData') -%}
-      <!--  Single option fields, e.g. dropdown, radio buttons  -->
+{#      <!--  Single option fields, e.g. dropdown, radio buttons  -->#}
 {{ value.label -}}
+    {% elseif value is instance of('craft\\base\\Element') %}
+      {# Elements #}
+      {%- for elementField in value.getFieldLayout().getCustomFields() -%}
+
+        {{- _self.renderField(elementField, attribute(value, elementField.handle), "#{elementField.handle}-") -}}
+      {%- endfor %}
+{#      {{- _self.renderField(blockField, block, "#{field.handle}-") -}}#}
     {%- elseif value is instance of('craft\\fields\\data\\MultiOptionsFieldData') -%}
-      <!--  Multi option fields, e.g. checkboxes, multi-select  -->
+{#      <!--  Multi option fields, e.g. checkboxes, multi-select  -->#}
 {{ value|filter(v => v.selected)|map(v => v.label)|join(', ') -}}
     {%- elseif field is instance of('craft\\fields\\Table') %}
-<!--  Table fields  -->
+{#<!--  Table fields  -->#}
       <table>
         <thead>
         {% for column in field.columns %}
@@ -84,11 +92,14 @@
         {% endfor -%}
         </tbody>
       </table>
-    {%- else -%}
-      <!-- Everything else  -->
-      {%- set value = value is array ? (value | json_encode | raw) : value -%}
+    {% elseif field is instance of('nystudio107\\seomatic\\fields\\SeoSettings') %}
+{#      Do nothing #}
+    {% elseif value is string %}
       {{- value -}}
-{%- endif %}
+    {% else %}
+      {{ field.handle }} {{ value.classname ?? value }}
+      {{- value | json_encode(constant('JSON_PRETTY_PRINT')) | raw -}}
+    {%- endif %}
 </dd>
   </div>
 {%- endmacro %}

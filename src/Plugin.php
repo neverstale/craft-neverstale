@@ -44,7 +44,6 @@ use neverstale\craft\services\TransactionLog;
 use neverstale\craft\services\VitePluginService;
 use neverstale\craft\traits\HasPluginLogfile;
 use neverstale\craft\utilities\PreviewContent;
-use neverstale\craft\utilities\ScanUtility;
 use neverstale\craft\variables\NeverstaleVariable;
 use neverstale\craft\web\assets\neverstale\NeverstaleAsset;
 use neverstale\craft\web\twig\Neverstale as NeverstaleTwigExtension;
@@ -418,7 +417,6 @@ class Plugin extends BasePlugin
     {
         Event::on(Utilities::class, Utilities::EVENT_REGISTER_UTILITIES, function(RegisterComponentTypesEvent $event) {
             $event->types[] = PreviewContent::class;
-            $event->types[] = ScanUtility::class;
         });
     }
     protected function registerElementTypes(): void
