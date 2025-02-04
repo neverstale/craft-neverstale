@@ -19,6 +19,7 @@ use craft\events\RegisterUrlRulesEvent;
 use craft\events\RegisterUserPermissionsEvent;
 use craft\helpers\App;
 use craft\helpers\Cp as CpHelper;
+use craft\helpers\ElementHelper;
 use craft\services\Dashboard;
 use craft\services\Elements;
 use craft\services\UserPermissions;
@@ -364,6 +365,16 @@ class Plugin extends BasePlugin
                  * @var Entry $entry
                  */
                 $entry = $event->sender;
+
+                // Ignore drafts
+                if (ElementHelper::isDraftOrRevision($entry)) {
+                    return;
+                }
+
+                // Ignore changes to non-root, non-canonical entries
+                if (ElementHelper::rootElementIfCanonical($entry) !== $entry) {
+                    return;
+                }
 
                 $content = NeverstaleContent::find()
                     ->entryId($entry->canonicalId)
