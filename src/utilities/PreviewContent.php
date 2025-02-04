@@ -30,7 +30,8 @@ class PreviewContent extends Utility
     public static function contentHtml(): string
     {
         $entryId = Craft::$app->request->getParam('entryId');
-        $previewEntry = $entryId ? null : Entry::find()->id($entryId)->one();
+
+        $previewEntry = $entryId ? Entry::find()->id($entryId)->one() : null;
 
         return Craft::$app->getView()->renderTemplate('neverstale/utilities/_previewContent', [
             'previewEntry' => $previewEntry,
