@@ -118,7 +118,7 @@ class NeverstaleContentQuery extends ElementQuery
         ]);
 
         if ($this->analysisStatus) {
-            $this->subQuery->andWhere(Db::parsebooleanparam('neverstale_content.analysisStatus', $this->analysisStatus));
+            $this->subQuery->andWhere(Db::parseParam('neverstale_content.analysisStatus', $this->analysisStatus));
         }
         if ($this->flagCount) {
             $this->subQuery->andWhere(Db::parsenumericparam('neverstale_content.flagCount', $this->flagCount));
