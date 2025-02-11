@@ -24,10 +24,12 @@ class TransactionLog extends Component
         $record->status = $logItem->getAnalysisStatus()->value;
         $record->message = $logItem->message;
         $record->event = $logItem->event;
+        $record->debugTransaction = $logItem->content;
 
-        if (App::devMode()) {
-            $record->debugTransaction = $logItem->content;
-        }
+        // Temporarily disabling this so we get debugTransaction in the db
+        //        if (App::devMode()) {
+        //            $record->debugTransaction = $logItem->content;
+        //        }
 
         return $record->save();
     }

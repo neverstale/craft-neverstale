@@ -37,7 +37,11 @@
             <summary class="ns-text-[10px] ns-px-1 ns-py-0">{{ 'Show more / less'|t('neverstale') }}</summary>
             <div>
                 <pre>
-                  {{- transaction.debugTransaction | json_decode | json_encode(constant('JSON_PRETTY_PRINT')) | raw }}
+                  {{- (transaction.debugTransaction | default('null'))
+                  | json_decode
+                  | json_encode(constant('JSON_PRETTY_PRINT'))
+                  | default('No debug data available') | raw
+                  }}
                 </pre>
             </div>
           </details>
