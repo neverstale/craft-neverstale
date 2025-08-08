@@ -365,4 +365,16 @@ class NeverstaleContent extends Element
     {
         return Plugin::getInstance()->content->save($this);
     }
+
+    protected static function defineActions(string $source = null): array
+    {
+        $actions = [];
+
+        // Add batch ingest action if user has permission
+        if (Craft::$app->getUser()->checkPermission(Permission::Ingest->value)) {
+            $actions[] = \neverstale\craft\elements\actions\BatchIngest::class;
+        }
+
+        return array_merge(parent::defineActions($source), $actions);
+    }
 }

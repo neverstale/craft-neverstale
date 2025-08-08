@@ -168,6 +168,61 @@ class ContentController extends BaseController
     }
 
     /**
+     * Batch ingest multiple content items to the Neverstale API
+     *
+     * @throws MethodNotAllowedHttpException
+     * @throws ForbiddenHttpException
+     */
+    public function actionBatchIngest(): Response
+    {
+        $this->requirePostRequest();
+        $this->requirePermission(Permission::Ingest->value);
+
+        $contentIds = $this->request->getBodyParam('contentIds', []);
+
+        if (empty($contentIds)) {
+            return $this->respondWithError(Plugin::t('No content items selected'));
+        }
+
+        $contents = NeverstaleContent::find()
+            ->id($contentIds)
+            ->all();
+
+        if (empty($contents)) {
+            return $this->respondWithError(Plugin::t('No valid content items found'));
+        }
+
+        $successCount = 0;
+        $errorCount = 0;
+        $errors = [];
+
+        foreach ($contents as $content) {
+            if (Plugin::getInstance()->content->ingest($content)) {
+                $successCount++;
+            } else {
+                $errorCount++;
+                $errors[] = Plugin::t("Failed to ingest content #{id}", ['id' => $content->id]);
+            }
+        }
+
+        if ($errorCount === 0) {
+            return $this->respondWithSuccess(Plugin::t('Successfully ingested {count} content items', ['count' => $successCount]));
+        } elseif ($successCount === 0) {
+            return $this->respondWithError(Plugin::t('Failed to ingest all content items') . ': ' . implode(', ', $errors));
+        } else {
+            return $this->asJson([
+                'success' => true,
+                'message' => Plugin::t('Ingested {successCount} of {total} content items. {errorCount} failed.', [
+                    'successCount' => $successCount,
+                    'total' => count($contents),
+                    'errorCount' => $errorCount
+                ]),
+                'errors' => $errors
+            ]);
+        }
+    }
+
+    /**
      * @throws ForbiddenHttpException
      * @throws MethodNotAllowedHttpException
      */

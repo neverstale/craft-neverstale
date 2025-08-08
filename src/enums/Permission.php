@@ -12,7 +12,6 @@ namespace neverstale\craft\enums;
  */
 enum Permission: string
 {
-    case Scan = 'neverstale:scan';
     case View = 'neverstale:view';
     case Delete = 'neverstale:delete';
     case Ingest = 'neverstale:ingest';
