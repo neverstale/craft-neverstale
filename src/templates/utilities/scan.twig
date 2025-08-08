@@ -14,25 +14,20 @@
 
 <p>Normally, content is automatically scanned when published. You should only need to manually content when first installing, or if new entry types have been added to the site.</p>
 
-<form {{ attr({
-  id: "neverstale-scan",
-  class: 'utility',
-  method: 'POST',
-}) }}>
-{% for entryType in entryTypes %}
+<form method="POST" id="neverstale-scan" class="utility">
     {{ actionInput('neverstale/scan/batch') }}
     {{ csrfInput() }}
 
-    {{ forms.checkboxGroup({
-      label: entryType.name|t('site'),
-      name: 'entryTypes[]',
-      value: entryType.id,
-      checked: true,
-    }) }}
+    {% for entryType in entryTypes %}
+        {{ forms.checkboxField({
+            label: entryType.name|t('site'),
+            name: 'entryTypes[]',
+            value: entryType.id,
+            checked: true,
+        }) }}
+    {% endfor %}
 
-
-{% endfor %}
-  <div class="buttons">
-    <button type="submit" class="btn submit">Scan selected</button>
-  </div>
+    <div class="buttons">
+        <button type="submit" class="btn submit">Scan selected</button>
+    </div>
 </form>
