@@ -96,13 +96,14 @@ class Content extends Component
 
         try {
             $response = $this->client->batchIngest($batchData);
-            $responseData = json_decode($response->getBody()->getContents(), true);
+            $responseBody = $response->getBody()->getContents();
+            $responseData = json_decode($responseBody, true);
 
             $successCount = 0;
             $errorCount = 0;
             $errors = [];
 
-            if ($responseData['status'] === 'success' && isset($responseData['data'])) {
+            if ($responseData && $responseData['status'] === 'success' && isset($responseData['data'])) {
                 // Process each item in the response
                 foreach ($responseData['data'] as $item) {
                     $customId = $item['custom_id'] ?? null;
@@ -110,13 +111,14 @@ class Content extends Component
                     if ($customId && isset($contentMap[$customId])) {
                         $content = $contentMap[$customId];
 
-                        // Create transaction log item for successful batch ingest
-                        $transaction = new TransactionLogItem([
-                            'transactionStatus' => ApiClient::STATUS_SUCCESS,
-                            'neverstaleId' => $item['id'] ?? null,
-                            'analysisStatus' => $item['analysis_status'] ?? null,
+                        // Create a TransactionResult object for consistency with existing code
+                        $transactionResult = new TransactionResult([
+                            'status' => ApiClient::STATUS_SUCCESS,
                             'message' => 'Batch ingest successful',
+                            'data' => new \neverstale\api\models\Content($item),
                         ]);
+
+                        $transaction = TransactionLogItem::fromContentResponse($transactionResult, 'api.batchIngest');
 
                         if ($this->onIngestSuccess($content, $transaction)) {
                             $successCount++;
@@ -135,11 +137,12 @@ class Content extends Component
                 Plugin::error("Batch ingest failed: {$errorMessage}");
 
                 foreach ($contents as $content) {
-                    $transaction = new TransactionLogItem([
-                        'transactionStatus' => ApiClient::STATUS_ERROR,
+                    $transactionResult = new TransactionResult([
+                        'status' => ApiClient::STATUS_ERROR,
                         'message' => $errorMessage,
                     ]);
 
+                    $transaction = TransactionLogItem::fromContentResponse($transactionResult, 'api.batchIngest.error');
                     $this->onIngestError($content, $transaction);
                     $errorCount++;
                     $errors[] = Plugin::t("Failed to ingest content #{id}: {message}", [
@@ -174,12 +177,14 @@ class Content extends Component
         } catch (\Exception $e) {
             Plugin::error("Batch ingest unexpected error: {$e->getMessage()}");
 
-            // Mark all content items as failed
+            // Mark all content items as failed using TransactionResult for consistency
             foreach ($contents as $content) {
-                $transaction = new TransactionLogItem([
-                    'transactionStatus' => ApiClient::STATUS_ERROR,
+                $transactionResult = new TransactionResult([
+                    'status' => ApiClient::STATUS_ERROR,
                     'message' => $e->getMessage(),
                 ]);
+
+                $transaction = TransactionLogItem::fromContentResponse($transactionResult, 'api.batchIngest.error');
                 $this->onIngestError($content, $transaction);
             }
 
