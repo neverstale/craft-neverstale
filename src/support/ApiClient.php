@@ -53,6 +53,21 @@ class ApiClient
     }
 
     /**
+     * Batch ingest multiple content items (up to 100)
+     *
+     * @param array<array<string,mixed>> $batchData Array of content items
+     * @throws \GuzzleHttp\Exception\GuzzleException
+     */
+    public function batchIngest(array $batchData): ResponseInterface
+    {
+        return $this->client->post('ingest/batch', [
+            'json' => [
+                'batch' => $batchData,
+            ],
+        ]);
+    }
+
+    /**
      * @param array<int,string> $customIds
      * @throws \GuzzleHttp\Exception\GuzzleException
      */

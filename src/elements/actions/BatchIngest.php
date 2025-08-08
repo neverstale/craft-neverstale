@@ -43,31 +43,26 @@ class BatchIngest extends ElementAction
             return false;
         }
 
-        $successCount = 0;
-        $errorCount = 0;
-        $errors = [];
+        // Use batch API for more efficient processing
+        $result = Plugin::getInstance()->content->batchIngest($elements);
 
-        foreach ($elements as $element) {
-            if (Plugin::getInstance()->content->ingest($element)) {
-                $successCount++;
-            } else {
-                $errorCount++;
-                $errors[] = Plugin::t("Failed to ingest content #{id}", ['id' => $element->id]);
-            }
-        }
+        $successCount = $result['successCount'];
+        $errorCount = $result['errorCount'];
+        $errors = $result['errors'];
 
         if ($errorCount === 0) {
             $this->setMessage(Plugin::t('Successfully submitted {count} content items to Neverstale', ['count' => $successCount]));
+            return true;
         } elseif ($successCount === 0) {
             $this->setMessage(Plugin::t('Failed to submit all content items to Neverstale'));
+            return false;
         } else {
             $this->setMessage(Plugin::t('Submitted {successCount} of {total} content items. {errorCount} failed.', [
                 'successCount' => $successCount,
                 'total' => count($elements),
                 'errorCount' => $errorCount
             ]));
+            return true; // Partial success is still considered success
         }
-
-        return true;
     }
 }

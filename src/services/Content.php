@@ -72,6 +72,125 @@ class Content extends Component
         }
     }
 
+    /**
+     * Batch ingest multiple content items using the batch API endpoint
+     *
+     * @param NeverstaleContent[] $contents Array of content items (max 100)
+     * @return array ['successCount' => int, 'errorCount' => int, 'errors' => array]
+     */
+    public function batchIngest(array $contents): array
+    {
+        $batchData = [];
+        $contentMap = [];
+
+        // Prepare batch data and create mapping
+        foreach ($contents as $content) {
+            $apiData = $content->forApi();
+            $apiData['webhook'] = [
+                'endpoint' => $content->webhookUrl,
+            ];
+
+            $batchData[] = $apiData;
+            $contentMap[$content->customId] = $content;
+        }
+
+        try {
+            $response = $this->client->batchIngest($batchData);
+            $responseData = json_decode($response->getBody()->getContents(), true);
+
+            $successCount = 0;
+            $errorCount = 0;
+            $errors = [];
+
+            if ($responseData['status'] === 'success' && isset($responseData['data'])) {
+                // Process each item in the response
+                foreach ($responseData['data'] as $item) {
+                    $customId = $item['custom_id'] ?? null;
+
+                    if ($customId && isset($contentMap[$customId])) {
+                        $content = $contentMap[$customId];
+
+                        // Create transaction log item for successful batch ingest
+                        $transaction = new TransactionLogItem([
+                            'transactionStatus' => ApiClient::STATUS_SUCCESS,
+                            'neverstaleId' => $item['id'] ?? null,
+                            'analysisStatus' => $item['analysis_status'] ?? null,
+                            'message' => 'Batch ingest successful',
+                        ]);
+
+                        if ($this->onIngestSuccess($content, $transaction)) {
+                            $successCount++;
+                        } else {
+                            $errorCount++;
+                            $errors[] = Plugin::t("Failed to update content #{id} after successful API call", ['id' => $content->id]);
+                        }
+                    } else {
+                        $errorCount++;
+                        $errors[] = Plugin::t("Content not found for custom_id: {customId}", ['customId' => $customId]);
+                    }
+                }
+            } else {
+                // Handle API error response
+                $errorMessage = $responseData['message'] ?? 'Unknown batch ingest error';
+                Plugin::error("Batch ingest failed: {$errorMessage}");
+
+                foreach ($contents as $content) {
+                    $transaction = new TransactionLogItem([
+                        'transactionStatus' => ApiClient::STATUS_ERROR,
+                        'message' => $errorMessage,
+                    ]);
+
+                    $this->onIngestError($content, $transaction);
+                    $errorCount++;
+                    $errors[] = Plugin::t("Failed to ingest content #{id}: {message}", [
+                        'id' => $content->id,
+                        'message' => $errorMessage
+                    ]);
+                }
+            }
+
+            Plugin::info("Batch ingest completed: {$successCount} successful, {$errorCount} failed");
+
+            return [
+                'successCount' => $successCount,
+                'errorCount' => $errorCount,
+                'errors' => $errors,
+            ];
+
+        } catch (ApiException $e) {
+            Plugin::error("Batch ingest API error: {$e->getMessage()}");
+
+            // Mark all content items as failed
+            foreach ($contents as $content) {
+                $transaction = TransactionLogItem::fromException($e, 'api.batchIngest.error');
+                $this->onIngestError($content, $transaction);
+            }
+
+            return [
+                'successCount' => 0,
+                'errorCount' => count($contents),
+                'errors' => [Plugin::t("Batch ingest failed: {message}", ['message' => $e->getMessage()])],
+            ];
+        } catch (\Exception $e) {
+            Plugin::error("Batch ingest unexpected error: {$e->getMessage()}");
+
+            // Mark all content items as failed
+            foreach ($contents as $content) {
+                $transaction = new TransactionLogItem([
+                    'transactionStatus' => ApiClient::STATUS_ERROR,
+                    'message' => $e->getMessage(),
+                ]);
+                $this->onIngestError($content, $transaction);
+            }
+
+            return [
+                'successCount' => 0,
+                'errorCount' => count($contents),
+                'errors' => [Plugin::t("Batch ingest failed: {message}", ['message' => $e->getMessage()])],
+            ];
+        }
+    }
+
     public function retrieveByCustomId(string $customId): ?\neverstale\api\models\Content
     {
         try {
