@@ -33,14 +33,14 @@ class BatchIngest extends ElementAction
         return Craft::$app->getUser()->checkPermission(Permission::Ingest->value);
     }
 
-    public function performAction(ElementQueryInterface $query): ?\craft\base\ElementActionResult
+    public function performAction(ElementQueryInterface $query): bool
     {
         /** @var NeverstaleContent[] $elements */
         $elements = $query->all();
 
         if (empty($elements)) {
             $this->setMessage(Plugin::t('No content items selected'));
-            return null;
+            return false;
         }
 
         $successCount = 0;
@@ -68,6 +68,6 @@ class BatchIngest extends ElementAction
             ]));
         }
 
-        return null;
+        return true;
     }
 }
