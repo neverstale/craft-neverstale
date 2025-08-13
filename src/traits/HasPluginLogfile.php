@@ -6,7 +6,7 @@ use Craft;
 use craft\base\Plugin;
 use craft\log\MonologTarget;
 use Monolog\Formatter\LineFormatter;
-use Psr\Log\LogLevel;
+use yii\log\Logger;
 
 /**
  * Trait HasOwnLogfile
@@ -29,7 +29,7 @@ trait HasPluginLogfile
      */
     public static function warn(string|array $message): void
     {
-        self::log($message, LogLevel::WARNING);
+        self::log($message, Logger::LEVEL_WARNING);
     }
 
     /**
@@ -37,7 +37,7 @@ trait HasPluginLogfile
      */
     public static function error(string|array $message): void
     {
-        self::log($message, LogLevel::ERROR);
+        self::log($message, Logger::LEVEL_ERROR);
     }
 
     /**
@@ -48,7 +48,7 @@ trait HasPluginLogfile
      * @see Logger::log()
      * @see registerLogTarget()
      */
-    public static function log(string|array $message, string $level = LogLevel::INFO): void
+    public static function log(string|array $message, string $level = Logger::LEVEL_INFO): void
     {
         Craft::getLogger()->log($message, $level, self::getInstance()->getHandle());
     }
@@ -61,7 +61,7 @@ trait HasPluginLogfile
         Craft::getLogger()->dispatcher->targets[] = new MonologTarget([
             'name' => self::getInstance()->getHandle(),
             'categories' => [self::getInstance()->getHandle()],
-            'level' => LogLevel::INFO,
+            'level' => Logger::LEVEL_INFO,
             'logContext' => false,
             'allowLineBreaks' => true,
             'formatter' => new LineFormatter(
