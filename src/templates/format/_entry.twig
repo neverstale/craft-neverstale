@@ -3,9 +3,8 @@
   ========================================
 
   @author Zaengle
-  @package zaengle/craft-neverstale
-  @since 1.0.0
-  @see https://github.com/zaengle/craft-neverstale
+  @package neverstale/neverstale
+  @since 2.0.0
   @var entry \craft\elements\Entry
 
   This template is used to format the content of an entry when it is sent to Neverstale.
@@ -44,13 +43,17 @@
     <dd>
     {%- if field is instance of('craft\\fields\\Matrix') %}
       {#  Matrix fields #}
-      {% for block in value %}
-        <dl>
-        {%- for blockField in block.getFieldLayout().getCustomFields() -%}
-          {{- _self.renderField(blockField, block, "#{field.handle}-") -}}
+      {% if value is iterable %}
+        {% for block in value %}
+          {% if block and block is instance of('craft\\base\\Element') and block.getFieldLayout() %}
+          <dl>
+          {%- for blockField in block.getFieldLayout().getCustomFields() -%}
+            {{- _self.renderField(blockField, block.getFieldValue(blockField.handle), "#{field.handle}-") -}}
+          {%- endfor %}
+          </dl>
+          {% endif %}
         {%- endfor %}
-        </dl>
-      {%- endfor %}
+      {% endif %}
     {% elseif value is instance of('craft\\elements\\db\\ElementQuery') %}
 {#      <!--  Relationship fields -->#}
       {{ _self.renderRelationSummary(value) }}

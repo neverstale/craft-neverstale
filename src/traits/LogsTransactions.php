@@ -1,11 +1,11 @@
 <?php
 
-namespace neverstale\craft\traits;
+namespace neverstale\neverstale\traits;
 
+use neverstale\neverstale\models\TransactionLogItem;
+use neverstale\neverstale\Plugin;
+use neverstale\neverstale\records\Content;
 use yii\db\ActiveQueryInterface;
-use neverstale\craft\models\TransactionLogItem;
-use neverstale\craft\Plugin;
-use neverstale\craft\records\Content;
 
 trait LogsTransactions
 {
@@ -13,17 +13,32 @@ trait LogsTransactions
     {
         return Plugin::getInstance()->transactionLog->logTo($this, $transaction);
     }
+
     public function clearTransactionLog(): bool
     {
         return Plugin::getInstance()->transactionLog->deleteFor($this);
     }
 
     /**
-     * @return ActiveQueryInterface
+     * Get all transaction log records as an array
+     *
+     * @return array
      */
-    public function getTransactionLogs(): ActiveQueryInterface
+    public function getAllTransactionLogs(): array
     {
-        return $this->getRecord()?->getTransactionLogs();
+        $query = $this->getTransactionLogs();
+
+        return $query ? $query->all() : [];
+    }
+
+    /**
+     * @return ActiveQueryInterface|null
+     */
+    public function getTransactionLogs(): ?ActiveQueryInterface
+    {
+        $record = $this->getRecord();
+
+        return $record?->getTransactionLogs();
     }
 
     abstract public function getRecord(): ?Content;

@@ -1,17 +1,17 @@
 {#
-  Neverstale Content Element Index Template
+Neverstale Content Element Index Template
 
-  @author Zaengle
-  @package zaengle/craft-neverstale
-  @since 1.0.0
-  @see https://github.com/zaengle/craft-neverstale
+@author Zaengle
+@package neverstale/neverstale
+@since 1.0.0
 #}
 
 {% extends '_layouts/elementindex' %}
 {% set title = 'Neverstale Content'|t('neverstale') %}
-{% set elementType = 'neverstale\\craft\\elements\\NeverstaleContent' %}
+{% set selectedSubnavItem = 'content' %}
+{% set elementType = 'neverstale\\neverstale\\elements\\Content' %}
 {% set canHaveDrafts = false %}
 {%- set crumbs = [
-  { label: 'Neverstale' | t('neverstale'), url: url('neverstale') },
-  { label: 'Content' | t('neverstale'), url: url('neverstale/content') },
+    { label: 'Neverstale' | t('neverstale'), url: url('neverstale') },
+    { label: 'Content' | t('neverstale'), url: url('neverstale/content') },
 ] %}

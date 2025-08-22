@@ -1,0 +1,9 @@
+<svg width="20" height="20" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
+  <!-- Neverstale logomark scaled and centered for 20px -->
+  <g transform="translate(2, 2) scale(0.3)">
+    <!-- Top right quadrant -->
+    <path d="M38.8494 0V15.999H54.9416C54.9456 7.16664 47.7373 0 38.8494 0Z" fill="#D6DD21"/>
+    <!-- Main cross and corners -->
+    <path d="M27.4728 4.68456C21.1879 -1.55983 10.9965 -1.55983 4.7116 4.68456L16.0922 15.9992H0C0 24.8316 7.20839 31.9982 16.0922 31.9982V15.9992L27.4728 27.3139C33.7576 33.5624 43.9491 33.5624 50.2299 27.3139L38.8493 15.9992L27.4687 4.68456H27.4728Z" fill="#D6DD21"/>
+  </g>
+</svg>

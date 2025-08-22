@@ -1,24 +1,23 @@
 <?php
 
-namespace neverstale\craft\enums;
+namespace neverstale\neverstale\enums;
 
 use craft\enums\Color;
-use neverstale\craft\Plugin;
+use neverstale\neverstale\Plugin;
 
 /**
  * Neverstale Analysis Status Enum
  *
  * Represents the status of content analysis.
  *
- * @author Zaengle
- * @package zaengle/craft-neverstale
- * @since 1.0.0
- * @see https://github.com/zaengle/craft-neverstale
+ * @author  Zaengle
+ * @package neverstale/neverstale
+ * @since   1.0.0
+ * @see     https://github.com/zaengle/craft-neverstale
  */
 enum AnalysisStatus: string
 {
     case UNSENT = 'unsent';
-
     case STALE = 'stale';
     case PENDING_INITIAL_ANALYSIS = 'pending-initial-analysis';
     case PENDING_REANALYSIS = 'pending-reanalysis';
@@ -54,7 +53,7 @@ enum AnalysisStatus: string
             self::PENDING_INITIAL_ANALYSIS, self::PENDING_REANALYSIS => Color::Pink,
             self::PROCESSING_REANALYSIS, self::PROCESSING_INITIAL_ANALYSIS => Color::Purple,
             self::ANALYZED_CLEAN => Color::Teal,
-            self::ANALYZED_FLAGGED => Color::Amber,
+            self::ANALYZED_FLAGGED => Color::Red,
             self::ANALYZED_ERROR => Color::Red,
             self::API_ERROR => Color::Red,
             self::ARCHIVED => Color::Gray,
@@ -67,6 +66,7 @@ enum AnalysisStatus: string
         return match ($this) {
             self::UNSENT, self::STALE => 'envelope',
             self::PROCESSING_REANALYSIS => 'hammer',
+            self::PROCESSING_INITIAL_ANALYSIS => 'hammer',
             self::PENDING_INITIAL_ANALYSIS => 'clock',
             self::PENDING_REANALYSIS => 'clock-rotate-left',
             self::ANALYZED_CLEAN => 'check',

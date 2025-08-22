@@ -1,25 +1,25 @@
 <?php
 
-namespace neverstale\craft\controllers;
+namespace neverstale\neverstale\controllers;
 
 use Craft;
+use neverstale\neverstale\elements\Content;
+use neverstale\neverstale\enums\Permission;
+use neverstale\neverstale\Plugin;
+use Throwable;
+use yii\base\InvalidConfigException;
 use yii\web\BadRequestHttpException;
 use yii\web\ForbiddenHttpException;
 use yii\web\MethodNotAllowedHttpException;
 use yii\web\NotFoundHttpException;
 use yii\web\Response;
-use neverstale\craft\elements\NeverstaleContent;
-use neverstale\craft\enums\Permission;
-use neverstale\craft\Plugin;
-use neverstale\craft\web\assets\neverstale\NeverstaleAsset;
 
 /**
  * Neverstale Content Controller
  *
- * @author Zaengle
- * @package zaengle/craft-neverstale
- * @since 1.0.0
- * @see https://github.com/zaengle/craft-neverstale
+ * @author  Zaengle
+ * @package neverstale/neverstale
+ * @since   1.0.0
  *
  * @property-read Plugin $module
  */
@@ -35,30 +35,36 @@ class ContentController extends BaseController
     /**
      * Render the Twig template for showing a content item
      *
-     * @param NeverstaleContent|null $content
-     * @param int|null $contentId
+     * @param  Content|null  $content
+     * @param  int|null      $contentId
      * @return Response
      * @throws ForbiddenHttpException
      * @throws NotFoundHttpException
-     * @throws \yii\base\InvalidConfigException
+     * @throws InvalidConfigException
      */
-    public function actionShow(?NeverstaleContent $content, ?int $contentId = null): Response
+    public function actionShow(?Content $content, ?int $contentId = null): Response
     {
         $this->requirePermission(Permission::View->value);
 
         if ($content === null) {
-            $content = NeverstaleContent::find()->id($contentId)->siteId('*')->one();
+            $content = Content::find()->id($contentId)->siteId('*')->one();
 
-            if (!$content) {
+            if (! $content) {
                 throw new NotFoundHttpException('Content not found');
             }
         }
 
-        $this->view->registerAssetBundle(NeverstaleAsset::class);
+        // Eager-load the transaction logs
+        if ($content->id && $content->getRecord()) {
+            $transactionLogs = $content->getRecord()->getTransactionLogs()->all();
+        } else {
+            $transactionLogs = [];
+        }
 
         return $this->renderTemplate('neverstale/content/_show', [
             'content' => $content,
-            'title' => $content->title,
+            'title' => $content->getUiLabel(),
+            'transactionLogs' => $transactionLogs,
         ]);
     }
 
@@ -82,10 +88,10 @@ class ContentController extends BaseController
 
         $customId = $this->request->getRequiredParam('customId');
 
-        $content = $this->plugin->content->retrieveByCustomId($customId);
+        $content = Plugin::getInstance()->content->retrieveByCustomId($customId);
 
-        if (!$content) {
-            return $this->asFailure('Could not fetch content for customId: ' . $customId);
+        if (! $content) {
+            return $this->asFailure('Could not fetch content for customId: '.$customId);
         }
 
         return $this->asJson([
@@ -106,12 +112,12 @@ class ContentController extends BaseController
         $this->requirePostRequest();
         $contentId = $this->request->getRequiredBodyParam('contentId');
 
-        $content = NeverstaleContent::findOne($contentId);
+        $content = Content::findOne($contentId);
 
-        if (!$content) {
+        if (! $content) {
             return $this->respondWithError(Plugin::t('Content not found'));
         }
-        if (!$this->plugin->content->refresh($content)) {
+        if (! Plugin::getInstance()->content->refresh($content)) {
             return $this->respondWithError(Plugin::t('Could not refresh content'));
         }
 
@@ -122,11 +128,11 @@ class ContentController extends BaseController
      * Delete a content item in Craft + the Neverstale API
      *
      * @see https://neverstale.io/docs/content.html#deleting-content
-     * @see NeverstaleContent::beforeDelete()
+     * @see Content::beforeDelete()
      *
      * @throws ForbiddenHttpException
      * @throws MethodNotAllowedHttpException
-     * @throws \Throwable
+     * @throws Throwable
      */
     public function actionDelete(): Response
     {
@@ -135,7 +141,7 @@ class ContentController extends BaseController
 
         $contentId = $this->request->getParam('contentId');
 
-        if (!Craft::$app->getElements()->deleteElementById($contentId)) {
+        if (! Craft::$app->getElements()->deleteElementById($contentId)) {
             return $this->respondWithError(Plugin::t('Could not delete content'));
         }
 
@@ -154,13 +160,13 @@ class ContentController extends BaseController
         $this->requirePermission(Permission::Ingest->value);
 
         $contentId = $this->request->getParam('contentId');
-        $content = NeverstaleContent::findOne(['id' => $contentId]);
+        $content = Content::findOne(['id' => $contentId]);
 
-        if (!$content) {
+        if (! $content) {
             return $this->respondWithError(Plugin::t("Content #{id} not found", ['id' => $contentId]));
         }
 
-        if (!Plugin::getInstance()->content->ingest($content)) {
+        if (! Plugin::getInstance()->content->ingest($content)) {
             return $this->respondWithError(Plugin::t("Could not ingest content #{id}", ['id' => $contentId]));
         }
 
@@ -184,7 +190,7 @@ class ContentController extends BaseController
             return $this->respondWithError(Plugin::t('No content items selected'));
         }
 
-        $contents = NeverstaleContent::find()
+        $contents = Content::find()
             ->id($contentIds)
             ->all();
 
@@ -208,16 +214,16 @@ class ContentController extends BaseController
         if ($errorCount === 0) {
             return $this->respondWithSuccess(Plugin::t('Successfully ingested {count} content items', ['count' => $successCount]));
         } elseif ($successCount === 0) {
-            return $this->respondWithError(Plugin::t('Failed to ingest all content items') . ': ' . implode(', ', $errors));
+            return $this->respondWithError(Plugin::t('Failed to ingest all content items').': '.implode(', ', $errors));
         } else {
             return $this->asJson([
                 'success' => true,
                 'message' => Plugin::t('Ingested {successCount} of {total} content items. {errorCount} failed.', [
                     'successCount' => $successCount,
                     'total' => count($contents),
-                    'errorCount' => $errorCount
+                    'errorCount' => $errorCount,
                 ]),
-                'errors' => $errors
+                'errors' => $errors,
             ]);
         }
     }
@@ -232,13 +238,13 @@ class ContentController extends BaseController
         $this->requirePermission(Permission::ClearLogs->value);
 
         $contentId = $this->request->getParam('contentId');
-        $content = NeverstaleContent::findOne(['id' => $contentId]);
+        $content = Content::findOne(['id' => $contentId]);
 
-        if (!$content) {
+        if (! $content) {
             return $this->respondWithError(Plugin::t("Content #{id} not found", ['id' => $contentId]));
         }
 
-        if (!Plugin::getInstance()->transactionLog->deleteFor($content)) {
+        if (! Plugin::getInstance()->transactionLog->deleteFor($content)) {
             return $this->respondWithError(Plugin::t("Could reset transaction logs for content #{id}", ['id' => $contentId]));
         }
 

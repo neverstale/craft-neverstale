@@ -1,0 +1,104 @@
+<div class="test-connection">
+    <p class="instructions">
+        {{ 'Test your API connection to ensure everything is set up correctly.'|t('neverstale') }}
+    </p>
+    
+    <div class="test-connection-button">
+        <button type="button" class="btn" id="test-connection-btn">
+            <span class="btn-text">{{ 'Test Connection'|t('neverstale') }}</span>
+            <div class="spinner hidden" aria-label="{{ 'Testing connection...'|t('neverstale') }}"></div>
+        </button>
+    </div>
+    
+    <div id="test-connection-result" class="test-result hidden">
+        <div class="success-message hidden">
+            <div class="icon success">✓</div>
+            <div class="message">
+                <strong>{{ 'Connection successful!'|t('neverstale') }}</strong>
+                <p>{{ 'Your Neverstale connection is working properly.'|t('neverstale') }}</p>
+            </div>
+        </div>
+        
+        <div class="error-message hidden">
+            <div class="icon error">✗</div>
+            <div class="message">
+                <strong>{{ 'Connection failed'|t('neverstale') }}</strong>
+                <p class="error-details"></p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const testBtn = document.getElementById('test-connection-btn');
+    const btnText = testBtn.querySelector('.btn-text');
+    const spinner = testBtn.querySelector('.spinner');
+    const result = document.getElementById('test-connection-result');
+    const successMsg = result.querySelector('.success-message');
+    const errorMsg = result.querySelector('.error-message');
+    
+    testBtn.addEventListener('click', function() {
+        // Reset state
+        testBtn.disabled = true;
+        btnText.textContent = '{{ 'Testing...'|t('neverstale') }}';
+        spinner.classList.remove('hidden');
+        result.classList.add('hidden');
+        successMsg.classList.add('hidden');
+        errorMsg.classList.add('hidden');
+        
+        // Get form data
+        const apiKey = document.querySelector('input[name="settings[apiKey]"]').value;
+        const webhookSecret = document.querySelector('input[name="settings[webhookSecret]"]').value;
+        
+        if (!apiKey || !webhookSecret) {
+            showError('{{ 'Please fill in both API Key and Webhook Secret before testing.'|t('neverstale') }}');
+            return;
+        }
+        
+        // Make test request
+        fetch('{{ actionUrl('neverstale/settings/test-connection') }}', {
+            method: 'POST',
+            headers: {
+                'Accept': 'application/json',
+                'Content-Type': 'application/json',
+                'X-CSRF-Token': '{{ craft.app.request.csrfToken }}'
+            },
+            body: JSON.stringify({
+                apiKey: apiKey,
+                webhookSecret: webhookSecret
+            })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                showSuccess();
+            } else {
+                showError(data.error || '{{ 'Connection test failed'|t('neverstale') }}');
+            }
+        })
+        .catch(error => {
+            showError('{{ 'Network error. Please try again.'|t('neverstale') }}');
+        });
+    });
+    
+    function showSuccess() {
+        resetButton();
+        result.classList.remove('hidden');
+        successMsg.classList.remove('hidden');
+    }
+    
+    function showError(message) {
+        resetButton();
+        result.classList.remove('hidden');
+        errorMsg.classList.remove('hidden');
+        errorMsg.querySelector('.error-details').textContent = message;
+    }
+    
+    function resetButton() {
+        testBtn.disabled = false;
+        btnText.textContent = '{{ 'Test Connection'|t('neverstale') }}';
+        spinner.classList.add('hidden');
+    }
+});
+</script>

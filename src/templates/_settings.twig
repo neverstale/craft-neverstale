@@ -1,68 +1,233 @@
-{#
-  Neverstale Plugin Settings
+{% extends '_layouts/cp' %}
 
-  @author Zaengle
-  @package zaengle/craft-neverstale
-  @since 1.0.0
-  @see https://github.com/zaengle/craft-neverstale
-
-  @var plugin \neverstale\Plugin
-  @var settings \neverstale\models\Settings
-#}
-
-{%- import '_includes/forms' as forms %}
+{% import '_includes/forms' as forms %}
 {%- import 'neverstale/_macros' as helpers %}
 
-<h2>{{ 'Neverstale Credentials'| t('neverstale') }}</h2>
+{% do view.registerAssetBundle('neverstale\\neverstale\\assets\\NeverstaleAsset') %}
 
-{{ forms.autosuggestField({
-  label: 'API Key' | t('neverstale'),
-  instructions: 'You can find your API key in Neverstale after you create your Content Source'|t('neverstale'),
-  name: 'apiKey',
-  required: true,
-  value: settings.apiKey,
-  suggestEnvVars: true,
-  errors: settings.getErrors('apiKey'),
-  warning: helpers.configOverrideWarning('apiKey'),
-  disabled: craft.neverstale.config.isOverriddenByFile('apiKey'),
-}) }}
+{% set crumbs = [
+    { label: 'Neverstale'|t('neverstale'), url: url('neverstale') },
+    { label: 'Settings'|t('neverstale'), url: url('neverstale/settings') }
+] %}
 
-{{ forms.autosuggestField({
-  label: 'Webhook Secret' | t('neverstale'),
-  instructions: 'You can find your Webhook Secret in your Neverstale account settings.'|t('neverstale'),
-  name: 'webhookSecret',
-  required: true,
-  value: settings.webhookSecret,
-  suggestEnvVars: true,
-  errors: settings.getErrors('webhookSecret'),
-  warning: helpers.configOverrideWarning('webhookSecret'),
-  disabled: craft.neverstale.config.isOverriddenByFile('webhookSecret'),
-}) }}
+{% set title = 'Neverstale' %}
+{% set selectedSubnavItem = 'settings' %}
 
-<h2>{{ 'Content settings'| t('neverstale') }}</h2>
+{% set showWelcome = craft.app.request.getParam('welcome') or not settings.apiKey %}
 
-{{ forms.lightswitchField({
-  first: true,
-  label: 'Enable Neverstale sync' | t('neverstale'),
-  name: 'enable',
-  on: settings.enable,
-  warning: helpers.configOverrideWarning('enable'),
-  disabled: craft.neverstale.config.isOverriddenByFile('enable'),
-}) }}
+{% if not showWelcome %}
+    {% set tabs = {
+        credentials: { label: 'Credentials'|t('neverstale'), url: '#credentials' },
+        sections: { label: 'Content Settings'|t('neverstale'), url: '#sections' },
+        advanced: { label: 'Advanced'|t('neverstale'), url: '#advanced' }
+    } %}
+{% endif %}
 
-{{ forms.checkboxSelectField({
-  id: 'enabledSections',
-  label: 'Which Sections should be enabled for Neverstale sync?' | t('neverstale'),
-  name: 'enabledSectionIds',
-  showAllOption: true,
-  warning: helpers.configOverrideWarning('sections'),
-  required: true,
-  instructions: 'Choose which sections you want to sync with Neverstale.'|t('neverstale'),
-  options: craft.app.entries.allSections() | map(section => {
-    label: section.name,
-    id: section.handle,
-    value: section.id,
-    disabled: craft.neverstale.config.isOverriddenByFile('sections'),
-    checked: section.id in (settings.enabledSections | map(section => section.id ?? null)),
-  }),
-}) }}
+{% set readOnly = readOnly ?? false %}
+{% set fullPageForm = not readOnly %}
+
+{% if readOnly %}
+    {% set contentNotice = readOnlyNotice() %}
+{% endif %}
+
+{% set welcome = craft.app.request.getParam('welcome') %}
+{% set docs = 'https://github.com/neverstale/craft-neverstale#' %}
+
+{% block actionButton %}
+    {% if not readOnly %}
+        <input type="submit" class="btn submit" value="{{ 'Save'|t('app') }}">
+    {% endif %}
+{% endblock %}
+
+{% block content %}
+
+    {% if not readOnly %}
+        <input type="hidden" name="action" value="neverstale/settings/save">
+        <input type="hidden" name="pluginHandle" value="neverstale">
+    {% endif %}
+
+    {% if showWelcome %}
+        <div class="neverstale-welcome">
+            {{ include('neverstale/_includes/welcome/hero') }}
+
+            <div class="flex gap-xl welcome-section">
+                {{ include('neverstale/_includes/welcome/step', { step: 1, text: 'Add your API credentials' }) }}
+
+                <div class="flex-grow">
+                    {{ forms.autosuggestField({
+                        label: 'API Key' | t('neverstale'),
+                        instructions: 'You must have an active <a href="https://app.neverstale.com" target="_blank">Neverstale account</a> and have created a Content Source. Your API Key can be found in your Content Source settings.'|t('neverstale'),
+                        name: 'settings[apiKey]',
+                        value: settings.apiKey,
+                        errors: settings.getErrors('apiKey'),
+                        disabled: readOnly,
+                        warning: helpers.configOverrideWarning('apiKey'),
+                    }) }}
+
+                    {{ forms.autosuggestField({
+                        label: 'Webhook Secret' | t('neverstale'),
+                        instructions: 'Your Webhook Secret can be found in your Content Source settings alongside the API Key.'|t('neverstale'),
+                        name: 'settings[webhookSecret]',
+                        value: settings.webhookSecret,
+                        errors: settings.getErrors('webhookSecret'),
+                        disabled: readOnly,
+                        warning: helpers.configOverrideWarning('webhookSecret'),
+                    }) }}
+                </div>
+            </div>
+
+            <div class="flex gap-xl field welcome-section">
+                {{ include('neverstale/_includes/welcome/step', { step: 2, text: 'Enable sync and choose sections' }) }}
+
+                <div class="flex-grow">
+                    {{ forms.lightswitchField({
+                        label: 'Enable Neverstale sync' | t('neverstale'),
+                        name: 'settings[enable]',
+                        on: settings.enable,
+                        disabled: readOnly,
+                        warning: helpers.configOverrideWarning('enable'),
+                    }) }}
+
+                    {{ forms.checkboxSelectField({
+                        id: 'enabledSections',
+                        label: 'Which Sections should be enabled for Neverstale sync?' | t('neverstale'),
+                        name: 'settings[enabledSectionIds]',
+                        showAllOption: true,
+                        instructions: 'Choose which sections you want to sync with Neverstale.'|t('neverstale'),
+                        options: craft.app.entries.allSections() | map(section => ({
+                            label: section.name,
+                            id: section.handle,
+                            value: section.id,
+                        })),
+                        values: settings.allowAllSections ? '*' : settings.enabledSectionIds,
+                        disabled: readOnly,
+                        warning: helpers.configOverrideWarning('sections'),
+                    }) }}
+                </div>
+            </div>
+
+            <div class="flex gap-xl field welcome-section">
+                {{ include('neverstale/_includes/welcome/step', { step: 3, text: 'Test your connection' }) }}
+
+                <div class="flex-grow">
+                    {{ include('neverstale/_includes/welcome/test-connection') }}
+                </div>
+            </div>
+
+            {{ include('neverstale/_includes/welcome/footer', { docs: docs }) }}
+        </div>
+
+    {% else %}
+
+        <div id="credentials">
+            {{ forms.autosuggestField({
+                label: 'API Key' | t('neverstale'),
+                instructions: 'You must have an active <a href="https://app.neverstale.com" target="_blank">Neverstale account</a> and have created a Content Source. Your API Key can be found in your Content Source settings.'|t('neverstale'),
+                name: 'settings[apiKey]',
+                value: settings.apiKey,
+                errors: settings.getErrors('apiKey'),
+                disabled: readOnly,
+                warning: helpers.configOverrideWarning('apiKey'),
+            }) }}
+
+            {{ forms.autosuggestField({
+                label: 'Webhook Secret' | t('neverstale'),
+                instructions: 'Your Webhook Secret can be found in your Content Source settings alongside the API Key.'|t('neverstale'),
+                name: 'settings[webhookSecret]',
+                value: settings.webhookSecret,
+                errors: settings.getErrors('webhookSecret'),
+                disabled: readOnly,
+                warning: helpers.configOverrideWarning('webhookSecret'),
+            }) }}
+
+            {% if not readOnly %}
+                {{ include('neverstale/_includes/test-connection') }}
+            {% endif %}
+        </div>
+
+        <div id="sections" class="hidden">
+            <div class="flex field">
+                {{ include('neverstale/_includes/welcome/step', { step: 2, text: 'Select sections to sync' }) }}
+
+                <div class="flex-grow">
+                    {{ forms.lightswitchField({
+                        label: 'Enable Neverstale sync' | t('neverstale'),
+                        name: 'settings[enable]',
+                        on: settings.enable,
+                        disabled: readOnly,
+                        warning: helpers.configOverrideWarning('enable'),
+                    }) }}
+
+                    {{ forms.checkboxSelectField({
+                        id: 'enabledSections',
+                        label: 'Which Sections should be enabled for Neverstale sync?' | t('neverstale'),
+                        name: 'settings[enabledSectionIds]',
+                        showAllOption: true,
+                        instructions: 'Choose which sections you want to sync with Neverstale.'|t('neverstale'),
+                        options: craft.app.entries.allSections() | map(section => ({
+                            label: section.name,
+                            id: section.handle,
+                            value: section.id,
+                        })),
+                        values: settings.allowAllSections ? '*' : settings.enabledSectionIds,
+                        disabled: readOnly,
+                        warning: helpers.configOverrideWarning('sections'),
+                    }) }}
+                </div>
+            </div>
+
+            <div class="flex field">
+                {{ include('neverstale/_includes/welcome/step', { step: 3, text: 'Save and start tracking' }) }}
+
+                <div class="flex-grow">
+                    {{ include('neverstale/_includes/welcome/footer', { docs: docs }) }}
+                </div>
+            </div>
+        </div>
+
+        <div id="advanced" class="hidden">
+            <div class="field">
+                <h2>{{ 'Webhook Configuration'|t('neverstale') }}</h2>
+
+                {{ forms.autosuggestField({
+                    label: 'Webhook Domain Override'|t('neverstale'),
+                    instructions: 'Override the domain used for webhook endpoints. If empty, uses the current site domain. Example: "https://webhook.example.com"'|t('neverstale'),
+                    name: 'settings[webhookDomain]',
+                    value: settings.webhookDomain,
+                    errors: settings.getErrors('webhookDomain'),
+                    disabled: readOnly,
+                    warning: helpers.configOverrideWarning('webhookDomain'),
+                    placeholder: 'https://webhook.example.com',
+                }) }}
+            </div>
+
+            <div class="field">
+                <h2>{{ 'Logging'|t('neverstale') }}</h2>
+
+                {{ forms.lightswitchField({
+                    label: 'Debug Logging'|t('neverstale'),
+                    instructions: 'Enable verbose debug logging for troubleshooting. When disabled, only essential logs (errors, warnings, and key info) are written to improve performance and reduce log file size.'|t('neverstale'),
+                    name: 'settings[debugLogging]',
+                    on: settings.debugLogging,
+                    disabled: readOnly,
+                    warning: helpers.configOverrideWarning('debugLogging'),
+                }) }}
+
+                <div class="field">
+                    <div class="heading">
+                        <label>{{ 'Log File Location'|t('neverstale') }}</label>
+                    </div>
+                    <div class="instructions">
+                        <p>{{ 'Neverstale logs are written to:'|t('neverstale') }} <code>storage/logs/neverstale-YYYY-MM-DD.log</code>
+                        </p>
+                        <p>{{ 'Webhook logs are written to:'|t('neverstale') }} <code>storage/logs/neverstale-webhook-YYYY-MM-DD.log</code>
+                        </p>
+                        <p>{{ 'Log files are rotated daily and kept for 5 days by default.'|t('neverstale') }}</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    {% endif %}
+
+{% endblock %}

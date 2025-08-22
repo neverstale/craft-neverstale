@@ -3,6 +3,5 @@
 *.log
 *Thumbs.db
 .env
-node_modules/
-vendor/
-packages/
+/node_modules
+/vendor

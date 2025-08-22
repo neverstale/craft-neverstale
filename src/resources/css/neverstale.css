@@ -1,0 +1,742 @@
+.neverstale-welcome {
+    max-width: 800px;
+    margin: 0 auto;
+}
+
+.neverstale-welcome a {
+    color: #1570ef;
+}
+
+.neverstale-welcome a:hover {
+    color: #1570ef;
+}
+
+/* Lightswitch styling */
+.neverstale-welcome .lightswitch.on {
+    background-color: #1570ef;
+}
+
+.neverstale-welcome .lightswitch.on .lightswitch-container {
+    background-color: #1570ef;
+}
+
+.neverstale-welcome .lightswitch.on::before {
+    color: #1570ef;
+}
+
+.neverstale-welcome.hero {
+    text-align: center;
+    margin: 48px 0;
+    padding-bottom: 48px;
+    border-bottom: 1px solid #e3e5e8;
+}
+
+.neverstale-welcome.hero .main {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 16px;
+}
+
+.neverstale-welcome.hero .icon {
+    width: auto;
+    height: 48px;
+}
+
+.neverstale-welcome.hero .icon svg {
+    width: 100%;
+    height: 100%;
+}
+
+/* Dashboard content summary styles */
+.neverstale-stat-card {
+    background: var(--white);
+    border: 1px solid var(--hairline-color);
+    border-radius: var(--medium-border-radius);
+    padding: 1rem;
+    text-align: center;
+    transition: border-color 0.2s ease;
+}
+
+.neverstale-stat-card:hover {
+    border-color: var(--medium-text-color);
+}
+
+.neverstale-stat-number {
+    font-size: 2rem;
+    font-weight: 700;
+    color: var(--text-color);
+    line-height: 1;
+}
+
+.neverstale-stat-label {
+    font-size: 0.875rem;
+    color: var(--medium-text-color);
+    margin-top: 0.25rem;
+    font-weight: 500;
+}
+
+.neverstale-stat-flagged .neverstale-stat-number {
+    color: var(--error-color);
+}
+
+.neverstale-stat-synced .neverstale-stat-number {
+    color: var(--success-color);
+}
+
+.neverstale-stat-pending .neverstale-stat-number {
+    color: var(--warning-color);
+}
+
+/* Quick Actions Navigation */
+.neverstale-nav-item {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 12px 20px;
+    color: var(--text-color);
+    text-decoration: none;
+    font-weight: 500;
+    transition: all 0.2s ease;
+    border-right: 1px solid var(--hairline-color);
+    background: var(--white);
+}
+
+.neverstale-nav-item:last-child {
+    border-right: none;
+}
+
+.neverstale-nav-item:hover {
+    background: var(--gray-050);
+    color: var(--link-color);
+    text-decoration: none;
+}
+
+.neverstale-nav-item:active {
+    background: var(--gray-100);
+}
+
+.neverstale-welcome.hero h1 {
+    margin: 0;
+    font-size: 32px;
+    font-weight: 600;
+}
+
+.neverstale-welcome.hero p {
+    margin: 0;
+    color: #8b949e;
+    font-size: 16px;
+}
+
+.neverstale-welcome-footer {
+    background: #fbfcfe;
+    border: 1px solid #e3e5e8;
+    border-radius: 3px;
+    padding: 24px;
+    margin-top: 24px;
+    margin-bottom: 24px;
+}
+
+.neverstale-welcome-footer p {
+    margin: 0 0 16px 0;
+}
+
+.neverstale-welcome-footer p:last-child {
+    margin-bottom: 0;
+}
+
+.step {
+    display: flex;
+    gap: 12px;
+    align-items: center;
+    margin-right: 24px;
+    flex-shrink: 0;
+    font-weight: 500;
+    color: #656d76;
+}
+
+.step .number {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 48px;
+    height: 48px;
+    min-width: 48px;
+    background: #D6DD21;
+    color: white;
+    border-radius: 50%;
+    font-weight: 600;
+    font-size: 20px;
+    margin-top: 0;
+}
+
+.step .text {
+    display: none;
+    flex: 1;
+    line-height: 1.4;
+}
+
+/* Welcome section spacing and dividers */
+.welcome-section {
+    margin-bottom: 48px;
+    padding-bottom: 48px;
+    align-items: start;
+}
+
+.welcome-section:not(:last-child) {
+    border-bottom: 1px solid #e3e5e8;
+}
+
+.welcome-section:last-child {
+    margin-bottom: 0;
+    padding-bottom: 0;
+}
+
+/* Test Connection Widget */
+.test-connection {
+    padding: 24px;
+    background: #fbfcfe;
+    border: 1px solid #e3e5e8;
+    border-radius: 3px;
+}
+
+.test-connection .instructions {
+    margin: 0 0 16px 0;
+    color: #656d76;
+}
+
+.test-connection-button {
+}
+
+.test-connection-button .btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.test-result {
+
+    margin-top: 16px;
+}
+
+.success-message {
+    padding: 14px 16px;
+    background: #f7fce6;
+    border-radius: 3px;
+    border: 1px solid #D6DD21;
+    color: #5a6f2d;
+}
+
+.error-message {
+    padding: 14px 16px;
+    background: #f8d7da;
+    border-radius: 3px;
+    border: 1px solid #dc3545;
+    color: #721c24;
+}
+
+.success-message,
+.error-message {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+}
+
+.test-result .icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    font-weight: bold;
+    font-size: 14px;
+    flex-shrink: 0;
+}
+
+.test-result .icon.success {
+    background: #D6DD21;
+    color: white;
+}
+
+.test-result .icon.error {
+    background: #dc3545;
+    color: white;
+}
+
+.test-result .message strong {
+    display: block;
+    margin-bottom: 4px;
+}
+
+.test-result .message p {
+    margin: 0;
+    font-size: 14px;
+    opacity: 0.9;
+}
+
+/* Flag Cards */
+.flag-cards {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    margin-top: 16px;
+}
+
+.flag-card {
+    background: var(--white);
+    border: 1px solid var(--hairline-color);
+    border-radius: var(--medium-border-radius);
+    padding: 20px;
+    transition: all 0.2s ease;
+}
+
+.flag-card:hover {
+    border-color: var(--medium-text-color);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+}
+
+/* Flag-prioritized layout: 2/3 flags, 1/3 meta */
+.content-body .grid[data-cols="2"] {
+    gap: 30px;
+    display: grid;
+    grid-template-columns: 2fr 1fr;
+}
+
+/* Proper spacing for column headings */
+.content-body .grid[data-cols="2"] .heading {
+    margin-bottom: 8px;
+}
+
+.content-body .grid[data-cols="2"] .instructions {
+    margin-bottom: 24px;
+}
+
+.content-body .grid[data-cols="2"] .meta {
+    margin-top: 0;
+}
+
+.flag-header {
+    margin-bottom: 16px;
+}
+
+.flag-title {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.flag-title h6 {
+    margin: 0;
+    font-size: 16px;
+    font-weight: 600;
+    color: var(--text-color);
+    line-height: 1.2;
+}
+
+.flag-title .status {
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    flex-shrink: 0;
+}
+
+.flag-content {
+    margin-bottom: 16px;
+}
+
+.flag-content p {
+    margin: 0;
+    font-size: 14px;
+    line-height: 1.5;
+    color: var(--medium-text-color);
+}
+
+.flag-snippet {
+    margin-bottom: 16px;
+    background: var(--gray-050);
+    border: 1px solid var(--hairline-color);
+    border-radius: var(--small-border-radius);
+    padding: 12px;
+}
+
+.flag-snippet code {
+    font-family: var(--mono-font-family);
+    font-size: 13px;
+    line-height: 1.4;
+    color: var(--text-color);
+    background: none;
+    padding: 0;
+    border: none;
+    display: block;
+    white-space: pre-wrap;
+    word-break: break-word;
+}
+
+.flag-meta {
+    display: flex;
+    gap: 20px;
+    flex-wrap: wrap;
+    padding-top: 16px;
+    border-top: 1px solid var(--hairline-color);
+}
+
+.flag-meta-item {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    font-size: 13px;
+}
+
+.flag-meta-item .light {
+    color: var(--light-text-color);
+    font-size: 12px;
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.02em;
+}
+
+/* Flag Assignment Styling */
+.flag-assignment {
+    margin-bottom: 12px;
+    padding: 12px;
+    background: var(--gray-050);
+    border: 1px solid var(--hairline-color);
+    border-radius: var(--small-border-radius);
+    border-left: 3px solid var(--warning-color);
+}
+
+.assignment-user {
+    margin-bottom: 6px;
+}
+
+.assignment-user .light {
+    color: var(--light-text-color);
+    font-size: 11px;
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.02em;
+    display: block;
+    margin-bottom: 2px;
+}
+
+.assignment-user strong {
+    color: var(--text-color);
+    font-weight: 600;
+    font-size: 14px;
+}
+
+.assignment-note {
+    font-size: 13px;
+    line-height: 1.4;
+}
+
+.assignment-note .light {
+    color: var(--medium-text-color);
+    font-weight: 500;
+    font-size: 12px;
+}
+
+/* Improved Content Details Styling */
+.content-body .meta.readable {
+    background: var(--white);
+    border: 1px solid var(--hairline-color);
+    border-radius: var(--medium-border-radius);
+    padding: 0;
+    margin: 0;
+    overflow: hidden;
+}
+
+.content-body .meta.readable .data {
+    padding: 10px 16px;
+    border-bottom: 1px solid var(--hairline-color);
+    transition: background-color 0.15s ease;
+    margin: 0;
+}
+
+.content-body .meta.readable .data:first-child {
+    border-top-left-radius: var(--medium-border-radius);
+    border-top-right-radius: var(--medium-border-radius);
+}
+
+.content-body .meta.readable .data:last-child {
+    border-bottom: none;
+    border-bottom-left-radius: var(--medium-border-radius);
+    border-bottom-right-radius: var(--medium-border-radius);
+}
+
+.content-body .meta.readable .data:hover {
+    background: var(--gray-050);
+}
+
+.content-body .meta.readable .data .heading {
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--medium-text-color);
+    text-transform: uppercase;
+    letter-spacing: 0.02em;
+    margin: 0 0 2px 0;
+}
+
+.content-body .meta.readable .data .value {
+    font-size: 13px;
+    color: var(--text-color);
+    line-height: 1.3;
+    word-break: break-all;
+}
+
+.content-body .meta.readable .data .value code {
+    background: var(--gray-100);
+    padding: 2px 4px;
+    border-radius: var(--small-border-radius);
+    font-family: var(--mono-font-family);
+    font-size: 11px;
+    color: var(--text-color);
+    border: 1px solid var(--hairline-color);
+}
+
+/* ===================================
+   Neverstale Flag Slideout Styles
+   ===================================
+   1. Section Styles
+   2. Flag Item Styles
+   3. Radio Card Styles
+   4. Custom Date Field
+   5. Responsive Design
+   =================================== */
+
+/* ===================================
+   1. Section Styles
+   =================================== */
+.neverstale-section {
+    margin-bottom: 32px;
+}
+
+.neverstale-section h3 {
+    margin: 0 0 8px 0;
+    font-size: 16px;
+    font-weight: 600;
+    color: #24292f;
+}
+
+/* ===================================
+   2. Flag Item Styles
+   =================================== */
+.neverstale-flag-item {
+    border-radius: 6px;
+    padding: 16px;
+    margin-bottom: 24px;
+}
+
+.neverstale-flag-item--active {
+    border: 1px solid #ddd;
+    background: #fff;
+}
+
+.neverstale-flag-item--empty {
+    border: 1px solid #e5e7eb;
+    background: #f9fafb;
+}
+
+.neverstale-flag-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 12px;
+}
+
+.neverstale-flag-title-inner {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.neverstale-flag-label {
+    font-size: 14px;
+}
+
+.neverstale-flag-explanation {
+    margin-bottom: 12px;
+    line-height: 1.5;
+    color: #374151;
+}
+
+.neverstale-flag-explanation--empty {
+    color: #6b7280;
+}
+
+.neverstale-flag-snippet {
+    margin-bottom: 12px;
+    padding: 12px;
+    background: #f9fafb;
+    border: 1px solid #e5e7eb;
+    border-radius: 4px;
+}
+
+.neverstale-flag-snippet-label {
+    font-size: 11px;
+    text-transform: uppercase;
+    color: #6b7280;
+    margin-bottom: 6px;
+    font-weight: 500;
+}
+
+.neverstale-flag-snippet-code {
+    font-family: 'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, monospace;
+    font-size: 13px;
+    color: #0969da;
+    background: none;
+    padding: 0;
+}
+
+/* ===================================
+   3. Radio Card Styles
+   =================================== */
+.neverstale-radio-cards {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    margin-top: 8px;
+}
+
+.neverstale-radio-card {
+    display: block;
+    position: relative;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.neverstale-radio-card input[type="radio"] {
+    position: absolute;
+    opacity: 0;
+    width: 0;
+    height: 0;
+}
+
+.neverstale-radio-card-content {
+    display: block;
+    padding: 16px;
+    border: 2px solid #e5e7eb;
+    border-radius: 8px;
+    background: #fff;
+    transition: all 0.2s ease;
+}
+
+.neverstale-radio-card:hover .neverstale-radio-card-content {
+    border-color: #d1d5db;
+    background: #f9fafb;
+}
+
+.neverstale-radio-card input[type="radio"]:checked ~ .neverstale-radio-card-content {
+    border-color: #0073e5;
+    background: #f0f9ff;
+    box-shadow: 0 0 0 3px rgba(0, 115, 229, 0.1);
+}
+
+.neverstale-radio-card input[type="radio"]:focus ~ .neverstale-radio-card-content {
+    outline: 2px solid #0073e5;
+    outline-offset: 2px;
+}
+
+.neverstale-radio-card-header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 4px;
+}
+
+.neverstale-radio-indicator {
+    display: inline-block;
+    width: 20px;
+    height: 20px;
+    border: 2px solid #d1d5db;
+    border-radius: 50%;
+    position: relative;
+    flex-shrink: 0;
+    transition: all 0.2s ease;
+}
+
+.neverstale-radio-card input[type="radio"]:checked ~ .neverstale-radio-card-content .neverstale-radio-indicator {
+    border-color: #0073e5;
+}
+
+.neverstale-radio-card input[type="radio"]:checked ~ .neverstale-radio-card-content .neverstale-radio-indicator::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 10px;
+    height: 10px;
+    background: #0073e5;
+    border-radius: 50%;
+    transform: translate(-50%, -50%);
+}
+
+.neverstale-radio-card-header strong {
+    font-size: 14px;
+    font-weight: 600;
+    color: #111827;
+}
+
+.neverstale-radio-card-description {
+    font-size: 13px;
+    color: #6b7280;
+    line-height: 1.4;
+    margin-left: 32px;
+}
+
+.neverstale-radio-card input[type="radio"]:checked ~ .neverstale-radio-card-content .neverstale-radio-card-header strong {
+    color: #0073e5;
+}
+
+/* ===================================
+   4. Custom Date Field
+   =================================== */
+.neverstale-radio-card-custom .neverstale-radio-card-body {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+}
+
+.neverstale-radio-card-custom .neverstale-radio-card-left {
+    flex: 0 0 auto;
+}
+
+.neverstale-radio-card-custom .neverstale-radio-card-right {
+    flex: 0 0 auto;
+}
+
+/* Simple width for date input */
+#custom-date-section input {
+    width: 140px;
+}
+
+/* ===================================
+   5. Responsive Design
+   =================================== */
+@media (max-width: 600px) {
+    .neverstale-radio-card-content {
+        padding: 14px;
+    }
+    
+    .neverstale-radio-card-description {
+        margin-left: 0;
+        margin-top: 8px;
+    }
+    
+    /* Stack date picker below text on mobile */
+    .neverstale-radio-card-custom .neverstale-radio-card-body {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+    
+    #custom-date-section {
+        margin-top: 12px;
+        width: 100%;
+    }
+    
+    #custom-date-section input {
+        width: 100%;
+    }
+}

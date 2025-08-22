@@ -1,0 +1,153 @@
+{# Slideout content for ignore flag options - Craft native form pattern #}
+{% import "_includes/forms" as forms %}
+
+{# Form handled by asCpScreen in controller #}
+{{ hiddenInput('flagId', flagId) }}
+{{ hiddenInput('customId', customId) }}
+
+{# Flag Information Section #}
+<div class="neverstale-section">
+    <h3>{{ 'Ignoring Flag'|t('neverstale') }}</h3>
+    
+    {% if flag %}
+        <div class="neverstale-flag-item neverstale-flag-item--active">
+            <div class="neverstale-flag-header">
+                <div class="neverstale-flag-title">
+                    <div class="neverstale-flag-title-inner">
+                        <span class="status red"></span>
+                        <strong class="neverstale-flag-label">{{ flag.getUiLabel() }}</strong>
+                    </div>
+                </div>
+            </div>
+            
+            {% if flag.reason %}
+                <div class="neverstale-flag-explanation">
+                    {{ flag.reason }}
+                </div>
+            {% endif %}
+            
+            {% if flag.snippet %}
+                <div class="neverstale-flag-snippet">
+                    <div class="neverstale-flag-snippet-label">
+                        {{ 'Flagged Content:'|t('neverstale') }}
+                    </div>
+                    <code class="neverstale-flag-snippet-code">{{ flag.snippet }}</code>
+                </div>
+            {% endif %}
+        </div>
+    {% else %}
+        <div class="neverstale-flag-item neverstale-flag-item--empty">
+            <div class="neverstale-flag-header">
+                <div class="neverstale-flag-title">
+                    <div class="neverstale-flag-title-inner">
+                        <span class="status gray"></span>
+                        <strong class="neverstale-flag-label">{{ 'Flag #' ~ flagId }}</strong>
+                    </div>
+                </div>
+            </div>
+            <div class="neverstale-flag-explanation neverstale-flag-explanation--empty">
+                {{ 'Flag details could not be loaded'|t('neverstale') }}
+            </div>
+        </div>
+    {% endif %}
+</div>
+
+{# Duration Selection with Card-Style Radio Buttons #}
+<div class="field">
+    <div class="heading">
+        <label>{{ 'How long should this flag be ignored?'|t('neverstale') }}</label>
+    </div>
+    <div class="neverstale-radio-cards">
+        <label class="neverstale-radio-card">
+            <input type="radio" name="ignoreOption" value="forever" checked>
+            <div class="neverstale-radio-card-content">
+                <div class="neverstale-radio-card-header">
+                    <span class="neverstale-radio-indicator"></span>
+                    <strong>{{ 'Ignore Forever'|t('neverstale') }}</strong>
+                </div>
+                <div class="neverstale-radio-card-description">
+                    {{ 'This flag will never appear again'|t('neverstale') }}
+                </div>
+            </div>
+        </label>
+        
+        <label class="neverstale-radio-card">
+            <input type="radio" name="ignoreOption" value="1-day">
+            <div class="neverstale-radio-card-content">
+                <div class="neverstale-radio-card-header">
+                    <span class="neverstale-radio-indicator"></span>
+                    <strong>{{ '1 Day'|t('neverstale') }}</strong>
+                </div>
+                <div class="neverstale-radio-card-description">
+                    {{ 'Until tomorrow'|t('neverstale') }}
+                </div>
+            </div>
+        </label>
+        
+        <label class="neverstale-radio-card">
+            <input type="radio" name="ignoreOption" value="1-week">
+            <div class="neverstale-radio-card-content">
+                <div class="neverstale-radio-card-header">
+                    <span class="neverstale-radio-indicator"></span>
+                    <strong>{{ '1 Week'|t('neverstale') }}</strong>
+                </div>
+                <div class="neverstale-radio-card-description">
+                    {{ 'For the next 7 days'|t('neverstale') }}
+                </div>
+            </div>
+        </label>
+        
+        <label class="neverstale-radio-card">
+            <input type="radio" name="ignoreOption" value="1-month">
+            <div class="neverstale-radio-card-content">
+                <div class="neverstale-radio-card-header">
+                    <span class="neverstale-radio-indicator"></span>
+                    <strong>{{ '1 Month'|t('neverstale') }}</strong>
+                </div>
+                <div class="neverstale-radio-card-description">
+                    {{ 'For the next 30 days'|t('neverstale') }}
+                </div>
+            </div>
+        </label>
+        
+        <label class="neverstale-radio-card">
+            <input type="radio" name="ignoreOption" value="3-months">
+            <div class="neverstale-radio-card-content">
+                <div class="neverstale-radio-card-header">
+                    <span class="neverstale-radio-indicator"></span>
+                    <strong>{{ '3 Months'|t('neverstale') }}</strong>
+                </div>
+                <div class="neverstale-radio-card-description">
+                    {{ 'For the next 90 days'|t('neverstale') }}
+                </div>
+            </div>
+        </label>
+        
+        <label class="neverstale-radio-card neverstale-radio-card-custom">
+            <input type="radio" name="ignoreOption" value="custom">
+            <div class="neverstale-radio-card-content">
+                <div class="neverstale-radio-card-body">
+                    <div class="neverstale-radio-card-left">
+                        <div class="neverstale-radio-card-header">
+                            <span class="neverstale-radio-indicator"></span>
+                            <strong>{{ 'Custom Date'|t('neverstale') }}</strong>
+                        </div>
+                        <div class="neverstale-radio-card-description">
+                            {{ 'Pick a specific date'|t('neverstale') }}
+                        </div>
+                    </div>
+                    <div class="neverstale-radio-card-right" id="custom-date-section">
+                        {{ forms.dateField({
+                            name: 'customDate',
+                            value: null,
+                            placeholder: 'Select date'|t('neverstale')
+                        }) }}
+                    </div>
+                </div>
+            </div>
+        </label>
+    </div>
+</div>
+
+
+{# Styles are now in resources/css/neverstale.css #}

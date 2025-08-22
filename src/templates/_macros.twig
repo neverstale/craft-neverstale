@@ -1,26 +1,26 @@
 {%- macro configOverrideWarning(setting, fileConfig) -%}
-  {%- if craft.neverstale.config.get(setting) is not null -%}
-    {{- 'This setting is being overridden by the `{setting}` value in the `config/neverstale.php` file.'|t('neverstale', params = {
-      setting: setting,
-    }) }}
-  {%- else -%}
-    {{ false }}
-  {%- endif -%}
+    {%- if craft.neverstale.config.get(setting) is not null -%}
+        {{- 'This setting is being overridden by the `{setting}` value in the `config/neverstale.php` file.'|t('neverstale', params = {
+            setting: setting,
+        }) }}
+    {%- else -%}
+        {{ false }}
+    {%- endif -%}
 {%- endmacro -%}
 
 {%- macro alert(message, type = 'info', classes = '', attrs = {}) %}
-  {%- set alertClasses = 'ns-bg-blue-100 ns-border-blue-500' %}
-  {%- switch type %}
+    {%- set alertClasses = 'ns-bg-blue-100 ns-border-blue-500' %}
+    {%- switch type %}
     {%- case 'warning' %}
-      {%- set alertClasses = 'ns-bg-orange-100 ns-border-orange-500' %}
+        {%- set alertClasses = 'ns-bg-orange-100 ns-border-orange-500' %}
     {%- case 'error' %}
-      {%- set alertClasses = 'ns-bg-red-100 ns-border-red-700' %}
-  {%- case 'success' %}
-      {%- set alertClasses = 'ns-bg-green-100 ns-border-green-700' %}
-  {%- endswitch  %}
-  <div {{  attr({
-    class: 'ns-mt-2 ns-p-2 ns-border ns-rounded ns-flex ns-gap-2 ns-items-baseline ' ~ alertClasses ~ ' ' ~ classes,
-  } | merge(attrs)) }}>
-    {{ message | raw }}
-  </div>
+        {%- set alertClasses = 'ns-bg-red-100 ns-border-red-700' %}
+    {%- case 'success' %}
+        {%- set alertClasses = 'ns-bg-green-100 ns-border-green-700' %}
+    {%- endswitch  %}
+    <div {{  attr({
+        class: 'ns-mt-2 ns-p-2 ns-border ns-rounded ns-flex ns-gap-2 ns-items-baseline ' ~ alertClasses ~ ' ' ~ classes,
+    } | merge(attrs)) }}>
+        {{ message | raw }}
+    </div>
 {% endmacro %}

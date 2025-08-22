@@ -1,33 +1,36 @@
 <?php
 
-namespace neverstale\craft\behaviors;
+namespace neverstale\neverstale\behaviors;
 
-use craft\base\ElementInterface;
 use craft\elements\Entry;
+use neverstale\neverstale\elements\Content;
 use yii\base\Behavior;
-use neverstale\craft\elements\db\NeverstaleContentQuery;
-use neverstale\craft\elements\NeverstaleContent;
+use yii\base\InvalidConfigException;
 
 /**
  * Has Neverstale Content Behavior
  *
- * @author Zaengle
- * @package zaengle/craft-neverstale
- * @since 1.0.0
- * @see https://github.com/zaengle/craft-neverstale
+ * @author  Zaengle
+ * @package neverstale/neverstale
+ * @since   1.0.0
  *
- * @property-read NeverstaleContent|null $neverstaleContent
- * @property Entry $owner
+ * @property-read Content|null $neverstaleContent
+ * @property Entry             $owner
  */
 class HasNeverstaleContentBehavior extends Behavior
 {
-    public function getNeverstaleContent(): NeverstaleContent|ElementInterface|null
+    /**
+     * Because this adds a property to the owner,
+     * we want to be specific about the  name of the property
+     * to avoid conflicts with other behaviors or properties.
+     * @return Content|null
+     * @throws InvalidConfigException
+     */
+    public function getNeverstaleContent(): ?Content
     {
-        /** @var NeverstaleContentQuery $query */
-        $query = NeverstaleContent::find();
-
-        return $query->entryId($this->owner->id)
-            ->orderBy(['dateUpdated' => SORT_DESC])
+        return Content::find()
+            ->entryId($this->owner->canonicalId ?? $this->owner->id)
+            ->siteId($this->owner->siteId)
             ->one();
     }
 }

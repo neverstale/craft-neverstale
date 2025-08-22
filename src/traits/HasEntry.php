@@ -1,6 +1,6 @@
 <?php
 
-namespace neverstale\craft\traits;
+namespace neverstale\neverstale\traits;
 
 use Craft;
 use craft\base\ElementInterface;

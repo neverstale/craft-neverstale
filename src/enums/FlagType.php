@@ -1,12 +1,12 @@
 <?php
 
-namespace neverstale\craft\enums;
+namespace neverstale\neverstale\enums;
 
 /**
  * Neverstale Flag Type Enum
  *
  * @author Zaengle
- * @package zaengle/craft-neverstale
+ * @package neverstale/neverstale
  * @since 1.0.0
  * @see https://github.com/zaengle/craft-neverstale
  */

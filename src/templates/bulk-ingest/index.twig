@@ -1,0 +1,107 @@
+{% extends "_layouts/cp" %}
+{% import "_includes/forms" as forms %}
+
+{% set title = 'Bulk Content Ingestion'|t('neverstale') %}
+{% set selectedSubnavItem = 'bulk-ingest' %}
+
+{%- set crumbs = [
+  { label: 'Neverstale' | t('neverstale'), url: url('neverstale') },
+  { label: 'Bulk Ingest' | t('neverstale'), url: url('neverstale/bulk-ingest') },
+] %}
+
+{% block content %}
+    <div id="bulk-ingest-utility" class="bulk-ingest-utility">
+        
+        <div class="pane">
+            <h2>{{ 'Start Bulk Ingestion'|t('neverstale') }}</h2>
+            
+            <form id="bulk-ingest-form" method="post">
+                {{ csrfInput() }}
+                <input type="hidden" name="action" value="neverstale/bulk-ingest/start-bulk-ingest">
+                
+                <div class="field">
+                    <div class="heading">
+                        <label>{{ 'Content Selection'|t('neverstale') }}</label>
+                    </div>
+                    <div class="instructions">
+                        <p>{{ 'Select which sections to process.'|t('neverstale') }}</p>
+                    </div>
+                    <div class="input">
+                        {% if sectionOptions|length > 0 %}
+                            {% set sectionCheckboxes = [] %}
+                            {% for section in sectionOptions %}
+                                {% set sectionCheckboxes = sectionCheckboxes|merge([{
+                                    label: section.label,
+                                    value: section.value
+                                }]) %}
+                            {% endfor %}
+                            
+                            {{ forms.checkboxGroup({
+                                name: 'sections',
+                                options: sectionCheckboxes,
+                                class: 'section-checkboxes'
+                            }) }}
+                        {% else %}
+                            <p class="warning">{{ 'No sections are enabled for Neverstale. Please configure sections in the plugin settings.'|t('neverstale') }}</p>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <div class="field">
+                    <div class="heading">
+                        <label for="site-select">{{ 'Site'|t('neverstale') }}</label>
+                    </div>
+                    <div class="input">
+                        {{ forms.select({
+                            name: 'siteId',
+                            id: 'site-select',
+                            options: [{ label: 'All Sites'|t('neverstale'), value: '' }]|merge(craft.app.sites.allSites|map(site => { label: site.name, value: site.id })),
+                            value: ''
+                        }) }}
+                    </div>
+                </div>
+
+                <div class="field">
+                    <div class="heading">
+                        <label for="batch-size">{{ 'Batch Size'|t('neverstale') }}</label>
+                    </div>
+                    <div class="instructions">
+                        <p>{{ 'Number of items to process per batch (1-100).'|t('neverstale') }}</p>
+                    </div>
+                    <div class="input">
+                        {{ forms.text({
+                            name: 'batchSize',
+                            id: 'batch-size',
+                            value: 100,
+                            type: 'number',
+                            min: 1,
+                            max: 100,
+                            size: 10
+                        }) }}
+                    </div>
+                </div>
+
+                <div class="buttons">
+                    <button type="submit" class="btn submit"{% if sectionOptions|length == 0 %} disabled{% endif %}>
+                        {{ 'Start Bulk Ingestion'|t('neverstale') }}
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <style>
+        .bulk-ingest-utility .pane {
+            margin-bottom: 2rem;
+        }
+        
+        .section-checkboxes {
+            max-height: 200px;
+            overflow-y: auto;
+            border: 1px solid #d1d5db;
+            border-radius: 4px;
+            padding: 0.5rem;
+        }
+    </style>
+
+{% endblock %}

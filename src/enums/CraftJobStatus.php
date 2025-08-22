@@ -1,6 +1,6 @@
 <?php
 
-namespace neverstale\craft\enums;
+namespace neverstale\neverstale\enums;
 
 /**
  * Job status is essentially an enum but it's not exposed as such in Craft.

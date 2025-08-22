@@ -1,0 +1,15 @@
+{% set showWelcome = craft.app.request.getParam('welcome') or not settings.apiKey %}
+{% if showWelcome %}
+
+    <div class="neverstale-welcome-footer readable">
+        <p>
+            📊
+            {{ 'Visit your <a href="{url}" class="go">Neverstale dashboard</a> to view detailed content analytics and set up staleness alerts.'|t('neverstale', {url: 'https://neverstale.com/dashboard'})|raw }}
+        </p>
+        <p>
+            📖
+            {{ 'Need help? Check out the <a href="{url}" class="go" target="_blank">Getting Started Guide</a>'|t('neverstale', {url: docs ~ 'getting-started'})|raw }}
+        </p>
+    </div>
+
+{% endif %}

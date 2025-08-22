@@ -1,72 +1,269 @@
-{#
-  Neverstale Content Show/Edit Template
+{% extends "_layouts/cp" %}
+{% do view.registerAssetBundle('neverstale\\neverstale\\assets\\NeverstaleAsset') %}
 
-  @author Zaengle
-  @package zaengle/craft-neverstale
-  @since 1.0.0
-  @see https://github.com/zaengle/craft-neverstale
-  @var content \neverstale\elements\NeverstaleContent
-#}
+{% set title = content.uiLabel %}
+{% set docTitle = title %}
+{% set selectedSubnavItem = 'content' %}
 
-{%- extends '_layouts/cp' %}
-{%- import '_includes/forms' as forms %}
-
-{%- set crumbs = [
-  { label: 'Neverstale' | t('neverstale'), url: url('neverstale') },
-  { label: 'Content' | t('neverstale'), url: url('neverstale/content') },
-  { label: "##{content.id}", url: content.cpEditUrl },
+{% set crumbs = [
+    { label: "Neverstale"|t('neverstale'), url: url('neverstale') },
+    { label: "Content"|t('neverstale'), url: url('neverstale/content') },
+    { label: content.uiLabel }
 ] %}
 
-{%- set title = "Neverstale: #{content.entry.title}" %}
-
-{%- do craft.neverstale.viteService.register('src/web/assets/neverstale/src/neverstale.ts', false, {
-  'depends': [
-    'neverstale\\craft\\web\\assets\\neverstale\\NeverstaleAsset',
-  ],
-}) %}
-
-{%- block actionButton %}
-  <form method="post">
-    {{ hiddenInput('contentId', content.id) }}
-    {{ actionInput('neverstale/content/ingest') }}
-    {{ redirectInput(craft.app.request.url) }}
-    {{ csrfInput() }}
-    <button type="submit" class="btn icon">
-      {{ tag('span', {
-        'data-icon': 'circle-arrow-up',
-        'data-icon-size': 'small',
-        'role': 'img',
-      }) }}
-      <span>{{ 'Resubmit Content to Neverstale'|t('neverstale') }}</span>
-    </button>
-  </form>
-{%- endblock %}
-
-
-
-{%- block main %}
-  <div class="ns-grid ns-grid-cols-1 lg:ns-grid-cols-3 ns-gap-4 ns-ms-1 ns-me-1">
-    {%- if content.isPendingProcessingOrStale %}
-        <blockquote class="note warning lg:ns-col-span-3 ns-mb-4">
-          <p>{{ 'This content is currently pending processing by Neverstale, and as such
-      some values may be out of date'|t('neverstale') }}
-          </p>
-        </blockquote>
-    {%- endif %}
-    <div class="content-pane ns-px-4 lg:ns-col-span-2">
-      {% include 'neverstale/_components/content/submission-details' with { content: content } only %}
-      <hr class="ns-ms-0 ns-me-0">
-      {% include 'neverstale/_components/content/transaction-log' with { content: content } only %}
+{# Add all action buttons to the header actions #}
+{% block actionButton %}
+    <div class="btngroup">
+        <button type="button" class="btn submit" data-action="neverstale/content/ingest"
+                data-content-id="{{ content.id }}">
+            {{ "Trigger Analysis"|t('neverstale') }}
+        </button>
+        {% if content.entry %}
+            <a href="{{ content.entry.cpEditUrl }}" class="btn" target="_blank">
+                {{ "Edit Entry"|t('neverstale') }}
+            </a>
+        {% endif %}
+        <a href="{{ url('neverstale/content') }}" class="btn">
+            {{ "Back to Content"|t('neverstale') }}
+        </a>
     </div>
-    <div class="content-pane lg:ns-col-span-1">
-      {% include 'neverstale/_components/flags-widget' with {
-        content: content,
-        title: 'Content Flags'|t('neverstale'),
-        opts: {
-          showContentSummary: false,
-          showLocalDetailsLink: false,
-        },
-      } only %}
-    </div>
-  </div>
 {% endblock %}
+
+{% block content %}
+    <div class="content-body">
+        <div class="grid" data-cols="2">
+            {# Left column - Content Flags (2/3 width) #}
+            <div>
+                <div class="field">
+                    {% if content.flagCount and content.flagCount > 0 %}
+                        {% set allFlags = content.getFlags() %}
+                        
+                        {% if allFlags|length %}
+                            <div class="heading">
+                                <label>{{ "Content Flags"|t('neverstale') }}</label>
+                            </div>
+                            <div class="instructions">
+                                <p>{{ "This content has {count} flag(s) detected by Neverstale analysis."|t('neverstale', { count: allFlags|length }) }}</p>
+                            </div>
+
+                            <div class="flag-cards">
+                                {% for flag in allFlags %}
+                                    <div class="flag-card{{ flag.isActive() ? '' : ' flag-ignored' }}">
+                                        <div class="flag-header">
+                                            <div class="flag-title">
+                                                <span class="status {{ flag.isActive() ? 'red' : 'gray' }}"></span>
+                                                <h6>{{ flag.flag|title }}{{ flag.isActive() ? '' : ' (Ignored)' }}</h6>
+                                            </div>
+                                        </div>
+
+                                        {% if flag.reason %}
+                                            <div class="flag-content">
+                                                <p>{{ flag.reason }}</p>
+                                            </div>
+                                        {% endif %}
+
+                                        {% if flag.snippet %}
+                                            <div class="flag-snippet">
+                                                <code class="language-text">{{ flag.snippet }}</code>
+                                            </div>
+                                        {% endif %}
+
+
+                                        {% if flag.lastAnalyzedAt or flag.expiredAt %}
+                                            <div class="flag-meta">
+                                                {% if flag.lastAnalyzedAt %}
+                                                    <span class="flag-meta-item">
+                                                        <span class="light">{{ "Analyzed"|t('neverstale') }}</span>
+                                                        {{ flag.lastAnalyzedAt|datetime('short') }}
+                                                    </span>
+                                                {% endif %}
+                                                {% if flag.expiredAt %}
+                                                    <span class="flag-meta-item">
+                                                        <span class="light">{{ "Expires"|t('neverstale') }}</span>
+                                                        {{ flag.expiredAt|datetime('short') }}
+                                                    </span>
+                                                {% endif %}
+                                            </div>
+                                        {% endif %}
+                                    </div>
+                                {% endfor %}
+                            </div>
+                        {% endif %}
+                    {% else %}
+                        <div class="heading">
+                            <label>{{ "Content Flags"|t('neverstale') }}</label>
+                        </div>
+                        <div class="instructions">
+                            <p>{{ "No flags detected for this content."|t('neverstale') }}</p>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+
+            {# Right column - Content Details (1/3 width) #}
+            <div>
+                <div class="field">
+                    <div class="heading">
+                        <label>{{ "Content Details"|t('neverstale') }}</label>
+                    </div>
+                    <div class="instructions">
+                        <p>{{ "Metadata and analysis information for this content."|t('neverstale') }}</p>
+                    </div>
+
+                    <div class="meta readable">
+                        <div class="data">
+                            <h5 class="heading">{{ "Status"|t('app') }}</h5>
+                            <div class="value">
+                                {% if content.statusColor is defined and content.statusModel is defined %}
+                                    <span class="status {{ content.statusColor }}"
+                                          style="white-space: nowrap; display: inline-block;"></span>
+                                    <span>{{ content.statusModel.label ?? content.status ?? 'Unknown' }}</span>
+                                {% else %}
+                                    <span class="status gray"
+                                          style="white-space: nowrap; display: inline-block;"></span>
+                                    <span>{{ content.status ?? 'Unknown' }}</span>
+                                {% endif %}
+                            </div>
+                        </div>
+
+                        {% if content.flagCount is not null %}
+                            <div class="data">
+                                <h5 class="heading">{{ "Flag Count"|t('neverstale') }}</h5>
+                                <div class="value">{{ content.flagCount }}</div>
+                            </div>
+                        {% endif %}
+
+                        {% if content.dateAnalyzed %}
+                            <div class="data">
+                                <h5 class="heading">{{ "Date Analyzed"|t('neverstale') }}</h5>
+                                <div class="value">{{ content.dateAnalyzed|datetime }}</div>
+                            </div>
+                        {% endif %}
+
+                        {% if content.dateExpired %}
+                            <div class="data">
+                                <h5 class="heading">{{ "Date Expired"|t('neverstale') }}</h5>
+                                <div class="value">{{ content.dateExpired|datetime }}</div>
+                            </div>
+                        {% endif %}
+
+                        {% if content.neverstaleId %}
+                            <div class="data">
+                                <h5 class="heading">{{ "Neverstale ID"|t('neverstale') }}</h5>
+                                <div class="value"><code>{{ content.neverstaleId }}</code></div>
+                            </div>
+                        {% endif %}
+
+                        <div class="data">
+                            <h5 class="heading">{{ "Custom ID"|t('neverstale') }}</h5>
+                            <div class="value">
+                                {% if content.customId is defined %}
+                                    <code>{{ content.customId }}</code>
+                                {% else %}
+                                    <code>{{ content.entryId ~ ':' ~ content.siteId ~ ':' ~ content.id }}</code>
+                                {% endif %}
+                            </div>
+                        </div>
+
+                        <div class="data">
+                            <h5 class="heading">{{ "Site"|t('app') }}</h5>
+                            <div class="value">{{ content.site.name ?? "Unknown"|t('neverstale') }}</div>
+                        </div>
+
+                        <div class="data">
+                            <h5 class="heading">{{ "Date Created"|t('app') }}</h5>
+                            <div class="value">{{ content.dateCreated|datetime }}</div>
+                        </div>
+
+                        <div class="data">
+                            <h5 class="heading">{{ "Date Updated"|t('app') }}</h5>
+                            <div class="value">{{ content.dateUpdated|datetime }}</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        {# Transaction logs #}
+        {% if transactionLogs is defined and transactionLogs|length %}
+            <div class="field">
+                <div class="heading">
+                    <label>{{ "Transaction History"|t('neverstale') }}</label>
+                </div>
+                <div class="instructions">
+                    <p>{{ "History of API interactions and status changes for this content."|t('neverstale') }}</p>
+                </div>
+
+                <div class="tablechart">
+                    <table class="data fullwidth">
+                        <thead>
+                            <tr>
+                                <th>{{ "Date"|t('app') }}</th>
+                                <th>{{ "Event"|t('neverstale') }}</th>
+                                <th>{{ "Status"|t('app') }}</th>
+                                <th>{{ "Message"|t('neverstale') }}</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for transaction in transactionLogs %}
+                                <tr>
+                                    <td>{{ transaction.dateCreated|datetime }}</td>
+                                    <td>{{ transaction.event ?: "—" }}</td>
+                                    <td>{{ transaction.status ?: "—" }}</td>
+                                    <td>{{ transaction.message ?: "—" }}</td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        {% endif %}
+    </div>
+{% endblock %}
+
+{% js %}
+    // Handle trigger analysis button
+    document.addEventListener('DOMContentLoaded', function() {
+    const triggerBtn = document.querySelector('[data-action="neverstale/content/ingest"]');
+
+    if (triggerBtn) {
+    triggerBtn.addEventListener('click', function() {
+    const contentId = this.getAttribute('data-content-id');
+    const originalText = this.textContent;
+
+    // Disable button and show loading state
+    this.disabled = true;
+    this.textContent = 'Triggering Analysis...';
+    this.classList.add('loading');
+
+    // Make the API request
+    Craft.sendActionRequest('POST', 'neverstale/content/ingest', {
+    data: {
+    contentId: contentId
+    }
+    }).then((response) => {
+    if (response.data.success) {
+    Craft.cp.displayNotice(response.data.message || 'Analysis triggered successfully');
+    // Reload the page after a short delay to show updated data
+    setTimeout(() => {
+    window.location.reload();
+    }, 1500);
+    } else {
+    Craft.cp.displayError(response.data.error || 'Failed to trigger analysis');
+    // Re-enable button
+    this.disabled = false;
+    this.textContent = originalText;
+    this.classList.remove('loading');
+    }
+    }).catch((error) => {
+    console.error('Error triggering analysis:', error);
+    Craft.cp.displayError('Failed to trigger analysis');
+    // Re-enable button
+    this.disabled = false;
+    this.textContent = originalText;
+    this.classList.remove('loading');
+    });
+    });
+    }
+    });
+{% endjs %}

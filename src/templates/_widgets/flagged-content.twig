@@ -1,66 +1,361 @@
-{#
-  Neverstale Flagged Content Dashboard widget
+{# @var entries array #}
+{# @var stats array #}
+{# @var showStats bool #}
+{# @var widget neverstale\neverstale\widgets\FlaggedContentWidget #}
 
-  @var \neverstale\craft\Services\Setup setup
-  @var Collection<\neverstale\craft\elements\NeverstaleContent> flaggedContent
-  @var ?\DateTime lastSync
-#}
+<div class="neverstale-enhanced-widget">
+    {% if showStats %}
+        <div class="neverstale-widget-stats-grid">
+            <div class="neverstale-stat-item neverstale-stat-flagged">
+                <span class="neverstale-stat-number">{{ stats.flagged }}</span>
+                <span class="neverstale-stat-label">{{ 'Flagged'|t('neverstale') }}</span>
+            </div>
+            <div class="neverstale-stat-item neverstale-stat-synced">
+                <span class="neverstale-stat-number">{{ stats.synced }}</span>
+                <span class="neverstale-stat-label">{{ 'Synced'|t('neverstale') }}</span>
+            </div>
+            <div class="neverstale-stat-item neverstale-stat-pending">
+                <span class="neverstale-stat-number">{{ stats.pending }}</span>
+                <span class="neverstale-stat-label">{{ 'Pending'|t('neverstale') }}</span>
+            </div>
+            {% if stats.ignored > 0 %}
+                <div class="neverstale-stat-item neverstale-stat-ignored">
+                    <span class="neverstale-stat-number">{{ stats.ignored }}</span>
+                    <span class="neverstale-stat-label">{{ 'Ignored'|t('neverstale') }}</span>
+                </div>
+            {% endif %}
+        </div>
+        <hr class="neverstale-widget-divider">
+    {% endif %}
 
-{%- import 'neverstale/_macros' as helpers %}
-{%- do craft.neverstale.viteService.register('src/web/assets/neverstale/src/neverstale.ts', false, {
-  'depends': [
-    'neverstale\\craft\\web\\assets\\neverstale\\NeverstaleAsset',
-  ],
-}) %}
-{%- if not setup.isSyncEnabled %}
-  {{ helpers.alert('Neverstale sync is disabled for this environment.', 'info') }}
-{%- elseif not setup.hasCredentials or not setup.isContentConfigured %}
-  {%- set message %}
-  Neverstale is not yet set up to work with Craft. Visit the <a href="{{ url('neverstale') }}">dashboard to complete the process</a>.
-  {%- endset %}
-  {{- helpers.alert(message, 'warning') }}
-{%- elseif not setup.canConnect %}
-  {%- set message %}
-    <div class="ns-flex ns-flex-col">
-      <h3 class="ns-mb-0">Cannot connect</h3>
-      <p>Please <a href="{{ url('neverstale') }}">check your credentials are correct</a> or visit the <a href="https://status.neverstale.io">Neverstale Status page</a>.</p>
+    {% if entries|length %}
+        <div class="neverstale-widget-header">
+            <div class="neverstale-widget-title">
+                {% if widget.syncStatus == 'flagged' %}
+                    <span class="status light orange"></span>
+                    {{ '{count} flagged entries'|t('neverstale', {count: entries|length}) }}
+                {% elseif widget.syncStatus %}
+                    {{ '{count} {status} entries'|t('neverstale', {count: entries|length, status: widget.syncStatus}) }}
+                {% else %}
+                    {{ '{count} entries'|t('neverstale', {count: entries|length}) }}
+                {% endif %}
+            </div>
+            <a href="{{ cpUrl('neverstale/content') }}" class="neverstale-widget-link">
+                {{ 'View All'|t('neverstale') }}
+            </a>
+        </div>
+        
+        <div class="neverstale-widget-list">
+            {% for item in entries %}
+                {% set entry = item.entry %}
+                <div class="neverstale-widget-item {% if item.ignored %}neverstale-item-ignored{% endif %}">
+                    <div class="neverstale-widget-entry-info">
+                        <div class="neverstale-widget-entry-title">
+                            <a href="{{ entry.cpEditUrl }}" class="neverstale-entry-link">
+                                {{ entry.title ?: 'Untitled' }}
+                            </a>
+                            {% if item.ignored %}
+                                <span class="neverstale-ignored-indicator">{{ 'Ignored'|t('neverstale') }}</span>
+                            {% endif %}
+                        </div>
+                        <div class="neverstale-widget-entry-meta">
+                            <span class="neverstale-section-name">{{ entry.section ? entry.section.name : 'Unknown Section' }}</span>
+                            {% if item.flagCount > 0 %}
+                                •
+                                <span class="neverstale-flag-count">
+                                    {{ item.flagCount == 1 ? '1 flag' : item.flagCount ~ ' flags' }}
+                                </span>
+                            {% endif %}
+                            •
+                            <span class="neverstale-sync-status neverstale-status-{{ item.syncStatus }}">
+                                {% if item.syncStatus == 'flagged' %}
+                                    {{ 'Flagged'|t('neverstale') }}
+                                {% elseif item.syncStatus == 'synced' %}
+                                    {{ 'Synced'|t('neverstale') }}
+                                {% else %}
+                                    {{ 'Pending'|t('neverstale') }}
+                                {% endif %}
+                            </span>
+                            {% if item.assignees|length %}
+                                •
+                                <span class="neverstale-assignees">
+                                    👤 {{ item.assignees|join(', ') }}
+                                </span>
+                            {% endif %}
+                        </div>
+                        {% if item.lastAnalyzed %}
+                            <div class="neverstale-widget-entry-analyzed">
+                                <span class="neverstale-analyzed-label">{{ 'Last analyzed:'|t('neverstale') }}</span>
+                                <span class="neverstale-analyzed-date">{{ item.lastAnalyzed|datetime('short') }}</span>
+                            </div>
+                        {% endif %}
+                    </div>
+                    <div class="neverstale-widget-actions">
+                        {% if item.flagCount > 0 %}
+                            <a href="{{ entry.cpEditUrl }}#neverstale-flags" class="neverstale-review-btn neverstale-review-flagged">
+                                {{ 'Review Flags'|t('neverstale') }}
+                            </a>
+                        {% else %}
+                            <a href="{{ entry.cpEditUrl }}#neverstale-flags" class="neverstale-review-btn">
+                                {{ 'View'|t('neverstale') }}
+                            </a>
+                        {% endif %}
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
     </div>
-  {%- endset %}
-  {{- helpers.alert(message, 'error') }}
-{%- elseif flaggedContent.isEmpty() %}
-  {%- set message %}
-    <div class="ns-flex ns-flex-col">
-      <h3 class="ns-mb-0">You are all up-to-date!</h3>
-      <p>Neverstale did not find any expired content.</p>
+{% else %}
+    <div class="neverstale-widget-empty">
+        <div class="neverstale-empty-icon">
+            <span class="status light green large"></span>
+        </div>
+        <div class="neverstale-empty-text">
+            <strong>{{ 'No flagged content'|t('neverstale') }}</strong>
+            <p>{{ 'All your content is up to date!'|t('neverstale') }}</p>
+        </div>
     </div>
-  {%- endset %}
-  {{ helpers.alert(message, 'success') }}
-{%- else %}
-  {%- set message %}
-    <div class="ns-flex ns-flex-col">
-      <h3 class="ns-mb-0">Content has been flagged</h3>
-      <p>Neverstale flagged {{ flaggedContent.count() }} {{ flaggedContent.count() > 1 ?  'entries' : 'entry' }} for your attention</p>
-    </div>
-  {%- endset %}
-  {{ helpers.alert(message, 'warning') }}
-{%- endif %}
-{% if flaggedContent.count() %}
-<table class="ns-text-sm">
-  <thead>
-    <tr>
-      <th>Entry</th>
-      <th>Flags</th>
-      <th>Expired</th>
-    </tr>
-  </thead>
-  {% for content in flaggedContent %}
-    <tr>
-      <td>
-        <a href="{{ content.entry.cpEditUrl }}">{{ content.entry.title }}</a>
-      </td>
-      <td>{{ content.flagCount }}</td>
-      <td>{{ content.dateExpired|date('Y-m-d') }}</td>
-    </tr>
-  {% endfor %}
-</table>
 {% endif %}
+
+<style>
+    .neverstale-enhanced-widget {
+        min-height: 200px;
+    }
+    
+    /* Stats Grid */
+    .neverstale-widget-stats-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(80px, 1fr));
+        gap: 12px;
+        margin-bottom: 16px;
+    }
+    
+    .neverstale-stat-item {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        padding: 12px 8px;
+        border-radius: 6px;
+        text-align: center;
+    }
+    
+    .neverstale-stat-flagged {
+        background: #fef3c7;
+        border: 1px solid #f59e0b;
+    }
+    
+    .neverstale-stat-synced {
+        background: #dcfce7;
+        border: 1px solid #16a34a;
+    }
+    
+    .neverstale-stat-pending {
+        background: #f1f5f9;
+        border: 1px solid #64748b;
+    }
+    
+    .neverstale-stat-ignored {
+        background: #f3f4f6;
+        border: 1px solid #6b7280;
+    }
+    
+    .neverstale-stat-number {
+        font-size: 20px;
+        font-weight: 700;
+        line-height: 1;
+        margin-bottom: 4px;
+    }
+    
+    .neverstale-stat-label {
+        font-size: 11px;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        opacity: 0.8;
+    }
+    
+    .neverstale-widget-divider {
+        margin: 16px 0;
+        border: none;
+        height: 1px;
+        background: #e1e4e8;
+    }
+    
+    .neverstale-widget-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin-bottom: 16px;
+        padding-bottom: 12px;
+        border-bottom: 1px solid #e1e4e8;
+    }
+    
+    .neverstale-widget-stats {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        font-weight: 600;
+        color: #dc2626;
+    }
+    
+    .neverstale-widget-link {
+        font-size: 12px;
+        color: #0969da;
+        text-decoration: none;
+    }
+    
+    .neverstale-widget-link:hover {
+        text-decoration: underline;
+    }
+    
+    .neverstale-widget-list {
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+    }
+    
+    .neverstale-widget-item {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 12px;
+        background: #fafbfc;
+        border: 1px solid #e1e4e8;
+        border-radius: 6px;
+    }
+    
+    .neverstale-widget-entry-info {
+        flex: 1;
+    }
+    
+    .neverstale-widget-entry-title {
+        margin-bottom: 4px;
+    }
+    
+    .neverstale-entry-link {
+        color: #0969da;
+        text-decoration: none;
+        font-weight: 500;
+    }
+    
+    .neverstale-entry-link:hover {
+        text-decoration: underline;
+    }
+    
+    .neverstale-widget-entry-meta {
+        font-size: 12px;
+        color: #6e7781;
+        display: flex;
+        align-items: center;
+        gap: 6px;
+    }
+    
+    .neverstale-flag-count {
+        color: #dc2626;
+        font-weight: 600;
+    }
+    
+    .neverstale-status-flagged {
+        color: #dc2626;
+    }
+    
+    .neverstale-status-synced {
+        color: #0969da;
+    }
+    
+    .neverstale-review-btn {
+        background: #f97316;
+        color: white;
+        padding: 4px 8px;
+        border-radius: 4px;
+        font-size: 11px;
+        font-weight: 600;
+        text-decoration: none;
+        transition: background-color 0.2s;
+    }
+    
+    .neverstale-review-btn:hover {
+        background: #ea580c;
+        color: white;
+        text-decoration: none;
+    }
+    
+    /* Empty state */
+    .neverstale-widget-empty {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        text-align: center;
+        padding: 40px 20px;
+        min-height: 200px;
+    }
+    
+    .neverstale-empty-icon {
+        margin-bottom: 16px;
+    }
+    
+    .neverstale-empty-text strong {
+        display: block;
+        margin-bottom: 8px;
+        color: #24292f;
+    }
+    
+    .neverstale-empty-text p {
+        color: #6e7781;
+        margin: 0;
+    }
+    
+    /* Enhanced item styling */
+    .neverstale-item-ignored {
+        opacity: 0.6;
+        background: #f8f9fa !important;
+    }
+    
+    .neverstale-ignored-indicator {
+        font-size: 10px;
+        background: #6c757d;
+        color: white;
+        padding: 2px 6px;
+        border-radius: 8px;
+        margin-left: 8px;
+        text-transform: uppercase;
+        font-weight: 600;
+        letter-spacing: 0.5px;
+    }
+    
+    .neverstale-assignees {
+        color: #0969da;
+        font-size: 12px;
+    }
+    
+    .neverstale-widget-entry-analyzed {
+        margin-top: 6px;
+        font-size: 11px;
+        color: #6e7781;
+    }
+    
+    .neverstale-analyzed-label {
+        font-weight: 500;
+    }
+    
+    .neverstale-analyzed-date {
+        margin-left: 4px;
+    }
+    
+    .neverstale-review-flagged {
+        background: #dc2626 !important;
+        font-weight: 600;
+    }
+    
+    .neverstale-review-flagged:hover {
+        background: #b91c1c !important;
+    }
+    
+    .neverstale-widget-title {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        font-weight: 600;
+    }
+</style>

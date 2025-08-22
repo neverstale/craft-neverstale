@@ -1,0 +1,46 @@
+{# @var widget neverstale\neverstale\widgets\FlaggedContentWidget #}
+
+{% import "_includes/forms" as forms %}
+
+{{ forms.textField({
+    label: 'Maximum entries'|t('neverstale'),
+    instructions: 'The maximum number of entries to show in the widget.'|t('neverstale'),
+    id: 'limit',
+    name: 'limit',
+    value: widget.limit,
+    size: 2,
+    type: 'number',
+    min: 1,
+    max: 50,
+}) }}
+
+{{ forms.textField({
+    label: 'Sections'|t('neverstale'),
+    instructions: 'Comma-separated list of section handles to filter by (leave empty for all sections).'|t('neverstale'),
+    id: 'sections',
+    name: 'sections',
+    value: widget.sections,
+    placeholder: 'e.g. blog,news,pages',
+}) }}
+
+{{ forms.selectField({
+    label: 'Sync status'|t('neverstale'),
+    instructions: 'Filter entries by their Neverstale sync status.'|t('neverstale'),
+    id: 'syncStatus',
+    name: 'syncStatus',
+    value: widget.syncStatus,
+    options: [
+        {label: 'All statuses'|t('neverstale'), value: ''},
+        {label: 'Flagged content only'|t('neverstale'), value: 'flagged'},
+        {label: 'Synced content only'|t('neverstale'), value: 'synced'},
+        {label: 'Pending analysis only'|t('neverstale'), value: 'pending'},
+    ],
+}) }}
+
+{{ forms.lightswitchField({
+    label: 'Show statistics'|t('neverstale'),
+    instructions: 'Display statistics grid at the top of the widget.'|t('neverstale'),
+    id: 'showStats',
+    name: 'showStats',
+    on: widget.showStats,
+}) }}

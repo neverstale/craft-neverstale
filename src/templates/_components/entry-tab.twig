@@ -1,0 +1,638 @@
+{# @var element \craft\elements\Entry #}
+{# @var static bool #}
+
+{% import "_includes/forms" as forms %}
+
+{# Register the Neverstale asset bundle for JavaScript functionality #}
+{% do view.registerAssetBundle('neverstale\\neverstale\\assets\\NeverstaleAsset') %}
+
+{% set content = craft.neverstale.getContentForEntry(element) ?? null %}
+{% set flags = content ? content.getFlags() : [] %}
+{% set analysisStatus = content ? content.getAnalysisStatus() : null %}
+
+
+
+<div class="neverstale-entry-tab">
+    {% if not element.id %}
+        {# Disabled State for New Entries #}
+        <div class="neverstale-disabled-state">
+            <div class="neverstale-disabled-content">
+                <div class="neverstale-disabled-icon">
+                    <span class="status light"></span>
+                </div>
+                <div class="neverstale-disabled-text">
+                    <strong>{{ 'Neverstale Analysis Unavailable'|t('neverstale') }}</strong>
+                    <p>{{ 'Save this entry to enable Neverstale content analysis and flag detection.'|t('neverstale') }}</p>
+                </div>
+            </div>
+        </div>
+    {% elseif element.id %}
+        {# Alert Banner for Flags #}
+        {% if flags|length > 0 %}
+            {#            <div class="neverstale-alert-banner"> #}
+            {#                <div class="neverstale-alert-content"> #}
+            {#                    <div class="neverstale-alert-icon"> #}
+            {#                        <span class="status light orange large"></span> #}
+            {#                    </div> #}
+            {#                    <div class="neverstale-alert-text"> #}
+            {#                        <strong>{{ '{count} content flag{s} need attention'|t('neverstale', {count: neverstaleData.flags|length, s: neverstaleData.flags|length == 1 ? '' : 's'}) }}</strong> #}
+            {#                        <span class="neverstale-alert-desc">{{ 'Review the flagged content below and provide feedback'|t('neverstale') }}</span> #}
+            {#                    </div> #}
+            {#                    <div class="neverstale-alert-action"> #}
+            {#                        <a href="#neverstale-flags" class="neverstale-scroll-to-flags"> #}
+            {#                            {{ 'View Flags'|t('neverstale') }} #}
+            {#                        </a> #}
+            {#                    </div> #}
+            {#                </div> #}
+            {#            </div> #}
+        {% endif %}
+
+        {# Sync Status Section - Made more prominent #}
+        <div class="neverstale-sync-status-prominent">
+            {% if analysisStatus %}
+                {% set statusValue = analysisStatus.value %}
+                {% if statusValue == 'analyzed-clean' %}
+                    <div class="neverstale-status-card neverstale-status-synced">
+                        <div class="neverstale-status-icon">
+                            <span class="status green large"></span>
+                        </div>
+                        <div class="neverstale-status-content">
+                            <div class="neverstale-status-title">{{ 'Clean'|t('neverstale') }}</div>
+                            <div class="neverstale-status-date">{{ content.dateAnalyzed ? content.dateAnalyzed|date('M j, Y g:i A') : '' }}</div>
+                        </div>
+                    </div>
+                {% elseif statusValue == 'analyzed-flagged' or flags|length > 0 %}
+                    <div class="neverstale-status-card neverstale-status-flagged">
+                        <div class="neverstale-status-icon">
+                            <span class="status orange large"></span>
+                        </div>
+                        <div class="neverstale-status-content">
+                            <div class="neverstale-status-title">{{ 'Flagged'|t('neverstale') }}</div>
+                            <div class="neverstale-status-date">{{ content.dateAnalyzed ? content.dateAnalyzed|date('M j, Y g:i A') : '' }}</div>
+                        </div>
+                    </div>
+                {% elseif statusValue in ['unsent'] %}
+                    <div class="neverstale-status-card neverstale-status-pending">
+                        <div class="neverstale-status-icon">
+                            <span class="status large"></span>
+                        </div>
+                        <div class="neverstale-status-content">
+                            <div class="neverstale-status-title">{{ 'Not Sent'|t('neverstale') }}</div>
+                            <div class="neverstale-status-date">{{ 'Content not submitted for analysis'|t('neverstale') }}</div>
+                        </div>
+                        {% if not static %}
+                            <div class="neverstale-status-actions">
+                                <button type="button" class="btn submit small"
+                                        data-action="neverstale/reanalyze"
+                                        data-entry-id="{{ element.id }}">
+                                    <span class="spinner hidden"></span>
+                                    {{ 'Submit for Analysis'|t('neverstale') }}
+                                </button>
+                            </div>
+                        {% endif %}
+                    </div>
+                {% elseif statusValue in ['pending-initial-analysis', 'pending-reanalysis', 'processing-initial-analysis', 'processing-reanalysis'] %}
+                    <div class="neverstale-status-card neverstale-status-pending">
+                        <div class="neverstale-status-icon">
+                            <span class="status blue large"></span>
+                        </div>
+                        <div class="neverstale-status-content">
+                            <div class="neverstale-status-title">{{ statusValue in ['pending-initial-analysis', 'pending-reanalysis'] ? 'Pending'|t('neverstale') : 'Processing'|t('neverstale') }}</div>
+                            <div class="neverstale-status-date">{{ 'Waiting for Neverstale analysis'|t('neverstale') }}</div>
+                        </div>
+                    </div>
+                {% elseif statusValue in ['api-error', 'analyzed-error'] %}
+                    <div class="neverstale-status-card neverstale-status-flagged">
+                        <div class="neverstale-status-icon">
+                            <span class="status orange large"></span>
+                        </div>
+                        <div class="neverstale-status-content">
+                            <div class="neverstale-status-title">{{ statusValue == 'api-error' ? 'API Error'|t('neverstale') : 'Analysis Error'|t('neverstale') }}</div>
+                            <div class="neverstale-status-date">{{ 'Error occurred during analysis'|t('neverstale') }}</div>
+                        </div>
+                        {% if not static %}
+                            <div class="neverstale-status-actions">
+                                <button type="button" class="btn submit small"
+                                        data-action="neverstale/reanalyze"
+                                        data-entry-id="{{ element.id }}">
+                                    <span class="spinner hidden"></span>
+                                    {{ 'Retry'|t('neverstale') }}
+                                </button>
+                            </div>
+                        {% endif %}
+                    </div>
+                {% elseif statusValue == 'stale' %}
+                    <div class="neverstale-status-card neverstale-status-flagged">
+                        <div class="neverstale-status-icon">
+                            <span class="status orange large"></span>
+                        </div>
+                        <div class="neverstale-status-content">
+                            <div class="neverstale-status-title">{{ 'Stale'|t('neverstale') }}</div>
+                            <div class="neverstale-status-date">{{ 'Content needs re-analysis'|t('neverstale') }}</div>
+                        </div>
+                    </div>
+                {% else %}
+                    <div class="neverstale-status-card neverstale-status-pending">
+                        <div class="neverstale-status-icon">
+                            <span class="status large"></span>
+                        </div>
+                        <div class="neverstale-status-content">
+                            <div class="neverstale-status-title">{{ statusValue|title }}</div>
+                            <div class="neverstale-status-date">{{ 'Status: ' ~ statusValue }}</div>
+                        </div>
+                    </div>
+                {% endif %}
+            {% else %}
+                <div class="neverstale-status-card neverstale-status-pending">
+                    <div class="neverstale-status-icon">
+                        <span class="status large"></span>
+                    </div>
+                    <div class="neverstale-status-content">
+                        <div class="neverstale-status-title">{{ 'Not Analyzed'|t('neverstale') }}</div>
+                        <div class="neverstale-status-date">{{ 'Content not submitted for analysis'|t('neverstale') }}</div>
+                    </div>
+                </div>
+            {% endif %}
+        </div>
+
+        {# Only show additional sections if content has been successfully analyzed #}
+        {% if analysisStatus and analysisStatus.value in ['analyzed-clean', 'analyzed-flagged'] %}
+            <hr>
+
+            {# Metadata Section #}
+            {% if content %}
+                <div class="neverstale-section">
+                    <h3>{{ 'Content Details'|t('neverstale') }}</h3>
+                    <div class="neverstale-meta">
+                        {% if content.dateAnalyzed %}
+                            <div class="neverstale-meta-item">
+                                <strong>{{ 'Last Analyzed:'|t('neverstale') }}</strong>
+                                <span>{{ content.dateAnalyzed|datetime('short') }}</span>
+                            </div>
+                        {% endif %}
+                        {% if content.dateExpired %}
+                            <div class="neverstale-meta-item">
+                                <strong>{{ 'Expires:'|t('neverstale') }}</strong>
+                                <span>{{ content.dateExpired|datetime('short') }}</span>
+                            </div>
+                        {% endif %}
+                        {% if content.flagCount > 0 %}
+                            <div class="neverstale-meta-item">
+                                <strong>{{ 'Active Flags:'|t('neverstale') }}</strong>
+                                <span>{{ content.flagCount }}</span>
+                            </div>
+                        {% endif %}
+                    </div>
+                </div>
+            {% endif %}
+        {% endif %}
+
+        {% if flags|length > 0 and analysisStatus and analysisStatus.value in ['analyzed-clean', 'analyzed-flagged', 'stale'] %}
+            <hr>
+
+            {# Flags Section #}
+            <div class="neverstale-section" id="neverstale-flags">
+                <h3>{{ 'Content Flags'|t('neverstale') }} <span class="info">{{ flags|length }}</span></h3>
+                <div class="neverstale-flags">
+                    {% for flag in flags %}
+                        <div class="neverstale-flag-item{{ flag.isActive() ? '' : ' neverstale-flag-ignored' }}"
+                             style="border: 1px solid {{ flag.isActive() ? '#ddd' : '#e5e7eb' }}; border-radius: 6px; padding: 16px; margin-bottom: 12px; background: {{ flag.isActive() ? '#fff' : '#f9fafb' }};">
+                            <div class="neverstale-flag-header"
+                                 style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 12px;">
+                                <div class="neverstale-flag-title">
+                                    <div style="display: flex; align-items: center; gap: 8px;">
+                                        <span class="status {{ flag.isActive() ? 'red' : 'gray' }}"></span>
+                                        <strong style="font-size: 14px;">{{ flag.getUiLabel() }}{{ flag.isActive() ? '' : ' (Ignored)' }}</strong>
+                                    </div>
+                                </div>
+                                {% if not static %}
+                                    <div class="neverstale-flag-actions"
+                                         style="display: flex; gap: 8px; align-items: center;">
+                                        {% if flag.isActive() %}
+                                            <a href="#" class="btn secondary"
+                                               data-flag-id="{{ flag.flagId }}"
+                                               data-custom-id="{{ content.customId }}"
+                                               style="white-space: nowrap;">
+                                                {{ 'Ignore'|t('neverstale') }}
+                                            </a>
+                                        {% endif %}
+                                    </div>
+                                {% endif %}
+                            </div>
+                            {# Main flag content - reason first for context #}
+                            {% if flag.reason %}
+                                <div class="neverstale-flag-explanation"
+                                     style="margin-bottom: 12px; line-height: 1.5; color: #374151;">
+                                    {{ flag.reason }}
+                                </div>
+                            {% endif %}
+
+                            {% if flag.snippet %}
+                                <div class="neverstale-flag-snippet"
+                                     style="margin-bottom: 12px; padding: 12px; background: #f9fafb; border: 1px solid #e5e7eb; border-radius: 4px;">
+                                    <div style="font-size: 11px; text-transform: uppercase; color: #6b7280; margin-bottom: 6px; font-weight: 500;">
+                                        {{ 'Flagged Content:'|t('neverstale') }}
+                                    </div>
+                                    <code style="font-size: 13px; color: #111827;">{{ flag.snippet }}</code>
+                                </div>
+                            {% endif %}
+
+
+                            {% if not flag.isActive() %}
+                                <div class="neverstale-flag-ignored-notice"
+                                     style="margin-top: 12px; padding: 8px 12px; background: #f3f4f6; border-radius: 4px;">
+                                    <span style="font-size: 12px; color: #6b7280;">
+                                        ✓ {{ 'Ignored'|t('neverstale') }} {{ flag.ignoredAt|datetime('relative') }}
+                                    </span>
+                                </div>
+                            {% endif %}
+                        </div>
+                    {% endfor %}
+                </div>
+            </div>
+        {% endif %}
+
+    {% endif %}
+</div>
+
+<style>
+    .neverstale-entry-tab {
+        padding: 24px;
+    }
+
+    /* Disabled state for new entries */
+    .neverstale-disabled-state {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        min-height: 200px;
+        background: #f8f9fa;
+        border: 2px dashed #dee2e6;
+        border-radius: 8px;
+        text-align: center;
+    }
+
+    .neverstale-disabled-content {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 16px;
+        max-width: 300px;
+    }
+
+    .neverstale-disabled-icon {
+        opacity: 0.6;
+    }
+
+
+    .neverstale-disabled-icon .status {
+        width: 24px;
+        height: 24px;
+    }
+
+    .neverstale-disabled-text strong {
+        display: block;
+        color: #6c757d;
+        font-size: 16px;
+        margin-bottom: 8px;
+    }
+
+    .neverstale-disabled-text p {
+        color: #6c757d;
+        margin: 0;
+        font-size: 14px;
+        line-height: 1.5;
+    }
+
+    .neverstale-section {
+        margin-bottom: 24px;
+    }
+
+    .neverstale-section h3 {
+        margin-bottom: 16px;
+        font-size: 16px;
+        font-weight: 600;
+    }
+
+    .neverstale-sync-status {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+
+    .neverstale-ignored-badge {
+        margin-left: 12px;
+        padding: 2px 8px;
+        background: #f3f4f6;
+        border-radius: 4px;
+        font-size: 12px;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+
+    .neverstale-meta-item {
+        margin-bottom: 8px;
+    }
+
+    .neverstale-meta-item strong {
+        margin-right: 8px;
+    }
+
+    .neverstale-flags {
+        display: flex;
+        flex-direction: column;
+        gap: 16px;
+    }
+
+    .neverstale-flag-item {
+        padding: 16px;
+        background: #fafbfc;
+        border: 1px solid #e1e4e8;
+        border-radius: 6px;
+    }
+
+    .neverstale-flag-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin-bottom: 12px;
+    }
+
+    .neverstale-flag-title {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+
+    .neverstale-flag-actions {
+        display: flex;
+        gap: 8px;
+        flex-shrink: 0;
+    }
+
+    .neverstale-flag-snippet {
+        margin-bottom: 8px;
+        padding: 8px 12px;
+        background: white;
+        border: 1px solid #e1e4e8;
+        border-radius: 4px;
+        font-family: monospace;
+        font-size: 13px;
+        overflow-x: auto;
+    }
+
+    .neverstale-flag-snippet code {
+        color: #0969da;
+    }
+
+    .neverstale-flag-explanation {
+        margin-bottom: 12px;
+        color: #57606a;
+        font-size: 14px;
+        line-height: 1.5;
+    }
+
+    .neverstale-flag-feedback {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        padding-top: 12px;
+        border-top: 1px solid #e1e4e8;
+    }
+
+    .neverstale-flag-feedback .light.small {
+        font-size: 12px;
+        color: #6e7781;
+    }
+
+    /* New feedback button styles */
+    .neverstale-feedback-btn {
+        display: inline-flex !important;
+        align-items: center;
+        gap: 6px;
+        padding: 4px 8px !important;
+        font-size: 11px !important;
+        line-height: 1.2;
+        border: 1px solid #d1d5db;
+        background: white;
+        color: #6b7280;
+        border-radius: 4px;
+        text-decoration: none;
+    }
+
+    .neverstale-feedback-btn:hover {
+        background: #f9fafb;
+        border-color: #9ca3af;
+    }
+
+    .neverstale-feedback-btn .size-4 {
+        width: 14px;
+        height: 14px;
+        flex-shrink: 0;
+    }
+
+    .neverstale-feedback-btn .whitespace-nowrap {
+        white-space: nowrap;
+    }
+
+    .neverstale-feedback-status {
+        margin-left: 12px;
+        font-size: 12px;
+        color: #6e7781;
+        font-style: italic;
+    }
+
+    .neverstale-actions {
+        margin-top: 16px;
+    }
+
+    .neverstale-entry-tab hr {
+        margin: 24px 0;
+        border: 0;
+        border-top: 1px solid #e1e4e8;
+    }
+
+    .neverstale-external-link {
+        display: inline-flex;
+        align-items: center;
+        gap: 4px;
+        color: #0969da;
+        text-decoration: none;
+    }
+
+    .neverstale-external-link:hover {
+        text-decoration: underline;
+    }
+
+    .neverstale-external-link .icon {
+        width: 12px;
+        height: 12px;
+        opacity: 0.7;
+    }
+
+    .neverstale-external-link .icon svg {
+        width: 100%;
+        height: 100%;
+    }
+
+    /* Alert Banner Styles */
+    .neverstale-alert-banner {
+        margin: -24px -24px 24px -24px;
+        padding: 16px 24px;
+        background: linear-gradient(135deg, #fff4e6 0%, #fef7ed 100%);
+        border: 1px solid #fed7aa;
+        border-left: 4px solid #f97316;
+        border-radius: 0;
+    }
+
+    .neverstale-alert-content {
+        display: flex;
+        align-items: center;
+        gap: 16px;
+    }
+
+    .neverstale-alert-icon {
+        flex-shrink: 0;
+    }
+
+    .neverstale-alert-text {
+        flex: 1;
+        line-height: 1.4;
+    }
+
+    .neverstale-alert-text strong {
+        display: block;
+        color: #ea580c;
+        font-size: 15px;
+        margin-bottom: 2px;
+    }
+
+    .neverstale-alert-desc {
+        font-size: 13px;
+        color: #9a3412;
+    }
+
+    .neverstale-alert-action {
+        flex-shrink: 0;
+    }
+
+    .neverstale-scroll-to-flags {
+        display: inline-flex;
+        align-items: center;
+        padding: 6px 12px;
+        background: #f97316;
+        color: white;
+        text-decoration: none;
+        border-radius: 4px;
+        font-size: 12px;
+        font-weight: 600;
+        transition: background-color 0.2s;
+    }
+
+    .neverstale-scroll-to-flags:hover {
+        background: #ea580c;
+        color: white;
+        text-decoration: none;
+    }
+
+    /* Prominent Sync Status Styles */
+    .neverstale-sync-status-prominent {
+        position: relative;
+        margin-bottom: 24px;
+    }
+
+    .neverstale-status-card {
+        display: flex;
+        align-items: center;
+        padding: 20px 24px;
+        border-radius: 8px;
+        border: 2px solid;
+        background: white;
+    }
+
+    .neverstale-status-synced {
+        border-color: #28a745;
+        background: #f8fff9;
+    }
+
+    .neverstale-status-flagged {
+        border-color: #fd7e14;
+        background: #fffbf7;
+    }
+
+    .neverstale-status-pending {
+        border-color: #6c757d;
+        background: #f8f9fa;
+    }
+
+    .neverstale-status-icon {
+        margin-right: 16px;
+    }
+
+    .neverstale-status-icon .status.large {
+        width: 20px;
+        height: 20px;
+    }
+
+    .neverstale-status-content {
+        flex: 1;
+    }
+
+    .neverstale-status-title {
+        font-size: 18px;
+        font-weight: 600;
+        margin-bottom: 4px;
+    }
+
+    .neverstale-status-date {
+        font-size: 14px;
+        color: #6e7781;
+    }
+
+    .neverstale-status-actions {
+        margin-left: auto;
+        display: flex;
+        gap: 8px;
+        flex-shrink: 0;
+    }
+
+    .neverstale-status-actions .btn {
+        font-size: 12px;
+        padding: 6px 12px;
+        height: auto;
+        line-height: 1.2;
+    }
+
+    .neverstale-ignored-overlay {
+        position: absolute;
+        top: 0;
+        right: 0;
+        padding: 8px;
+    }
+
+    .neverstale-ignored-badge-large {
+        padding: 6px 12px;
+        background: #6c757d;
+        color: white;
+        border-radius: 6px;
+        font-size: 12px;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+
+    /* Ignored flag styling */
+    .neverstale-flag-ignored {
+        opacity: 0.7;
+    }
+
+    .neverstale-flag-ignored .neverstale-flag-title strong {
+        color: #6b7280;
+    }
+
+    .neverstale-flag-ignored .neverstale-flag-explanation {
+        color: #9ca3af;
+    }
+
+
+</style>
