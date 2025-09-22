@@ -56,15 +56,8 @@ class RouteRegistrar implements RegistrarInterface
      */
     private function registerSiteRoutes(): void
     {
-        Event::on(
-            UrlManager::class,
-            UrlManager::EVENT_REGISTER_SITE_URL_RULES,
-            function (RegisterUrlRulesEvent $event) {
-                $event->rules = array_merge([
-                    'actions/neverstale/webhooks' => 'neverstale/webhooks/index',
-                ], $event->rules);
-            }
-        );
+        // Note: Removed custom route registration as Craft should handle
+        // actions/neverstale/webhooks automatically via controller naming
     }
 
     /**
