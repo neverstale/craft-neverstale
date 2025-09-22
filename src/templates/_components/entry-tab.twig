@@ -256,6 +256,9 @@
                                          style="margin-top: 12px; padding: 8px 12px; background: #f3f4f6; border-radius: 4px;">
                                     <span style="font-size: 12px; color: #6b7280;">
                                         ✓ {{ 'Ignored'|t('neverstale') }} {{ flag.ignoredAt|datetime('relative') }}
+                                        {% if flag.expiredAt %}
+                                            • {{ 'Until'|t('neverstale') }} {{ flag.expiredAt|datetime('short') }}
+                                        {% endif %}
                                     </span>
                                     </div>
                                 {% endif %}

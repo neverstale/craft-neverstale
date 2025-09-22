@@ -54,8 +54,8 @@
                     Craft.cp.displayNotice(data.message);
                 }
 
-                // Immediately update the flag display
-                updateFlagDisplay(flagId, customId);
+                // Immediately update the flag display with expiry date if available
+                updateFlagDisplay(flagId, customId, data ? data.expiryDate : null);
 
                 // Also refresh the page after a delay to ensure data consistency
                 // This serves as a backup and updates other elements like entry meta
@@ -232,7 +232,7 @@
     /**
      * Update flag display immediately after successful operation
      */
-    function updateFlagDisplay(flagId, customId) {
+    function updateFlagDisplay(flagId, customId, expiryDate) {
         // Find all flag items with this flag ID
         var $flagItems = $('.neverstale-flag-item').filter(function() {
             var $ignoreBtn = $(this).find('a[data-flag-id="' + flagId + '"]');
@@ -271,10 +271,20 @@
 
             // Add ignored notice if it doesn't exist
             if (!$flagItem.find('.neverstale-flag-ignored-notice').length) {
+                var ignoreMessage = '✓ Ignored just now';
+
+                // Use expiry date if provided
+                if (expiryDate) {
+                    var formattedExpiry = formatDate(expiryDate);
+                    if (formattedExpiry) {
+                        ignoreMessage += ' • Until ' + formattedExpiry;
+                    }
+                }
+
                 var $ignoredNotice = $(
                   '<div class="neverstale-flag-ignored-notice" style="margin-top: 12px; padding: 8px 12px; background: #f3f4f6; border-radius: 4px;">' +
                   '<span style="font-size: 12px; color: #6b7280;">' +
-                  '✓ Ignored just now' +
+                  ignoreMessage +
                   '</span>' +
                   '</div>'
                 );
