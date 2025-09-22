@@ -63,8 +63,8 @@ trait HasContent
         $record->neverstaleId = $this->neverstaleId;
         $record->analysisStatus = $this->analysisStatus ?? AnalysisStatus::UNSENT->value;
         $record->flagCount = $this->flagCount;
-        $record->dateAnalyzed = $this->dateAnalyzed ? $this->dateAnalyzed->format('Y-m-d H:i:s') : null;
-        $record->dateExpired = $this->dateExpired ? $this->dateExpired->format('Y-m-d H:i:s') : null;
+        $record->dateAnalyzed = $this->dateAnalyzed;
+        $record->dateExpired = $this->dateExpired;
 
         Plugin::debug("ContentRecord attributes set: entryId={$record->entryId}, siteId={$record->siteId}, analysisStatus={$record->analysisStatus}");
 
