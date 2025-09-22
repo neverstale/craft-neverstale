@@ -122,14 +122,24 @@
                         {% endif %}
                     </div>
                 {% elseif statusValue == 'stale' %}
-                    <div class="neverstale-status-card neverstale-status-flagged">
+                    <div class="neverstale-status-card neverstale-status-stale">
                         <div class="neverstale-status-icon">
                             <span class="status orange large"></span>
                         </div>
                         <div class="neverstale-status-content">
-                            <div class="neverstale-status-title">{{ 'Stale'|t('neverstale') }}</div>
-                            <div class="neverstale-status-date">{{ 'Content needs re-analysis'|t('neverstale') }}</div>
+                            <div class="neverstale-status-title">{{ 'Needs Re-analysis'|t('neverstale') }}</div>
+                            <div class="neverstale-status-date">{{ 'Flags may have been modified or ignored'|t('neverstale') }}</div>
                         </div>
+                        {% if not static %}
+                            <div class="neverstale-status-actions">
+                                <button type="button" class="btn submit small"
+                                        data-action="neverstale/reanalyze"
+                                        data-entry-id="{{ element.id }}">
+                                    <span class="spinner hidden"></span>
+                                    {{ 'Re-analyze Now'|t('neverstale') }}
+                                </button>
+                            </div>
+                        {% endif %}
                     </div>
                 {% else %}
                     <div class="neverstale-status-card neverstale-status-pending">
@@ -187,68 +197,91 @@
             {% endif %}
         {% endif %}
 
-        {% if flags|length > 0 and analysisStatus and analysisStatus.value in ['analyzed-clean', 'analyzed-flagged', 'stale'] %}
+        {# Show flags section for flagged or stale content, or when flags exist #}
+        {% if (analysisStatus and analysisStatus.value in ['analyzed-flagged', 'stale']) or flags|length > 0 %}
             <hr>
 
             {# Flags Section #}
             <div class="neverstale-section" id="neverstale-flags">
                 <h3>{{ 'Content Flags'|t('neverstale') }} <span class="info">{{ flags|length }}</span></h3>
-                <div class="neverstale-flags">
-                    {% for flag in flags %}
-                        <div class="neverstale-flag-item{{ flag.isActive() ? '' : ' neverstale-flag-ignored' }}"
-                             style="border: 1px solid {{ flag.isActive() ? '#ddd' : '#e5e7eb' }}; border-radius: 6px; padding: 16px; margin-bottom: 12px; background: {{ flag.isActive() ? '#fff' : '#f9fafb' }};">
-                            <div class="neverstale-flag-header"
-                                 style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 12px;">
-                                <div class="neverstale-flag-title">
-                                    <div style="display: flex; align-items: center; gap: 8px;">
-                                        <span class="status {{ flag.isActive() ? 'red' : 'gray' }}"></span>
-                                        <strong style="font-size: 14px;">{{ flag.getUiLabel() }}{{ flag.isActive() ? '' : ' (Ignored)' }}</strong>
+
+                {% if flags|length > 0 %}
+                    <div class="neverstale-flags">
+                        {% for flag in flags %}
+                            <div class="neverstale-flag-item{{ flag.isActive() ? '' : ' neverstale-flag-ignored' }}"
+                                 style="border: 1px solid {{ flag.isActive() ? '#ddd' : '#e5e7eb' }}; border-radius: 6px; padding: 16px; margin-bottom: 12px; background: {{ flag.isActive() ? '#fff' : '#f9fafb' }};">
+                                <div class="neverstale-flag-header"
+                                     style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 12px;">
+                                    <div class="neverstale-flag-title">
+                                        <div style="display: flex; align-items: center; gap: 8px;">
+                                            <span class="status {{ flag.isActive() ? 'red' : 'gray' }}"></span>
+                                            <strong style="font-size: 14px;">{{ flag.getUiLabel() }}{{ flag.isActive() ? '' : ' (Ignored)' }}</strong>
+                                        </div>
                                     </div>
+                                    {% if not static %}
+                                        <div class="neverstale-flag-actions"
+                                             style="display: flex; gap: 8px; align-items: center;">
+                                            {% if flag.isActive() %}
+                                                <a href="#" class="btn secondary"
+                                                   data-flag-id="{{ flag.flagId }}"
+                                                   data-custom-id="{{ content.customId }}"
+                                                   style="white-space: nowrap;">
+                                                    {{ 'Ignore'|t('neverstale') }}
+                                                </a>
+                                            {% endif %}
+                                        </div>
+                                    {% endif %}
                                 </div>
-                                {% if not static %}
-                                    <div class="neverstale-flag-actions"
-                                         style="display: flex; gap: 8px; align-items: center;">
-                                        {% if flag.isActive() %}
-                                            <a href="#" class="btn secondary"
-                                               data-flag-id="{{ flag.flagId }}"
-                                               data-custom-id="{{ content.customId }}"
-                                               style="white-space: nowrap;">
-                                                {{ 'Ignore'|t('neverstale') }}
-                                            </a>
-                                        {% endif %}
+                                {# Main flag content - reason first for context #}
+                                {% if flag.reason %}
+                                    <div class="neverstale-flag-explanation"
+                                         style="margin-bottom: 12px; line-height: 1.5; color: #374151;">
+                                        {{ flag.reason }}
                                     </div>
                                 {% endif %}
-                            </div>
-                            {# Main flag content - reason first for context #}
-                            {% if flag.reason %}
-                                <div class="neverstale-flag-explanation"
-                                     style="margin-bottom: 12px; line-height: 1.5; color: #374151;">
-                                    {{ flag.reason }}
-                                </div>
-                            {% endif %}
 
-                            {% if flag.snippet %}
-                                <div class="neverstale-flag-snippet"
-                                     style="margin-bottom: 12px; padding: 12px; background: #f9fafb; border: 1px solid #e5e7eb; border-radius: 4px;">
-                                    <div style="font-size: 11px; text-transform: uppercase; color: #6b7280; margin-bottom: 6px; font-weight: 500;">
-                                        {{ 'Flagged Content:'|t('neverstale') }}
+                                {% if flag.snippet %}
+                                    <div class="neverstale-flag-snippet"
+                                         style="margin-bottom: 12px; padding: 12px; background: #f9fafb; border: 1px solid #e5e7eb; border-radius: 4px;">
+                                        <div style="font-size: 11px; text-transform: uppercase; color: #6b7280; margin-bottom: 6px; font-weight: 500;">
+                                            {{ 'Flagged Content:'|t('neverstale') }}
+                                        </div>
+                                        <code style="font-size: 13px; color: #111827;">{{ flag.snippet }}</code>
                                     </div>
-                                    <code style="font-size: 13px; color: #111827;">{{ flag.snippet }}</code>
-                                </div>
-                            {% endif %}
+                                {% endif %}
 
 
-                            {% if not flag.isActive() %}
-                                <div class="neverstale-flag-ignored-notice"
-                                     style="margin-top: 12px; padding: 8px 12px; background: #f3f4f6; border-radius: 4px;">
+                                {% if not flag.isActive() %}
+                                    <div class="neverstale-flag-ignored-notice"
+                                         style="margin-top: 12px; padding: 8px 12px; background: #f3f4f6; border-radius: 4px;">
                                     <span style="font-size: 12px; color: #6b7280;">
                                         ✓ {{ 'Ignored'|t('neverstale') }} {{ flag.ignoredAt|datetime('relative') }}
                                     </span>
-                                </div>
+                                    </div>
+                                {% endif %}
+                            </div>
+                        {% endfor %}
+                    </div>
+                {% else %}
+                    {# Show message when in flagged/stale state but no flags to display #}
+                    <div class="neverstale-no-flags-message">
+                        <div class="neverstale-no-flags-content">
+                            {% if analysisStatus.value == 'stale' %}
+                                <p>{{ 'This content needs to be re-analyzed. Previous flags may have been resolved or ignored.'|t('neverstale') }}</p>
+                                {% if not static %}
+                                    <button type="button" class="btn submit small"
+                                            data-action="neverstale/reanalyze"
+                                            data-entry-id="{{ element.id }}">
+                                        <span class="spinner hidden"></span>
+                                        {{ 'Re-analyze Content'|t('neverstale') }}
+                                    </button>
+                                {% endif %}
+                            {% else %}
+                                <p>{{ 'No flags are currently available to display.'|t('neverstale') }}</p>
                             {% endif %}
                         </div>
-                    {% endfor %}
-                </div>
+                    </div>
+                {% endif %}
             </div>
         {% endif %}
 
@@ -565,6 +598,11 @@
         background: #f8f9fa;
     }
 
+    .neverstale-status-stale {
+        border-color: #fbbf24;
+        background: #fffbeb;
+    }
+
     .neverstale-status-icon {
         margin-right: 16px;
     }
@@ -634,5 +672,28 @@
         color: #9ca3af;
     }
 
+    /* No flags message styling */
+    .neverstale-no-flags-message {
+        padding: 24px;
+        background: #f9fafb;
+        border: 1px solid #e5e7eb;
+        border-radius: 6px;
+        text-align: center;
+    }
+
+    .neverstale-no-flags-content {
+        max-width: 400px;
+        margin: 0 auto;
+    }
+
+    .neverstale-no-flags-content p {
+        color: #6b7280;
+        margin: 0 0 16px 0;
+        line-height: 1.5;
+    }
+
+    .neverstale-no-flags-content .btn {
+        margin: 0 auto;
+    }
 
 </style>
