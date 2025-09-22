@@ -70,7 +70,7 @@ class Content extends ActiveRecord
             [['analysisStatus'], 'default', 'value' => AnalysisStatus::UNSENT->value],
             [['analysisStatus'], 'in', 'range' => array_map(fn($status) => $status->value, AnalysisStatus::cases())],
             [['flagCount'], 'integer', 'min' => 0],
-            [['dateAnalyzed', 'dateExpired'], 'datetime'],
+            [['dateAnalyzed', 'dateExpired'], 'safe'],
             [['uid'], 'string', 'max' => 36],
             [['neverstaleId'], 'string', 'max' => 255],
         ];
