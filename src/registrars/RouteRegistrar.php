@@ -18,6 +18,7 @@ class RouteRegistrar implements RegistrarInterface
     public function register(): void
     {
         $this->registerCPRoutes();
+        $this->registerSiteRoutes();
         $this->registerNavigation();
     }
 
@@ -45,6 +46,22 @@ class RouteRegistrar implements RegistrarInterface
                     'neverstale/flag/ignore' => 'neverstale/flag/ignore',
                     'neverstale/flag/reschedule' => 'neverstale/flag/reschedule',
                     'neverstale/settings' => 'neverstale/settings/edit',
+                ], $event->rules);
+            }
+        );
+    }
+
+    /**
+     * Register Site URL routes (for webhooks)
+     */
+    private function registerSiteRoutes(): void
+    {
+        Event::on(
+            UrlManager::class,
+            UrlManager::EVENT_REGISTER_SITE_URL_RULES,
+            function (RegisterUrlRulesEvent $event) {
+                $event->rules = array_merge([
+                    'actions/neverstale/webhooks' => 'neverstale/webhooks/index',
                 ], $event->rules);
             }
         );
