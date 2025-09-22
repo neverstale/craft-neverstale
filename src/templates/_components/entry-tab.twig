@@ -257,7 +257,7 @@
                                     <span style="font-size: 12px; color: #6b7280;">
                                         ✓ {{ 'Ignored'|t('neverstale') }} {{ flag.ignoredAt|datetime('relative') }}
                                         {% if flag.expiredAt %}
-                                            • {{ 'Until'|t('neverstale') }} {{ flag.expiredAt|datetime('short') }}
+                                            • {{ 'Until'|t('neverstale') }} {{ flag.expiredAt|date('M j, Y') }}
                                         {% endif %}
                                     </span>
                                     </div>

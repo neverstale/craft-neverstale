@@ -142,61 +142,13 @@
             showCustomDateSection($slideout, $customSection);
         }
 
-        // Monitor date input changes and format display
+        // Focus the date field when custom is selected
         if ($customSection.length > 0) {
-            var $dateInput = $customSection.find('input[type="text"], input[type="date"]');
-
-            // Monitor for Craft's date picker updates
-            $dateInput.on('change blur', function() {
-                var dateValue = $(this).val();
-                if (dateValue) {
-                    // Format and update any visible date display
-                    var formattedDate = formatDate(dateValue);
-
-                    // Update the input's display value if needed
-                    var $displayElement = $(this).siblings('.datewrapper').find('.text');
-                    if ($displayElement.length > 0) {
-                        $displayElement.val(formattedDate);
-                    }
-
-                    // Update any date preview text
-                    var $datePreview = $customSection.find('.date-preview');
-                    if ($datePreview.length > 0) {
-                        $datePreview.text(formattedDate);
-                    }
-                }
-            });
-
-            // Also monitor for Craft's date picker widget events
-            if (window.Craft && window.Craft.DateTimePicker) {
+            var $dateInput = $customSection.find('input[type="text"]');
+            if ($dateInput.length > 0) {
                 setTimeout(function() {
-                    var $dateWrapper = $customSection.find('.datewrapper');
-                    if ($dateWrapper.length > 0) {
-                        var datePickerData = $dateWrapper.data('datepicker');
-                        if (datePickerData) {
-                            // Override the date picker's format display
-                            var originalUpdateValue = datePickerData.updateValue;
-                            if (originalUpdateValue) {
-                                datePickerData.updateValue = function() {
-                                    originalUpdateValue.call(this);
-                                    var $input = this.$date;
-                                    if ($input && $input.val()) {
-                                        var formattedDate = formatDate($input.val());
-                                        // Update display without affecting the actual value
-                                        var $display = this.$container.find('.text');
-                                        if ($display.length > 0 && $display.val() !== formattedDate) {
-                                            // Store original value
-                                            var originalVal = $input.val();
-                                            // Show formatted date
-                                            $display.attr('data-original-date', originalVal);
-                                            $display.val(formattedDate);
-                                        }
-                                    }
-                                };
-                            }
-                        }
-                    }
-                }, 200);
+                    $dateInput.focus();
+                }, 100);
             }
         }
     }

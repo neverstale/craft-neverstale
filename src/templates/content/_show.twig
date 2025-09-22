@@ -80,7 +80,7 @@
                                                 {% if flag.expiredAt %}
                                                     <span class="flag-meta-item">
                                                         <span class="light">{{ "Expires"|t('neverstale') }}</span>
-                                                        {{ flag.expiredAt|datetime('short') }}
+                                                        {{ flag.expiredAt|date('M j, Y') }}
                                                     </span>
                                                 {% endif %}
                                             </div>
