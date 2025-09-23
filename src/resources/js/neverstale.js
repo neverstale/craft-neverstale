@@ -311,7 +311,7 @@
             $button.prop('disabled', true);
 
             // Make AJAX request to re-analyze
-            Craft.postActionRequest('neverstale/content/ingest', {
+            Craft.postActionRequest('neverstale/content/reanalyze', {
                 entryId: entryId
             }, function(response) {
                 if (response.success) {

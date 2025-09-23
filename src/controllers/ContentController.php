@@ -229,6 +229,48 @@ class ContentController extends BaseController
     }
 
     /**
+     * Trigger reanalysis for content by entry ID
+     *
+     * @throws MethodNotAllowedHttpException
+     * @throws ForbiddenHttpException
+     * @throws BadRequestHttpException
+     */
+    public function actionReanalyze(): Response
+    {
+        $this->requirePostRequest();
+        $this->requirePermission(Permission::Ingest->value);
+        $this->requireAcceptsJson();
+
+        $entryId = $this->request->getRequiredBodyParam('entryId');
+
+        // Find or create content for this entry
+        $entry = Craft::$app->getEntries()->getEntryById($entryId);
+
+        if (! $entry) {
+            return $this->asFailure(Plugin::t("Entry #{id} not found", ['id' => $entryId]));
+        }
+
+        // Get or create the content record
+        $content = Plugin::getInstance()->content->find($entry);
+
+        if (! $content) {
+            $content = Plugin::getInstance()->content->create($entry);
+            Plugin::getInstance()->content->save($content);
+        }
+
+        if (! $content) {
+            return $this->asFailure(Plugin::t("Could not create content for entry #{id}", ['id' => $entryId]));
+        }
+
+        // Trigger reanalysis by ingesting the content
+        if (! Plugin::getInstance()->content->ingest($content)) {
+            return $this->asFailure(Plugin::t("Could not trigger reanalysis for entry #{id}", ['id' => $entryId]));
+        }
+
+        return $this->asSuccess(Plugin::t("Reanalysis started for entry #{id}", ['id' => $entryId]));
+    }
+
+    /**
      * @throws ForbiddenHttpException
      * @throws MethodNotAllowedHttpException
      */

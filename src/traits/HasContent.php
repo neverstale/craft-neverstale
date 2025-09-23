@@ -172,11 +172,11 @@ trait HasContent
 
             // If it's a full URL, append the action path
             if (parse_url($customUrl, PHP_URL_SCHEME)) {
-                return "{$customUrl}/actions/neverstale/webhooks";
+                return "{$customUrl}/index.php?p=actions/neverstale/webhooks";
             }
 
             // If it's just a domain, add https and action path
-            return "https://{$customUrl}/actions/neverstale/webhooks";
+            return "https://{$customUrl}/index.php?p=actions/neverstale/webhooks";
         }
 
         // Default behavior - use current site's domain

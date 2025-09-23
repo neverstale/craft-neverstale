@@ -60,6 +60,16 @@
                             <div class="neverstale-status-title">{{ 'Clean'|t('neverstale') }}</div>
                             <div class="neverstale-status-date">{{ content.dateAnalyzed ? content.dateAnalyzed|date('M j, Y g:i A') : '' }}</div>
                         </div>
+                        {% if not static %}
+                            <div class="neverstale-status-actions">
+                                <button type="button" class="btn secondary small"
+                                        data-action="neverstale/reanalyze"
+                                        data-entry-id="{{ element.id }}">
+                                    <span class="spinner hidden"></span>
+                                    {{ 'Re-analyze'|t('neverstale') }}
+                                </button>
+                            </div>
+                        {% endif %}
                     </div>
                 {% elseif statusValue == 'analyzed-flagged' or flags|length > 0 %}
                     <div class="neverstale-status-card neverstale-status-flagged">
@@ -70,6 +80,16 @@
                             <div class="neverstale-status-title">{{ 'Flagged'|t('neverstale') }}</div>
                             <div class="neverstale-status-date">{{ content.dateAnalyzed ? content.dateAnalyzed|date('M j, Y g:i A') : '' }}</div>
                         </div>
+                        {% if not static %}
+                            <div class="neverstale-status-actions">
+                                <button type="button" class="btn secondary small"
+                                        data-action="neverstale/reanalyze"
+                                        data-entry-id="{{ element.id }}">
+                                    <span class="spinner hidden"></span>
+                                    {{ 'Re-analyze'|t('neverstale') }}
+                                </button>
+                            </div>
+                        {% endif %}
                     </div>
                 {% elseif statusValue in ['unsent'] %}
                     <div class="neverstale-status-card neverstale-status-pending">
