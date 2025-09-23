@@ -196,6 +196,13 @@ class Content extends Element
                 ],
             ],
             [
+                'key' => AnalysisStatus::PENDING_REANALYSIS->value,
+                'label' => AnalysisStatus::PENDING_REANALYSIS->label(),
+                'criteria' => [
+                    'analysisStatus' => AnalysisStatus::PENDING_REANALYSIS->value,
+                ],
+            ],
+            [
                 'key' => AnalysisStatus::STALE->value,
                 'label' => Plugin::t('Stale'),
                 'criteria' => [
