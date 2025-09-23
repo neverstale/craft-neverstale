@@ -163,8 +163,10 @@ trait HasContent
         $settings = Plugin::getInstance()->getSettings();
 
         // Use custom webhook domain if configured
-        if (! empty($settings->webhookDomain)) {
-            $customUrl = rtrim($settings->webhookDomain, '/');
+        $webhookDomain = $settings->getWebhookDomain();
+
+        if (! empty($webhookDomain)) {
+            $customUrl = rtrim($webhookDomain, '/');
 
             // If it's a full URL, append the action path
             if (parse_url($customUrl, PHP_URL_SCHEME)) {

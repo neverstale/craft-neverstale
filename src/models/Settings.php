@@ -4,6 +4,7 @@ namespace neverstale\neverstale\models;
 
 use Craft;
 use craft\base\Model;
+use craft\helpers\App;
 use craft\models\Section;
 use Illuminate\Support\Collection;
 use neverstale\neverstale\Plugin;
@@ -98,6 +99,70 @@ class Settings extends Model
     public function getEnabledSectionIds(): array
     {
         return collect($this->enabledSectionIds)->map(fn($id) => (int) $id)->toArray();
+    }
+
+    /**
+     * Get bulk ingest max items with ENV override support
+     */
+    public function getBulkIngestMaxItems(): int
+    {
+        return (int) App::parseEnv($this->bulkIngestMaxItems, '$NEVERSTALE_BULK_INGEST_MAX_ITEMS');
+    }
+
+    /**
+     * Get bulk ingest batch size with ENV override support
+     */
+    public function getBulkIngestBatchSize(): int
+    {
+        return (int) App::parseEnv($this->bulkIngestBatchSize, '$NEVERSTALE_BULK_INGEST_BATCH_SIZE');
+    }
+
+    /**
+     * Get bulk ingest max concurrency with ENV override support
+     */
+    public function getBulkIngestMaxConcurrency(): int
+    {
+        return (int) App::parseEnv($this->bulkIngestMaxConcurrency, '$NEVERSTALE_BULK_INGEST_MAX_CONCURRENCY');
+    }
+
+    /**
+     * Get bulk ingest retry attempts with ENV override support
+     */
+    public function getBulkIngestRetryAttempts(): int
+    {
+        return (int) App::parseEnv($this->bulkIngestRetryAttempts, '$NEVERSTALE_BULK_INGEST_RETRY_ATTEMPTS');
+    }
+
+    /**
+     * Get bulk ingest timeout minutes with ENV override support
+     */
+    public function getBulkIngestTimeoutMinutes(): int
+    {
+        return (int) App::parseEnv($this->bulkIngestTimeoutMinutes, '$NEVERSTALE_BULK_INGEST_TIMEOUT_MINUTES');
+    }
+
+    /**
+     * Get bulk ingest enabled with ENV override support
+     */
+    public function getBulkIngestEnabled(): bool
+    {
+        return (bool) App::parseEnv($this->bulkIngestEnabled, '$NEVERSTALE_BULK_INGEST_ENABLED');
+    }
+
+    /**
+     * Get debug logging with ENV override support
+     */
+    public function getDebugLogging(): bool
+    {
+        return (bool) App::parseEnv($this->debugLogging, '$NEVERSTALE_DEBUG_LOGGING');
+    }
+
+    /**
+     * Get webhook domain with ENV override support
+     */
+    public function getWebhookDomain(): string
+    {
+        return App::parseEnv($this->webhookDomain, '$NEVERSTALE_WEBHOOK_DOMAIN');
     }
 
     public function setAttributes($values, $safeOnly = true): void

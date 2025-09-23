@@ -109,7 +109,7 @@ class BulkIngestController extends Controller
             }
 
             // Limit check
-            $maxItems = Plugin::getInstance()->getSettings()->bulkIngestMaxItems ?? 10;
+            $maxItems = Plugin::getInstance()->getSettings()->getBulkIngestMaxItems();
 
             if (count($entryIds) > $maxItems) {
                 return [

@@ -24,7 +24,7 @@ trait HasOwnLogFile
     public static function debug(string|array $message): void
     {
         // Only log debug messages if debug logging is enabled
-        if (! self::getInstance()->getSettings()->debugLogging) {
+        if (! self::getInstance()->getSettings()->getDebugLogging()) {
             return;
         }
 
