@@ -3,6 +3,7 @@
 namespace neverstale\neverstale\traits;
 
 use Craft;
+use craft\helpers\App;
 use craft\helpers\UrlHelper;
 use DateTime;
 use Exception;
