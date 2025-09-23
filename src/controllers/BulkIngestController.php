@@ -4,6 +4,7 @@ namespace neverstale\neverstale\controllers;
 
 use Craft;
 use craft\elements\Entry;
+use craft\helpers\App;
 use craft\helpers\Queue;
 use craft\web\Controller;
 use craft\web\Response;
@@ -109,7 +110,9 @@ class BulkIngestController extends Controller
             }
 
             // Limit check
-            $maxItems = Plugin::getInstance()->getSettings()->getBulkIngestMaxItems();
+            $settings = Plugin::getInstance()->getSettings();
+            $configValue = Plugin::getInstance()->config->get('bulkIngestMaxItems');
+            $maxItems = $configValue !== null ? (int) $configValue : (int) App::parseEnv($settings->bulkIngestMaxItems, '$NEVERSTALE_BULK_INGEST_MAX_ITEMS');
 
             if (count($entryIds) > $maxItems) {
                 return [

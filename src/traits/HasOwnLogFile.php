@@ -4,6 +4,7 @@ namespace neverstale\neverstale\traits;
 
 use Craft;
 use craft\base\Plugin;
+use craft\helpers\App;
 use craft\log\MonologTarget;
 use Monolog\Formatter\LineFormatter;
 use Psr\Log\LogLevel;
@@ -24,7 +25,11 @@ trait HasOwnLogFile
     public static function debug(string|array $message): void
     {
         // Only log debug messages if debug logging is enabled
-        if (! self::getInstance()->getSettings()->getDebugLogging()) {
+        $settings = self::getInstance()->getSettings();
+        $configValue = self::getInstance()->config->get('debugLogging');
+        $debugLogging = $configValue !== null ? (bool) $configValue : (bool) App::parseEnv($settings->debugLogging, '$NEVERSTALE_DEBUG_LOGGING');
+
+        if (! $debugLogging) {
             return;
         }
 

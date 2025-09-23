@@ -163,7 +163,8 @@ trait HasContent
         $settings = Plugin::getInstance()->getSettings();
 
         // Use custom webhook domain if configured
-        $webhookDomain = $settings->getWebhookDomain();
+        $configValue = Plugin::getInstance()->config->get('webhookDomain');
+        $webhookDomain = $configValue !== null ? (string) $configValue : App::parseEnv($settings->webhookDomain, '$NEVERSTALE_WEBHOOK_DOMAIN');
 
         if (! empty($webhookDomain)) {
             $customUrl = rtrim($webhookDomain, '/');

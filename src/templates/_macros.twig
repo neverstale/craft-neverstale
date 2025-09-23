@@ -8,16 +8,6 @@
     {%- endif -%}
 {%- endmacro -%}
 
-{%- macro envOverrideWarning(envVar) -%}
-    {%- set envValue = craft.app.config.general.parseEnv('$' ~ envVar) -%}
-    {%- if envValue != ('$' ~ envVar) and envValue is not empty -%}
-        {{- 'This setting is being overridden by the `{envVar}` environment variable.'|t('neverstale', params = {
-            envVar: envVar,
-        }) }}
-    {%- else -%}
-        {{ false }}
-    {%- endif -%}
-{%- endmacro -%}
 
 {%- macro alert(message, type = 'info', classes = '', attrs = {}) %}
     {%- set alertClasses = 'ns-bg-blue-100 ns-border-blue-500' %}
