@@ -195,6 +195,36 @@ class Content extends Element
                     'analysisStatus' => AnalysisStatus::PENDING_INITIAL_ANALYSIS->value,
                 ],
             ],
+            [
+                'key' => AnalysisStatus::STALE->value,
+                'label' => Plugin::t('Stale'),
+                'criteria' => [
+                    'analysisStatus' => AnalysisStatus::STALE->value,
+                ],
+            ],
+            [
+                'key' => 'processing',
+                'label' => Plugin::t('Processing'),
+                'criteria' => [
+                    'analysisStatus' => [
+                        AnalysisStatus::PROCESSING_INITIAL_ANALYSIS->value,
+                        AnalysisStatus::PROCESSING_REANALYSIS->value,
+                    ],
+                ],
+            ],
+            [
+                'heading' => Plugin::t('Errors'),
+            ],
+            [
+                'key' => 'analysis-errors',
+                'label' => Plugin::t('Analysis Errors'),
+                'criteria' => [
+                    'analysisStatus' => [
+                        AnalysisStatus::ANALYZED_ERROR->value,
+                        AnalysisStatus::API_ERROR->value,
+                    ],
+                ],
+            ],
         ];
     }
 
