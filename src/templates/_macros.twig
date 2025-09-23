@@ -9,8 +9,8 @@
 {%- endmacro -%}
 
 {%- macro envOverrideWarning(envVar) -%}
-    {%- set envValue = craft.app.config.env(envVar) -%}
-    {%- if envValue is not empty -%}
+    {%- set envValue = craft.app.config.general.parseEnv('$' ~ envVar) -%}
+    {%- if envValue != ('$' ~ envVar) and envValue is not empty -%}
         {{- 'This setting is being overridden by the `{envVar}` environment variable.'|t('neverstale', params = {
             envVar: envVar,
         }) }}
