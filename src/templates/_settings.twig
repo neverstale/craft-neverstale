@@ -196,7 +196,7 @@
                     value: settings.webhookDomain,
                     errors: settings.getErrors('webhookDomain'),
                     disabled: readOnly,
-                    warning: helpers.configOverrideWarning('webhookDomain'),
+                    warning: helpers.configOverrideWarning('webhookDomain') ?: helpers.envOverrideWarning('NEVERSTALE_WEBHOOK_DOMAIN'),
                     placeholder: 'https://webhook.example.com',
                 }) }}
             </div>
@@ -210,7 +210,7 @@
                     name: 'settings[debugLogging]',
                     on: settings.debugLogging,
                     disabled: readOnly,
-                    warning: helpers.configOverrideWarning('debugLogging'),
+                    warning: helpers.configOverrideWarning('debugLogging') ?: helpers.envOverrideWarning('NEVERSTALE_DEBUG_LOGGING'),
                 }) }}
 
                 <div class="field">
