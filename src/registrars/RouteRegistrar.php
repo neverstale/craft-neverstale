@@ -52,15 +52,6 @@ class RouteRegistrar implements RegistrarInterface
     }
 
     /**
-     * Register Site URL routes (for webhooks)
-     */
-    private function registerSiteRoutes(): void
-    {
-        // Note: Removed custom route registration as Craft should handle
-        // actions/neverstale/webhooks automatically via controller naming
-    }
-
-    /**
      * Register CP navigation items
      */
     private function registerNavigation(): void

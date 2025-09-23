@@ -247,27 +247,38 @@ class ContentController extends BaseController
         $entry = Craft::$app->getEntries()->getEntryById($entryId);
 
         if (! $entry) {
-            return $this->asFailure(Plugin::t("Entry #{id} not found", ['id' => $entryId]));
+            return $this->respondWithError(Plugin::t("Entry #{id} not found", ['id' => $entryId]));
         }
 
         // Get or create the content record
         $content = Plugin::getInstance()->content->find($entry);
 
+        $isNewContent = false;
         if (! $content) {
             $content = Plugin::getInstance()->content->create($entry);
-            Plugin::getInstance()->content->save($content);
+            $isNewContent = true;
         }
 
         if (! $content) {
-            return $this->asFailure(Plugin::t("Could not create content for entry #{id}", ['id' => $entryId]));
+            return $this->respondWithError(Plugin::t("Could not create content for entry #{id}", ['id' => $entryId]));
         }
+
+        // Set the appropriate pending status
+        if ($isNewContent) {
+            $content->setAnalysisStatus(\neverstale\neverstale\enums\AnalysisStatus::PENDING_INITIAL_ANALYSIS);
+        } else {
+            $content->setAnalysisStatus(\neverstale\neverstale\enums\AnalysisStatus::PENDING_REANALYSIS);
+        }
+
+        // Save the content with updated status
+        Plugin::getInstance()->content->save($content);
 
         // Trigger reanalysis by ingesting the content
         if (! Plugin::getInstance()->content->ingest($content)) {
-            return $this->asFailure(Plugin::t("Could not trigger reanalysis for entry #{id}", ['id' => $entryId]));
+            return $this->respondWithError(Plugin::t("Could not trigger reanalysis for entry #{id}", ['id' => $entryId]));
         }
 
-        return $this->asSuccess(Plugin::t("Reanalysis started for entry #{id}", ['id' => $entryId]));
+        return $this->respondWithSuccess(Plugin::t("Reanalysis started for entry #{id}", ['id' => $entryId]));
     }
 
     /**

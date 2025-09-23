@@ -17,14 +17,14 @@
      * Initialize ignore flag slideout handlers
      */
     function initIgnoreFlagSlideouts() {
-        var $buttons = $('a[data-flag-id]');
+        const $buttons = $('a[data-flag-id]');
 
         $buttons.on('click', function(e) {
             e.preventDefault();
 
-            var $button = $(this);
-            var flagId = $button.data('flag-id');
-            var customId = $button.data('custom-id');
+            const $button = $(this);
+            const flagId = $button.data('flag-id');
+            const customId = $button.data('custom-id');
 
             // Validate required data
             if (!flagId || !customId) {
@@ -32,7 +32,7 @@
             }
 
             // Create slideout using native Craft pattern
-            var slideout = new Craft.CpScreenSlideout('neverstale/flag/ignore-slideout', {
+            const slideout = new Craft.CpScreenSlideout('neverstale/flag/ignore-slideout', {
                 params: {
                     flagId: flagId,
                     customId: customId
@@ -83,7 +83,7 @@
         }
 
         // Format as "Dec 25, 2024"
-        var options = {
+        const options = {
             year: 'numeric',
             month: 'short',
             day: 'numeric'
@@ -97,8 +97,8 @@
      */
     function initCustomDatePicker() {
         // Find slideout container
-        var $slideout = $('.slideout:visible, .hud:visible').last();
-        var $radioButtons, $customSection;
+        const $slideout = $('.slideout:visible, .hud:visible').last();
+        let $radioButtons, $customSection;
 
         if ($slideout.length > 0) {
             // Search within slideout context
@@ -124,7 +124,7 @@
 
         // Handle custom date section visibility
         $radioButtons.on('change', function() {
-            var selectedValue = $(this).val();
+            const selectedValue = $(this).val();
 
             if (selectedValue === 'custom') {
                 showCustomDateSection($slideout, $customSection);
@@ -134,7 +134,7 @@
         });
 
         // Set initial state
-        var $checkedOption = $slideout.length > 0
+        const $checkedOption = $slideout.length > 0
           ? $slideout.find('input[type="radio"]:checked')
           : $('input[type="radio"]:checked');
 
@@ -144,7 +144,7 @@
 
         // Focus the date field when custom is selected
         if ($customSection.length > 0) {
-            var $dateInput = $customSection.find('input[type="text"]');
+            const $dateInput = $customSection.find('input[type="text"]');
             if ($dateInput.length > 0) {
                 setTimeout(function() {
                     $dateInput.focus();
@@ -163,7 +163,7 @@
 
         // Focus the date field when custom is selected
         if ($customSection.length > 0) {
-            var $dateInput = $customSection.find('input[type="text"]');
+            const $dateInput = $customSection.find('input[type="text"]');
             if ($dateInput.length > 0) {
                 setTimeout(function() {
                     $dateInput.focus();
@@ -186,14 +186,14 @@
      */
     function updateFlagDisplay(flagId, customId, expiryDate) {
         // Find all flag items with this flag ID
-        var $flagItems = $('.neverstale-flag-item').filter(function() {
-            var $ignoreBtn = $(this).find('a[data-flag-id="' + flagId + '"]');
+        const $flagItems = $('.neverstale-flag-item').filter(function() {
+            const $ignoreBtn = $(this).find('a[data-flag-id="' + flagId + '"]');
             return $ignoreBtn.length > 0;
         });
 
         $flagItems.each(function() {
-            var $flagItem = $(this);
-            var $ignoreBtn = $flagItem.find('a[data-flag-id="' + flagId + '"]');
+            const $flagItem = $(this);
+            const $ignoreBtn = $flagItem.find('a[data-flag-id="' + flagId + '"]');
 
             // Update flag appearance to show it's been ignored
             $flagItem.addClass('neverstale-flag-ignored');
@@ -208,9 +208,9 @@
             $flagItem.find('.status').removeClass('red').addClass('gray');
 
             // Update flag label to show ignored state
-            var $label = $flagItem.find('strong').first();
+            const $label = $flagItem.find('strong').first();
             if ($label.length > 0) {
-                var currentText = $label.text();
+                const currentText = $label.text();
                 if (!currentText.includes('(Ignored)')) {
                     $label.text(currentText + ' (Ignored)');
                 }
@@ -223,17 +223,17 @@
 
             // Add ignored notice if it doesn't exist
             if (!$flagItem.find('.neverstale-flag-ignored-notice').length) {
-                var ignoreMessage = '✓ Ignored just now';
+                let ignoreMessage = '✓ Ignored just now';
 
                 // Use expiry date if provided
                 if (expiryDate) {
-                    var formattedExpiry = formatDate(expiryDate);
+                    const formattedExpiry = formatDate(expiryDate);
                     if (formattedExpiry) {
                         ignoreMessage += ' • Until ' + formattedExpiry;
                     }
                 }
 
-                var $ignoredNotice = $(
+                const $ignoredNotice = $(
                   '<div class="neverstale-flag-ignored-notice" style="margin-top: 12px; padding: 8px 12px; background: #f3f4f6; border-radius: 4px;">' +
                   '<span style="font-size: 12px; color: #6b7280;">' +
                   ignoreMessage +
@@ -255,7 +255,7 @@
      * Update status banner after flag operations
      */
     function updateStatusBanner() {
-        var $statusCard = $('.neverstale-status-card');
+        const $statusCard = $('.neverstale-status-card');
         if ($statusCard.hasClass('neverstale-status-flagged')) {
             // Change from "Flagged" to "Stale"
             $statusCard.find('.neverstale-status-title').text('Stale');
@@ -267,17 +267,17 @@
      * Update flag section header count
      */
     function updateFlagSectionHeader() {
-        var $flagSection = $('#neverstale-flags');
+        const $flagSection = $('#neverstale-flags');
         if ($flagSection.length > 0) {
             // Count active vs ignored flags
-            var $allFlags = $flagSection.find('.neverstale-flag-item');
-            var $ignoredFlags = $flagSection.find('.neverstale-flag-item.neverstale-flag-ignored');
-            var totalFlags = $allFlags.length;
-            var ignoredCount = $ignoredFlags.length;
-            var activeCount = totalFlags - ignoredCount;
+            const $allFlags = $flagSection.find('.neverstale-flag-item');
+            const $ignoredFlags = $flagSection.find('.neverstale-flag-item.neverstale-flag-ignored');
+            const totalFlags = $allFlags.length;
+            const ignoredCount = $ignoredFlags.length;
+            const activeCount = totalFlags - ignoredCount;
 
             // Update the count display
-            var $countSpan = $flagSection.find('.info');
+            const $countSpan = $flagSection.find('.info');
             if ($countSpan.length > 0) {
                 if (activeCount > 0 && ignoredCount > 0) {
                     $countSpan.text(totalFlags + ' (' + activeCount + ' active, ' + ignoredCount + ' ignored)');
@@ -291,14 +291,36 @@
     }
 
     /**
+     * Update status display to show pending analysis
+     */
+    function updateStatusToPending() {
+        const $statusCard = $('.neverstale-status-card');
+
+        // Remove all status classes
+        $statusCard.removeClass('neverstale-status-synced neverstale-status-flagged neverstale-status-stale');
+        $statusCard.addClass('neverstale-status-pending');
+
+        // Update the status icon
+        const $statusIcon = $statusCard.find('.neverstale-status-icon .status');
+        $statusIcon.removeClass('green orange red gray').addClass('blue');
+
+        // Update the title and description
+        $statusCard.find('.neverstale-status-title').text('Processing');
+        $statusCard.find('.neverstale-status-date').text('Waiting for Neverstale analysis');
+
+        // Hide the action buttons since it's now processing
+        $statusCard.find('.neverstale-status-actions').hide();
+    }
+
+    /**
      * Initialize re-analyze button handlers
      */
     function initReanalyzeButtons() {
         $(document).on('click', 'button[data-action="neverstale/reanalyze"]', function(e) {
             e.preventDefault();
 
-            var $button = $(this);
-            var entryId = $button.data('entry-id');
+            const $button = $(this);
+            const entryId = $button.data('entry-id');
 
             if (!entryId) {
                 Craft.cp.displayError('Entry ID is missing');
@@ -317,10 +339,12 @@
                 if (response.success) {
                     Craft.cp.displayNotice(response.message || 'Content submitted for re-analysis');
 
-                    // Reload page after short delay to show updated status
-                    setTimeout(function() {
-                        location.reload();
-                    }, 1500);
+                    // Update the status card immediately to show pending state
+                    updateStatusToPending();
+
+                    // Remove loading state from button since operation is complete
+                    $button.removeClass('loading');
+                    $button.find('.spinner').addClass('hidden');
                 } else {
                     Craft.cp.displayError(response.error || 'Failed to re-analyze content');
 
