@@ -18,7 +18,6 @@ class RouteRegistrar implements RegistrarInterface
     public function register(): void
     {
         $this->registerCPRoutes();
-        $this->registerSiteRoutes();
         $this->registerNavigation();
     }
 
