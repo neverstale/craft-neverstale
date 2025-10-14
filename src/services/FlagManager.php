@@ -33,8 +33,16 @@ class FlagManager extends Component
             // Get existing flags for this content
             $existingFlags = Flag::find()
                 ->contentId($content->id)
-                ->indexBy('flagId')
                 ->all();
+
+            // Index by flagId manually
+            $indexedFlags = [];
+            foreach ($existingFlags as $flag) {
+                $indexedFlags[$flag->flagId] = $flag;
+            }
+            $existingFlags = $indexedFlags;
+
+            Plugin::debug("FlagManager: Found ".count($existingFlags)." existing flags for content #{$content->id}");
 
             $processedFlagIds = [];
             $successCount = 0;
