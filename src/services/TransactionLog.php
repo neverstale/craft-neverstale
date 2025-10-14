@@ -47,7 +47,7 @@ class TransactionLog extends Component
             $record->event = $logItem->event;
 
             // Store debug information in development mode or when explicitly enabled
-            if (App::devMode() || Plugin::getInstance()->getSettings()->enableDebugLogging) {
+            if (App::devMode() || Plugin::getInstance()->getSettings()->debugLogging) {
                 $record->debugTransaction = $logItem->content;
             }
 
