@@ -42,7 +42,7 @@ class FlagManager extends Component
             }
             $existingFlags = $indexedFlags;
 
-            Plugin::debug("FlagManager: Found ".count($existingFlags)." existing flags for content #{$content->id}");
+            Plugin::info("FlagManager: Found ".count($existingFlags)." existing flags for content #{$content->id}. Existing flagIds: ".json_encode(array_keys($existingFlags)));
 
             $processedFlagIds = [];
             $successCount = 0;
@@ -67,11 +67,13 @@ class FlagManager extends Component
                 $flag = $existingFlags[$flagId] ?? null;
 
                 if ($flag) {
+                    Plugin::info("FlagManager: Updating existing flag {$flagId} for content #{$content->id}");
                     // Update existing flag
                     if ($this->updateFlagFromApiData($flag, $apiFlag)) {
                         $successCount++;
                     }
                 } else {
+                    Plugin::info("FlagManager: Creating new flag {$flagId} for content #{$content->id}");
                     // Create new flag
                     if ($this->createFlagFromApiData($content, $apiFlag)) {
                         $successCount++;
