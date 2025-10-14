@@ -187,7 +187,7 @@ class EventRegistrar implements RegistrarInterface
                             'analyzed-clean' => 'green',   // Successfully analyzed, no issues
                             'analyzed-flagged' => 'red',   // Analyzed with flags
                             'unsent', 'pending-initial-analysis', 'pending-reanalysis', 'processing-initial-analysis', 'processing-reanalysis' => 'blue', // Pending/processing
-                            'api-error', 'stale', 'analyzed-error' => 'orange', // Errors/needs attention
+                            'api-error', 'analyzed-error' => 'orange', // Errors/needs attention
                             'archived' => 'gray', // Archived content
                             default => 'gray'
                         };
@@ -200,7 +200,6 @@ class EventRegistrar implements RegistrarInterface
                             'processing-initial-analysis', 'processing-reanalysis' => Craft::t('neverstale', 'Processing'),
                             'api-error' => Craft::t('neverstale', 'API Error'),
                             'analyzed-error' => Craft::t('neverstale', 'Analysis Error'),
-                            'stale' => Craft::t('neverstale', 'Stale'),
                             'archived' => Craft::t('neverstale', 'Archived'),
                             'unknown' => Craft::t('neverstale', 'Unknown'),
                             default => Craft::t('neverstale', 'Unknown')." ({$statusValue})" // Show the actual value for debugging

@@ -194,7 +194,6 @@ class ContentQuery extends ElementQuery
             AnalysisStatus::ANALYZED_ERROR,
             AnalysisStatus::API_ERROR,
             AnalysisStatus::ARCHIVED,
-            AnalysisStatus::STALE,
             AnalysisStatus::UNKNOWN => [
                 'neverstale_content.analysisStatus' => $status,
             ],

@@ -141,14 +141,15 @@
                             </div>
                         {% endif %}
                     </div>
-                {% elseif statusValue == 'stale' %}
-                    <div class="neverstale-status-card neverstale-status-stale">
+                {% elseif statusValue == 'analyzed-flagged' and flags|length == 0 %}
+                    {# Special case: flagged status but no visible flags (all ignored) #}
+                    <div class="neverstale-status-card neverstale-status-flagged">
                         <div class="neverstale-status-icon">
                             <span class="status orange large"></span>
                         </div>
                         <div class="neverstale-status-content">
-                            <div class="neverstale-status-title">{{ 'Needs Re-analysis'|t('neverstale') }}</div>
-                            <div class="neverstale-status-date">{{ 'Flags may have been modified or ignored'|t('neverstale') }}</div>
+                            <div class="neverstale-status-title">{{ 'Flagged - All Ignored'|t('neverstale') }}</div>
+                            <div class="neverstale-status-date">{{ 'All flags have been ignored'|t('neverstale') }}</div>
                         </div>
                         {% if not static %}
                             <div class="neverstale-status-actions">
@@ -217,8 +218,8 @@
             {% endif %}
         {% endif %}
 
-        {# Show flags section for flagged or stale content, or when flags exist #}
-        {% if (analysisStatus and analysisStatus.value in ['analyzed-flagged', 'stale']) or flags|length > 0 %}
+        {# Show flags section for flagged content or when flags exist #}
+        {% if (analysisStatus and analysisStatus.value == 'analyzed-flagged') or flags|length > 0 %}
             <hr>
 
             {# Flags Section #}
@@ -286,11 +287,11 @@
                         {% endfor %}
                     </div>
                 {% else %}
-                    {# Show message when in flagged/stale state but no flags to display #}
+                    {# Show message when in flagged state but no flags to display #}
                     <div class="neverstale-no-flags-message">
                         <div class="neverstale-no-flags-content">
-                            {% if analysisStatus.value == 'stale' %}
-                                <p>{{ 'This content needs to be re-analyzed. Previous flags may have been resolved or ignored.'|t('neverstale') }}</p>
+                            {% if analysisStatus.value == 'analyzed-flagged' %}
+                                <p>{{ 'All flags for this content have been ignored.'|t('neverstale') }}</p>
                                 {% if not static %}
                                     <button type="button" class="btn submit small"
                                             data-action="neverstale/reanalyze"
@@ -621,10 +622,6 @@
         background: #f8f9fa;
     }
 
-    .neverstale-status-stale {
-        border-color: #fbbf24;
-        background: #fffbeb;
-    }
 
     .neverstale-status-icon {
         margin-right: 16px;

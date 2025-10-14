@@ -50,7 +50,7 @@ class Status extends Model
     public function getLabel(): string
     {
         return match ($this->analysisStatus) {
-            AnalysisStatus::UNSENT, AnalysisStatus::STALE => Plugin::t('Pending'),
+            AnalysisStatus::UNSENT => Plugin::t('Pending'),
             AnalysisStatus::PENDING_INITIAL_ANALYSIS => Plugin::t('Pending Initial Analysis'),
             AnalysisStatus::PENDING_REANALYSIS => Plugin::t('Pending Reanalysis'),
             AnalysisStatus::PROCESSING_REANALYSIS, AnalysisStatus::PROCESSING_INITIAL_ANALYSIS => Plugin::t('Processing'),
@@ -66,7 +66,7 @@ class Status extends Model
     public function getColor(): Color
     {
         return match ($this->analysisStatus) {
-            AnalysisStatus::UNSENT, AnalysisStatus::STALE => Color::Orange,
+            AnalysisStatus::UNSENT => Color::Orange,
             AnalysisStatus::PENDING_INITIAL_ANALYSIS, AnalysisStatus::PENDING_REANALYSIS => Color::Pink,
             AnalysisStatus::PROCESSING_REANALYSIS, AnalysisStatus::PROCESSING_INITIAL_ANALYSIS => Color::Purple,
             AnalysisStatus::ANALYZED_CLEAN => Color::Teal,
@@ -81,7 +81,7 @@ class Status extends Model
     public function getIcon(): string
     {
         return match ($this->analysisStatus) {
-            AnalysisStatus::UNSENT, AnalysisStatus::STALE => 'envelope',
+            AnalysisStatus::UNSENT => 'envelope',
             AnalysisStatus::PROCESSING_REANALYSIS => 'hammer',
             AnalysisStatus::PROCESSING_INITIAL_ANALYSIS => 'hammer',
             AnalysisStatus::PENDING_INITIAL_ANALYSIS => 'clock',

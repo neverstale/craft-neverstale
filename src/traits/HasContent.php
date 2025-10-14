@@ -136,11 +136,6 @@ trait HasContent
         return $this->getAnalysisStatus() === AnalysisStatus::ANALYZED_FLAGGED;
     }
 
-    public function isStale(): bool
-    {
-        return $this->getAnalysisStatus() === AnalysisStatus::STALE;
-    }
-
     public function isUnsent(): bool
     {
         return $this->getAnalysisStatus() === AnalysisStatus::UNSENT;
@@ -150,7 +145,6 @@ trait HasContent
     {
         return match ($this->getAnalysisStatus()) {
             AnalysisStatus::UNSENT,
-            AnalysisStatus::STALE,
             AnalysisStatus::PENDING_INITIAL_ANALYSIS,
             AnalysisStatus::PENDING_REANALYSIS,
             AnalysisStatus::PROCESSING_REANALYSIS,

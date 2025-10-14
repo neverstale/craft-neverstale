@@ -244,7 +244,7 @@
             }
         });
 
-        // Update status banner to show "Stale" if it was showing "Flagged"
+        // Update status banner after flag operations
         updateStatusBanner();
 
         // Update flag count in section header
@@ -257,8 +257,7 @@
     function updateStatusBanner() {
         const $statusCard = $('.neverstale-status-card');
         if ($statusCard.hasClass('neverstale-status-flagged')) {
-            // Change from "Flagged" to "Stale"
-            $statusCard.find('.neverstale-status-title').text('Stale');
+            // Keep status as "Flagged" since we no longer use "Stale"
             $statusCard.find('.neverstale-status-date').text('Content needs re-analysis');
         }
     }
@@ -297,7 +296,7 @@
         const $statusCard = $('.neverstale-status-card');
 
         // Remove all status classes
-        $statusCard.removeClass('neverstale-status-synced neverstale-status-flagged neverstale-status-stale');
+        $statusCard.removeClass('neverstale-status-synced neverstale-status-flagged');
         $statusCard.addClass('neverstale-status-pending');
 
         // Update the status icon

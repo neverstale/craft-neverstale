@@ -203,13 +203,6 @@ class Content extends Element
                 ],
             ],
             [
-                'key' => AnalysisStatus::STALE->value,
-                'label' => Plugin::t('Stale'),
-                'criteria' => [
-                    'analysisStatus' => AnalysisStatus::STALE->value,
-                ],
-            ],
-            [
                 'key' => 'processing',
                 'label' => Plugin::t('Processing'),
                 'criteria' => [

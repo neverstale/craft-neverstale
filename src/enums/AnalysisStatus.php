@@ -18,7 +18,6 @@ use neverstale\neverstale\Plugin;
 enum AnalysisStatus: string
 {
     case UNSENT = 'unsent';
-    case STALE = 'stale';
     case PENDING_INITIAL_ANALYSIS = 'pending-initial-analysis';
     case PENDING_REANALYSIS = 'pending-reanalysis';
     case PROCESSING_REANALYSIS = 'processing-reanalysis';
@@ -33,7 +32,7 @@ enum AnalysisStatus: string
     public function label(): string
     {
         return match ($this) {
-            self::UNSENT, self::STALE => Plugin::t('Pending'),
+            self::UNSENT => Plugin::t('Pending'),
             self::PENDING_INITIAL_ANALYSIS => Plugin::t('Pending Initial Analysis'),
             self::PENDING_REANALYSIS => Plugin::t('Pending Reanalysis'),
             self::PROCESSING_REANALYSIS, self::PROCESSING_INITIAL_ANALYSIS => Plugin::t('Processing'),
@@ -49,7 +48,7 @@ enum AnalysisStatus: string
     public function color(): Color
     {
         return match ($this) {
-            self::UNSENT, self::STALE => Color::Orange,
+            self::UNSENT => Color::Orange,
             self::PENDING_INITIAL_ANALYSIS, self::PENDING_REANALYSIS => Color::Pink,
             self::PROCESSING_REANALYSIS, self::PROCESSING_INITIAL_ANALYSIS => Color::Purple,
             self::ANALYZED_CLEAN => Color::Teal,
@@ -64,7 +63,7 @@ enum AnalysisStatus: string
     public function icon(): string
     {
         return match ($this) {
-            self::UNSENT, self::STALE => 'envelope',
+            self::UNSENT => 'envelope',
             self::PROCESSING_REANALYSIS => 'hammer',
             self::PROCESSING_INITIAL_ANALYSIS => 'hammer',
             self::PENDING_INITIAL_ANALYSIS => 'clock',

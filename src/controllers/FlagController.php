@@ -112,9 +112,9 @@ class FlagController extends BaseController
                 ]);
             }
             
-            $content->setAnalysisStatus(AnalysisStatus::STALE);
+            $content->setAnalysisStatus(AnalysisStatus::ANALYZED_FLAGGED);
             Craft::$app->getElements()->saveElement($content);
-            
+
             // Use Craft's standard success response pattern for slideout
             return $this->asSuccess($message, [
                 'message' => $message,
@@ -220,7 +220,7 @@ class FlagController extends BaseController
         }
         try {
             Plugin::getInstance()->flag->ignore($content, $flagId);
-            $content->setAnalysisStatus(AnalysisStatus::STALE);
+            $content->setAnalysisStatus(AnalysisStatus::ANALYZED_FLAGGED);
             Craft::$app->getElements()->saveElement($content);
 
             if ($this->request->getAcceptsJson()) {
@@ -288,7 +288,7 @@ class FlagController extends BaseController
             $expiredAt = $expiredAt->setTimezone(new DateTimeZone('UTC'));
             Plugin::getInstance()->flag->reschedule($content, $flagId, $expiredAt);
 
-            $content->setAnalysisStatus(AnalysisStatus::STALE);
+            $content->setAnalysisStatus(AnalysisStatus::ANALYZED_FLAGGED);
             Craft::$app->getElements()->saveElement($content);
 
             if ($this->request->getAcceptsJson()) {

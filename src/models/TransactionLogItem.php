@@ -57,7 +57,7 @@ class TransactionLogItem extends Model
     {
         return match ($apiStatus) {
             \neverstale\api\enums\AnalysisStatus::UNSENT => AnalysisStatus::UNSENT,
-            \neverstale\api\enums\AnalysisStatus::STALE => AnalysisStatus::STALE,
+            \neverstale\api\enums\AnalysisStatus::STALE => AnalysisStatus::ANALYZED_FLAGGED, // Map legacy STALE to ANALYZED_FLAGGED
             \neverstale\api\enums\AnalysisStatus::PENDING_INITIAL_ANALYSIS => AnalysisStatus::PENDING_INITIAL_ANALYSIS,
             \neverstale\api\enums\AnalysisStatus::PENDING_REANALYSIS => AnalysisStatus::PENDING_REANALYSIS,
             \neverstale\api\enums\AnalysisStatus::PENDING_TOKEN_AVAILABILITY => AnalysisStatus::PENDING_INITIAL_ANALYSIS, // Map to closest equivalent
