@@ -218,6 +218,7 @@ class ContentQuery extends ElementQuery
             'neverstale_content.entryId',
             'neverstale_content.neverstaleId',
             'neverstale_content.siteId',
+            'neverstale_content.lastWebhookVersion',
         ]);
 
         if ($this->analysisStatus !== null) {

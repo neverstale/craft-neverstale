@@ -57,6 +57,7 @@ class Install extends Migration
             'flagCount' => $this->integer()->null()->comment('Number of flags detected (null until analyzed)'),
             'dateAnalyzed' => $this->dateTime()->null()->comment('Last analysis completion date'),
             'dateExpired' => $this->dateTime()->null()->comment('Content expiration date'),
+            'lastWebhookVersion' => $this->bigInteger()->unsigned()->defaultValue(0)->notNull()->comment('Last processed webhook version (Unix timestamp)'),
             'dateCreated' => $this->dateTime()->notNull(),
             'dateUpdated' => $this->dateTime()->notNull(),
         ]);

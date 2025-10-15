@@ -435,6 +435,31 @@ class Content extends Component
      */
     public function onWebhook(ContentElement $content, TransactionLogItem $transaction): bool
     {
+        // Check webhook version to prevent processing out-of-order webhooks
+        $incomingVersion = $transaction->getWebhookVersion();
+
+        // Backward compatibility: if no version metadata, process the webhook
+        if ($incomingVersion === null) {
+            Plugin::webhookInfo("Processing webhook without version metadata (backward compatibility) for content #{$content->id}");
+        } else {
+            // Check if this webhook is stale
+            if ($incomingVersion <= $content->lastWebhookVersion) {
+                Plugin::webhookWarning(
+                    "Ignoring stale webhook for content #{$content->id}. " .
+                    "Incoming version: {$incomingVersion}, Stored version: {$content->lastWebhookVersion}"
+                );
+                return true; // Return success - we intentionally ignored it
+            }
+
+            Plugin::webhookInfo(
+                "Processing webhook for content #{$content->id}. " .
+                "Version: {$incomingVersion} (previous: {$content->lastWebhookVersion})"
+            );
+
+            // Update webhook version
+            $content->lastWebhookVersion = $incomingVersion;
+        }
+
         $content->setAnalysisStatus($transaction->getAnalysisStatus());
         $content->flagCount = $transaction->getFlagCount();
 

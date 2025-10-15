@@ -21,6 +21,7 @@ use neverstale\neverstale\enums\AnalysisStatus;
  * @property int|null $flagCount Flag count
  * @property \DateTime|null $dateAnalyzed Last analyzed at
  * @property \DateTime|null $dateExpired Content expired at date
+ * @property int $lastWebhookVersion Last processed webhook version (Unix timestamp)
  * @property \DateTime $dateCreated Date created
  * @property \DateTime $dateUpdated Date updated
  * @property-read \yii\db\ActiveQueryInterface $transactionLogs
@@ -64,12 +65,14 @@ class Content extends ActiveRecord
     public function rules(): array
     {
         return [
-            [['entryId', 'siteId', 'flagCount'], 'integer'],
+            [['entryId', 'siteId', 'flagCount', 'lastWebhookVersion'], 'integer'],
             [['entryId', 'siteId'], 'required'],
             [['neverstaleId', 'analysisStatus'], 'string'],
             [['analysisStatus'], 'default', 'value' => AnalysisStatus::UNSENT->value],
             [['analysisStatus'], 'in', 'range' => array_map(fn($status) => $status->value, AnalysisStatus::cases())],
             [['flagCount'], 'integer', 'min' => 0],
+            [['lastWebhookVersion'], 'integer', 'min' => 0],
+            [['lastWebhookVersion'], 'default', 'value' => 0],
             [['dateAnalyzed', 'dateExpired'], 'safe'],
             [['uid'], 'string', 'max' => 36],
             [['neverstaleId'], 'string', 'max' => 255],
@@ -91,6 +94,7 @@ class Content extends ActiveRecord
             'flagCount' => 'Flag Count',
             'dateAnalyzed' => 'Date Analyzed',
             'dateExpired' => 'Date Expired',
+            'lastWebhookVersion' => 'Last Webhook Version',
             'dateCreated' => 'Date Created',
             'dateUpdated' => 'Date Updated',
         ];

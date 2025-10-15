@@ -97,6 +97,11 @@ class TransactionLogItem extends Model
         return $this->content?->channel_id;
     }
 
+    public function getWebhookVersion(): ?int
+    {
+        return $this->content?->webhook_metadata['content_version'] ?? null;
+    }
+
     public static function fromContentResponse(TransactionResult $transaction, ?string $event = null): self
     {
         return new self([

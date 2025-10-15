@@ -34,6 +34,7 @@ trait HasContent
     public ?int $flagCount = null;
     public ?DateTime $dateAnalyzed = null;
     public ?DateTime $dateExpired = null;
+    public int $lastWebhookVersion = 0;
     protected ?string $analysisStatus = null;
     protected ?CustomId $customId = null;
 
@@ -66,6 +67,7 @@ trait HasContent
         $record->flagCount = $this->flagCount;
         $record->dateAnalyzed = $this->dateAnalyzed;
         $record->dateExpired = $this->dateExpired;
+        $record->lastWebhookVersion = $this->lastWebhookVersion;
 
         Plugin::debug("ContentRecord attributes set: entryId={$record->entryId}, siteId={$record->siteId}, analysisStatus={$record->analysisStatus}");
 
