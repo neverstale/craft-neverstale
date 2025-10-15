@@ -2209,12 +2209,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/neverstale/php-api.git",
-                "reference": "3e784d8bfa2ec2936ca8208e34205ac6479dbfd6"
+                "reference": "ee71be9b53e5905803ed393c28804043389d1f96"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/neverstale/php-api/zipball/3e784d8bfa2ec2936ca8208e34205ac6479dbfd6",
-                "reference": "3e784d8bfa2ec2936ca8208e34205ac6479dbfd6",
+                "url": "https://api.github.com/repos/neverstale/php-api/zipball/ee71be9b53e5905803ed393c28804043389d1f96",
+                "reference": "ee71be9b53e5905803ed393c28804043389d1f96",
                 "shasum": ""
             },
             "require": {
@@ -2248,7 +2248,7 @@
                 "issues": "https://github.com/neverstale/php-api/issues",
                 "source": "https://github.com/neverstale/php-api/tree/main"
             },
-            "time": "2025-08-08T20:47:10+00:00"
+            "time": "2025-10-15T19:29:01+00:00"
         },
         {
             "name": "paragonie/constant_time_encoding",
