@@ -30,19 +30,39 @@ class FlagManager extends Component
         Plugin::debug("FlagManager: Syncing ".count($apiFlags)." flags for content #{$content->id}");
 
         try {
-            // Get existing flags for this content
-            $existingFlags = Flag::find()
+            // Collect all flagIds from API response
+            $apiFlagIds = [];
+            foreach ($apiFlags as $apiFlag) {
+                if (is_array($apiFlag)) {
+                    $flagId = $apiFlag['id'] ?? null;
+                } else {
+                    $flagId = $apiFlag->id ?? null;
+                }
+                if ($flagId) {
+                    $apiFlagIds[] = $flagId;
+                }
+            }
+
+            // Get existing flags by flagId (globally, since flagId is unique)
+            $existingFlags = [];
+            if (!empty($apiFlagIds)) {
+                $existingFlagsList = Flag::find()
+                    ->flagId($apiFlagIds)
+                    ->all();
+
+                // Index by flagId
+                foreach ($existingFlagsList as $flag) {
+                    $existingFlags[$flag->flagId] = $flag;
+                }
+            }
+
+            // Also get flags currently associated with this content (to track deletions)
+            $contentFlags = Flag::find()
                 ->contentId($content->id)
                 ->all();
+            $contentFlagIds = array_map(fn($f) => $f->flagId, $contentFlags);
 
-            // Index by flagId manually
-            $indexedFlags = [];
-            foreach ($existingFlags as $flag) {
-                $indexedFlags[$flag->flagId] = $flag;
-            }
-            $existingFlags = $indexedFlags;
-
-            Plugin::info("FlagManager: Found ".count($existingFlags)." existing flags for content #{$content->id}. Existing flagIds: ".json_encode(array_keys($existingFlags)));
+            Plugin::info("FlagManager: Found ".count($existingFlags)." existing flags globally. Content #{$content->id} currently has ".count($contentFlags)." flags.");
 
             $processedFlagIds = [];
             $successCount = 0;
@@ -63,30 +83,46 @@ class FlagManager extends Component
 
                 $processedFlagIds[] = $flagId;
 
-                // Check if flag already exists
+                // Check if flag already exists (globally)
                 $flag = $existingFlags[$flagId] ?? null;
 
                 if ($flag) {
+                    // Flag exists - check if it needs to be moved to this content
+                    if ($flag->contentId != $content->id) {
+                        Plugin::warning("FlagManager: Flag {$flagId} exists for content #{$flag->contentId}, but API returned it for content #{$content->id}. Updating contentId.");
+                        $flag->contentId = $content->id;
+                    }
                     Plugin::info("FlagManager: Updating existing flag {$flagId} for content #{$content->id}");
-                    // Update existing flag
                     if ($this->updateFlagFromApiData($flag, $apiFlag)) {
                         $successCount++;
                     }
                 } else {
                     Plugin::info("FlagManager: Creating new flag {$flagId} for content #{$content->id}");
                     // Create new flag
-                    if ($this->createFlagFromApiData($content, $apiFlag)) {
+                    $created = $this->createFlagFromApiData($content, $apiFlag);
+                    if ($created) {
                         $successCount++;
+                    } else {
+                        // Creation failed - might be race condition, try to find and update
+                        Plugin::warning("FlagManager: Failed to create flag {$flagId}, attempting to find and update (possible race condition)");
+                        $existingFlag = Flag::find()->flagId($flagId)->one();
+                        if ($existingFlag) {
+                            Plugin::info("FlagManager: Found flag {$flagId} after failed create, updating instead");
+                            if ($this->updateFlagFromApiData($existingFlag, $apiFlag)) {
+                                $successCount++;
+                            }
+                        }
                     }
                 }
             }
 
-            // Remove flags that are no longer in the API response
-            $flagsToRemove = array_diff(array_keys($existingFlags), $processedFlagIds);
+            // Remove flags that are no longer in the API response FOR THIS CONTENT
+            $flagsToRemove = array_diff($contentFlagIds, $processedFlagIds);
             foreach ($flagsToRemove as $flagIdToRemove) {
-                $flagToRemove = $existingFlags[$flagIdToRemove];
-                if (Craft::$app->getElements()->deleteElement($flagToRemove)) {
-                    Plugin::debug("FlagManager: Removed obsolete flag {$flagIdToRemove}");
+                // Find the flag in the content's current flags
+                $flagToRemove = array_values(array_filter($contentFlags, fn($f) => $f->flagId === $flagIdToRemove))[0] ?? null;
+                if ($flagToRemove && Craft::$app->getElements()->deleteElement($flagToRemove)) {
+                    Plugin::debug("FlagManager: Removed obsolete flag {$flagIdToRemove} from content #{$content->id}");
                 }
             }
 
