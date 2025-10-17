@@ -94,8 +94,12 @@
                         <div class="heading">
                             <label>{{ "Content Flags"|t('neverstale') }}</label>
                         </div>
-                        <div class="instructions">
-                            <p>{{ "No flags detected for this content."|t('neverstale') }}</p>
+                        <div style="text-align: center; padding: 60px 40px; background: #f9fafb; border-radius: 4px; border: 1px solid #e5e7eb;">
+                            <svg width="48" height="48" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg" style="margin: 0 auto 16px;">
+                                <circle cx="24" cy="24" r="22" fill="#10b981" stroke="#059669" stroke-width="2"/>
+                                <path d="M14 24L20 30L34 16" stroke="white" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+                            </svg>
+                            <p style="margin: 0; font-size: 16px; font-weight: 500; color: #374151;">{{ "All clear! No flags detected for this content."|t('neverstale') }}</p>
                         </div>
                     {% endif %}
                 </div>
