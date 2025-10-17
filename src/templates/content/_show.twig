@@ -35,23 +35,10 @@
             {# Left column - Content Flags (2/3 width) #}
             <div>
                 <div class="field">
-                    {# Debug output #}
                     {% set allFlags = content.getFlags() %}
-                    <div style="background: #f0f0f0; padding: 10px; margin-bottom: 20px; font-family: monospace; font-size: 12px;">
-                        <strong>Debug Info:</strong><br>
-                        Content ID: {{ content.id }}<br>
-                        Flag Count (from content): {{ content.flagCount ?? 'null' }}<br>
-                        Flags retrieved: {{ allFlags|length }}<br>
-                        {% if allFlags|length > 0 %}
-                            Flag details:<br>
-                            {% for flag in allFlags %}
-                                - Flag ID: {{ flag.flagId }}, Type: {{ flag.flag }}, Active: {{ flag.isActive() ? 'Yes' : 'No' }}<br>
-                            {% endfor %}
-                        {% endif %}
-                    </div>
 
-                    {% if content.flagCount and content.flagCount > 0 %}
-                        
+                    {% if allFlags|length > 0 %}
+
                         {% if allFlags|length %}
                             <div class="heading">
                                 <label>{{ "Content Flags"|t('neverstale') }}</label>
