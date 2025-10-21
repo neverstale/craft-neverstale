@@ -5,6 +5,7 @@ namespace neverstale\neverstale\services;
 use Craft;
 use craft\elements\Entry;
 use craft\helpers\App;
+use craft\helpers\ElementHelper;
 use craft\helpers\Queue;
 use DateTime;
 use Exception;
@@ -52,23 +53,23 @@ class Content extends Component
         $envBaseUri = App::parseEnv('$NEVERSTALE_API_BASE_URI');
         $baseUri = $envBaseUri ?: 'https://api.neverstale.com';
 
-        Plugin::debug("Environment NEVERSTALE_API_BASE_URI: ".($envBaseUri ? $envBaseUri : 'NOT SET'));
+        Plugin::debug("Environment NEVERSTALE_API_BASE_URI: " . ($envBaseUri ? $envBaseUri : 'NOT SET'));
         Plugin::debug("Content service initializing API client with baseUri: {$baseUri}");
-        Plugin::debug("API key configured: ".(! empty($apiKey) ? 'YES' : 'NO'));
+        Plugin::debug("API key configured: " . (!empty($apiKey) ? 'YES' : 'NO'));
 
         if (empty($apiKey)) {
             Plugin::error("Neverstale API key is not configured. Please set the apiKey setting in the plugin configuration.");
         }
 
         try {
-            Plugin::debug("Initializing API client with apiKey: ".(empty($apiKey) ? 'EMPTY' : substr($apiKey, 0, 10).'...'));
+            Plugin::debug("Initializing API client with apiKey: " . (empty($apiKey) ? 'EMPTY' : substr($apiKey, 0, 10) . '...'));
             $this->client = new ApiClient([
                 'apiKey' => $apiKey,
                 'baseUri' => $baseUri,
             ]);
             Plugin::debug("API client initialized successfully");
         } catch (Exception $e) {
-            Plugin::error("Failed to initialize Neverstale API client: ".$e->getMessage());
+            Plugin::error("Failed to initialize Neverstale API client: " . $e->getMessage());
             throw $e;
         }
     }
@@ -85,7 +86,7 @@ class Content extends Component
 
         try {
             // Validate API client is initialized
-            if (! isset($this->client)) {
+            if (!isset($this->client)) {
                 Plugin::error("API client is not initialized for content #{$content->id}");
                 $transaction = new TransactionLogItem([
                     'transactionStatus' => ApiClient::STATUS_ERROR,
@@ -98,7 +99,7 @@ class Content extends Component
 
             // Prepare API data
             $apiData = $content->forApi();
-            Plugin::debug("API data prepared for content #{$content->id}: ".json_encode(array_keys($apiData)));
+            Plugin::debug("API data prepared for content #{$content->id}: " . json_encode(array_keys($apiData)));
 
             $webhookConfig = [
                 'webhook' => [
@@ -130,13 +131,13 @@ class Content extends Component
             }
         } catch (ApiException $e) {
             Plugin::error("API exception during ingest for content #{$content->id}: {$e->getMessage()}");
-            Plugin::debug("API exception details: ".$e->getTraceAsString());
+            Plugin::debug("API exception details: " . $e->getTraceAsString());
             $transaction = TransactionLogItem::fromException($e, 'api.error');
 
             return $this->onIngestError($content, $transaction);
         } catch (Exception $e) {
             Plugin::error("General exception during ingest for content #{$content->id}: {$e->getMessage()}");
-            Plugin::debug("Exception details: ".$e->getTraceAsString());
+            Plugin::debug("Exception details: " . $e->getTraceAsString());
 
             // Create a transaction log for the general exception
             $transaction = new TransactionLogItem([
@@ -179,20 +180,20 @@ class Content extends Component
      */
     public function save(ContentElement $content): bool
     {
-        Plugin::debug("Content::save() attempting to save content: ID=".($content->id ?? 'null'));
+        Plugin::debug("Content::save() attempting to save content: ID=" . ($content->id ?? 'null'));
         Plugin::debug("Content state: entryId={$content->entryId}, siteId={$content->siteId}");
 
         $saved = Craft::$app->getElements()->saveElement($content);
 
-        Plugin::debug("Content::save() - Elements::saveElement() returned: ".($saved ? 'true' : 'false'));
+        Plugin::debug("Content::save() - Elements::saveElement() returned: " . ($saved ? 'true' : 'false'));
 
-        if (! $saved) {
+        if (!$saved) {
             $errors = $content->getErrors();
-            Plugin::error("Failed to save content #{$content->id}. Errors: ".print_r($errors, true));
+            Plugin::error("Failed to save content #{$content->id}. Errors: " . print_r($errors, true));
 
             // Log additional debugging info
-            Plugin::debug("Content validation errors: ".json_encode($errors));
-            Plugin::debug("Content attributes: ".json_encode($content->getAttributes()));
+            Plugin::debug("Content validation errors: " . json_encode($errors));
+            Plugin::debug("Content attributes: " . json_encode($content->getAttributes()));
         } else {
             Plugin::debug("Content saved successfully with ID: {$content->id}");
         }
@@ -224,7 +225,7 @@ class Content extends Component
      */
     public function batchIngest(array $contents): array
     {
-        Plugin::info("Content::batchIngest() called with ".count($contents)." content items");
+        Plugin::info("Content::batchIngest() called with " . count($contents) . " content items");
 
         $batchData = [];
         $contentMap = [];
@@ -245,8 +246,8 @@ class Content extends Component
 
         try {
             $result = $this->client->batchIngest($batchData);
-            Plugin::info("API response success: ".($result->getWasSuccess() ? 'true' : 'false'));
-            Plugin::info("API response data: ".json_encode($result->data));
+            Plugin::info("API response success: " . ($result->getWasSuccess() ? 'true' : 'false'));
+            Plugin::info("API response data: " . json_encode($result->data));
 
             if ($result->getWasSuccess() && isset($result->data)) {
                 // Process successful batch response
@@ -254,7 +255,7 @@ class Content extends Component
                 $items = isset($result->data['data']) ? $result->data['data'] : $result->data;
 
                 if (is_array($items)) {
-                    Plugin::info("Processing ".count($items)." items from API response");
+                    Plugin::info("Processing " . count($items) . " items from API response");
                     foreach ($items as $item) {
                         $customId = $item->custom_id ?? null;
 
@@ -307,7 +308,6 @@ class Content extends Component
                 'errorCount' => $errorCount,
                 'errors' => $errors,
             ];
-
         } catch (ApiException $e) {
             Plugin::error("Batch ingest API error: {$e->getMessage()}");
 
@@ -368,7 +368,6 @@ class Content extends Component
             Plugin::error("Failed to refresh content #{$content->id}");
 
             return false;
-
         } catch (ApiException $e) {
             Plugin::error("Failed to refresh content #{$content->id}: {$e->getMessage()}");
 
@@ -408,7 +407,7 @@ class Content extends Component
 
         Plugin::webhookDebug("Signature validation - Expected: $expectedSignature");
         Plugin::webhookDebug("Signature validation - Received: $userSignature");
-        Plugin::webhookDebug("Signature validation - Result: ".($isValid ? 'VALID' : 'INVALID'));
+        Plugin::webhookDebug("Signature validation - Result: " . ($isValid ? 'VALID' : 'INVALID'));
 
         return $isValid;
     }
@@ -442,6 +441,28 @@ class Content extends Component
         if ($incomingVersion === null) {
             Plugin::webhookInfo("Processing webhook without version metadata (backward compatibility) for content #{$content->id}");
         } else {
+            // Validate incoming version - reject obviously invalid timestamps
+            // Allow up to 1 hour in the future to account for minor clock skew
+            $now = time();
+            $maxFutureSkew = 3600; // 1 hour
+
+            if ($incomingVersion > $now + $maxFutureSkew) {
+                Plugin::webhookWarning(
+                    "Rejecting webhook with future timestamp for content #{$content->id}. " .
+                    "Incoming version: {$incomingVersion}, Current time: {$now}, Difference: " . ($incomingVersion - $now) . " seconds"
+                );
+                return true; // Return success - we intentionally ignored it
+            }
+
+            // If stored version is in the future, reset it
+            if ($content->lastWebhookVersion > $now + $maxFutureSkew) {
+                Plugin::webhookWarning(
+                    "Stored webhook version is in the future for content #{$content->id}. " .
+                    "Resetting from {$content->lastWebhookVersion} to 0"
+                );
+                $content->lastWebhookVersion = 0;
+            }
+
             // Check if this webhook is stale
             if ($incomingVersion <= $content->lastWebhookVersion) {
                 Plugin::webhookWarning(
@@ -473,13 +494,13 @@ class Content extends Component
 
         // Sync flags if we have flag data
         $flags = $transaction->getFlags();
-        Plugin::webhookDebug("Flags received: ".json_encode($flags));
-        Plugin::webhookDebug("Flag count: ".count($flags));
+        Plugin::webhookDebug("Flags received: " . json_encode($flags));
+        Plugin::webhookDebug("Flag count: " . count($flags));
 
-        if (! empty($flags)) {
-            Plugin::webhookInfo("Syncing ".count($flags)." flags for content #{$content->id}");
+        if (!empty($flags)) {
+            Plugin::webhookInfo("Syncing " . count($flags) . " flags for content #{$content->id}");
             $syncResult = Plugin::getInstance()->flagManager->syncFlagsForContent($content, $flags);
-            Plugin::webhookDebug("Flag sync result: ".($syncResult ? 'SUCCESS' : 'FAILED'));
+            Plugin::webhookDebug("Flag sync result: " . ($syncResult ? 'SUCCESS' : 'FAILED'));
         } else {
             Plugin::webhookDebug("No flags to sync");
         }
@@ -496,10 +517,25 @@ class Content extends Component
     public function handleEntrySave(Entry $entry): void
     {
         Plugin::debug("Handling entry save for ID: {$entry->id}, Title: {$entry->title}");
+        Plugin::debug("Entry isCanonical: " . ($entry->getIsCanonical() ? 'true' : 'false') . ", isDraft: " . (ElementHelper::isDraft($entry) ? 'true' : 'false') . ", isRevision: " . (ElementHelper::isRevision($entry) ? 'true' : 'false'));
 
         try {
-            // Check if entry should be ingested (includes canonical check)
-            if (! Plugin::getInstance()->entry->shouldIngest($entry)) {
+            // Only process canonical entries - skip drafts and revisions entirely
+            if (ElementHelper::isDraftOrRevision($entry)) {
+                Plugin::debug("Entry #{$entry->id} is a draft or revision - skipping analysis (only canonical entries trigger analysis)");
+                return;
+            }
+
+            // At this point we know the entry being saved is canonical
+            if (!$entry->getIsCanonical()) {
+                Plugin::debug("Entry #{$entry->id} is not canonical - skipping");
+                return;
+            }
+
+            Plugin::debug("Entry #{$entry->id} is canonical and will be processed");
+
+            // Check if entry should be ingested (includes enabled/section checks)
+            if (!Plugin::getInstance()->entry->shouldIngest($entry)) {
                 Plugin::debug("Entry {$entry->id} did not pass shouldIngest check");
 
                 return;
@@ -510,16 +546,15 @@ class Content extends Component
             $content = $this->findOrCreateContentFor($entry);
 
             // Check if content is already processed
-            if (! $content->isUnsent()) {
+            if (!$content->isUnsent()) {
                 Plugin::debug("Content {$content->id} already processed for entry {$entry->id}, skipping");
 
                 return;
             }
 
             $this->queue($content);
-
         } catch (Exception $e) {
-            Plugin::error("Failed to handle entry save for {$entry->id}: ".$e->getMessage());
+            Plugin::error("Failed to handle entry save for {$entry->id}: " . $e->getMessage());
         }
     }
 
@@ -536,23 +571,23 @@ class Content extends Component
 
         $content = $this->find($entry);
 
-        if (! $content) {
+        if (!$content) {
             Plugin::debug("No existing content found, creating new content");
             $content = $this->create($entry);
-            Plugin::debug("Content object created in memory: ".get_class($content));
-            Plugin::debug("Content before save: ID=".($content->id ?? 'null').", Entry ID={$content->entryId}, Site ID={$content->siteId}");
+            Plugin::debug("Content object created in memory: " . get_class($content));
+            Plugin::debug("Content before save: ID=" . ($content->id ?? 'null') . ", Entry ID={$content->entryId}, Site ID={$content->siteId}");
 
             $saveResult = $this->save($content);
-            Plugin::debug("Save result: ".($saveResult ? 'SUCCESS' : 'FAILED'));
+            Plugin::debug("Save result: " . ($saveResult ? 'SUCCESS' : 'FAILED'));
 
             if ($saveResult) {
-                Plugin::debug("Content after save: ID=".($content->id ?? 'null'));
+                Plugin::debug("Content after save: ID=" . ($content->id ?? 'null'));
                 Plugin::info(Plugin::t("Created Content #{contentId} for Entry #{entryId}", [
                     'entryId' => $entry->id,
                     'contentId' => $content->id,
                 ]));
             } else {
-                Plugin::error("Failed to save new content - validation errors: ".print_r($content->getErrors(), true));
+                Plugin::error("Failed to save new content - validation errors: " . print_r($content->getErrors(), true));
             }
         } else {
             Plugin::debug("Found existing content: ID={$content->id}");
@@ -576,7 +611,7 @@ class Content extends Component
             'siteId' => $entry->siteId,
         ]);
 
-        Plugin::debug("Content::find() result: ".($content ? "Found ID={$content->id}" : "Not found"));
+        Plugin::debug("Content::find() result: " . ($content ? "Found ID={$content->id}" : "Not found"));
 
         return $content;
     }
@@ -597,8 +632,8 @@ class Content extends Component
             'siteId' => $entry->siteId,
         ]);
 
-        Plugin::debug("Content::create() - Content object instantiated: ".get_class($content));
-        Plugin::debug("Content flagCount initialized to: ".($content->flagCount ?? 'null'));
+        Plugin::debug("Content::create() - Content object instantiated: " . get_class($content));
+        Plugin::debug("Content flagCount initialized to: " . ($content->flagCount ?? 'null'));
 
         return $content;
     }
@@ -620,9 +655,9 @@ class Content extends Component
                 'contentId' => $content->id,
             ]));
 
-            Plugin::debug("Job pushed to queue with ID: ".($jobId ?? 'unknown'));
+            Plugin::debug("Job pushed to queue with ID: " . ($jobId ?? 'unknown'));
         } catch (Exception $e) {
-            Plugin::error("Failed to push job to queue: ".$e->getMessage());
+            Plugin::error("Failed to push job to queue: " . $e->getMessage());
 
             $content->setAnalysisStatus(AnalysisStatus::API_ERROR);
             Craft::$app->getElements()->saveElement($content);
@@ -650,7 +685,7 @@ class Content extends Component
             'siteId' => $customId->siteId,
         ]);
 
-        if (! $entry) {
+        if (!$entry) {
             Plugin::error("Entry {$customId->entryId} not found for custom ID: {$strId}");
 
             return null;
@@ -667,7 +702,7 @@ class Content extends Component
      */
     public function getByCustomId(string|CustomId $customId): ?ContentElement
     {
-        if (! $customId instanceof CustomId) {
+        if (!$customId instanceof CustomId) {
             $customId = CustomId::parse($customId);
         }
 
@@ -682,7 +717,7 @@ class Content extends Component
      */
     public function checkCanConnect($forceFresh = false): bool
     {
-        if ($forceFresh || ! Craft::$app->cache->exists(self::HEALTH_CACHE_KEY)) {
+        if ($forceFresh || !Craft::$app->cache->exists(self::HEALTH_CACHE_KEY)) {
             Craft::$app->cache->set(
                 self::HEALTH_CACHE_KEY,
                 $this->client->health(),
