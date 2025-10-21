@@ -147,63 +147,71 @@ class FlagManager extends Component
     public function updateFlagFromApiData(Flag $flag, $apiFlag): bool
     {
         try {
+            $flagId = $apiFlag['id'] ?? null;
+            $flagType = $apiFlag['flag'] ?? null;
+            $reason = $apiFlag['reason'] ?? null;
+            $snippet = $apiFlag['snippet'] ?? null;
+            $lastAnalyzedAt = isset($apiFlag['last_analyzed_at']) ? new DateTime($apiFlag['last_analyzed_at']) : null;
+            $expiredAt = isset($apiFlag['expired_at']) ? new DateTime($apiFlag['expired_at']) : null;
+            $ignoredAt = isset($apiFlag['ignored_at']) ? new DateTime($apiFlag['ignored_at']) : null;
+
             $hasChanges = false;
 
             // Check for changes and update if necessary
-            if ($flag->flag !== $apiFlag->flag) {
-                $flag->flag = $apiFlag->flag;
+            if ($flag->flag !== $flagType) {
+                $flag->flag = $flagType;
                 $hasChanges = true;
             }
 
-            if ($flag->reason !== ($apiFlag->reason ?? null)) {
-                $flag->reason = $apiFlag->reason ?? null;
+            if ($flag->reason !== $reason) {
+                $flag->reason = $reason;
                 $hasChanges = true;
             }
 
-            if ($flag->snippet !== ($apiFlag->snippet ?? null)) {
-                $flag->snippet = $apiFlag->snippet ?? null;
+            if ($flag->snippet !== $snippet) {
+                $flag->snippet = $snippet;
                 $hasChanges = true;
             }
 
-            $apiLastAnalyzed = $apiFlag->last_analyzed_at ? $apiFlag->last_analyzed_at->format('Y-m-d H:i:s') : null;
+            $apiLastAnalyzed = $lastAnalyzedAt ? $lastAnalyzedAt->format('Y-m-d H:i:s') : null;
             $currentLastAnalyzed = $flag->lastAnalyzedAt ? $flag->lastAnalyzedAt->format('Y-m-d H:i:s') : null;
             if ($currentLastAnalyzed !== $apiLastAnalyzed) {
-                $flag->lastAnalyzedAt = $apiFlag->last_analyzed_at ?? null;
+                $flag->lastAnalyzedAt = $lastAnalyzedAt;
                 $hasChanges = true;
             }
 
-            $apiExpiredAt = $apiFlag->expired_at ? $apiFlag->expired_at->format('Y-m-d H:i:s') : null;
+            $apiExpiredAt = $expiredAt ? $expiredAt->format('Y-m-d H:i:s') : null;
             $currentExpiredAt = $flag->expiredAt ? $flag->expiredAt->format('Y-m-d H:i:s') : null;
             if ($currentExpiredAt !== $apiExpiredAt) {
-                $flag->expiredAt = $apiFlag->expired_at ?? null;
+                $flag->expiredAt = $expiredAt;
                 $hasChanges = true;
             }
 
-            $apiIgnoredAt = $apiFlag->ignored_at ? $apiFlag->ignored_at->format('Y-m-d H:i:s') : null;
+            $apiIgnoredAt = $ignoredAt ? $ignoredAt->format('Y-m-d H:i:s') : null;
             $currentIgnoredAt = $flag->ignoredAt ? $flag->ignoredAt->format('Y-m-d H:i:s') : null;
             if ($currentIgnoredAt !== $apiIgnoredAt) {
-                $flag->ignoredAt = $apiFlag->ignored_at ?? null;
+                $flag->ignoredAt = $ignoredAt;
                 $hasChanges = true;
             }
 
             if ($hasChanges) {
                 if (Craft::$app->getElements()->saveElement($flag)) {
-                    Plugin::debug("FlagManager: Updated flag {$apiFlag->id}");
+                    Plugin::debug("FlagManager: Updated flag {$flagId}");
 
                     return true;
                 } else {
-                    Plugin::error("FlagManager: Failed to save updated flag {$apiFlag->id}: ".json_encode($flag->getErrors()));
+                    Plugin::error("FlagManager: Failed to save updated flag {$flagId}: ".json_encode($flag->getErrors()));
 
                     return false;
                 }
             } else {
-                Plugin::debug("FlagManager: No changes for flag {$apiFlag->id}");
+                Plugin::debug("FlagManager: No changes for flag {$flagId}");
 
                 return true;
             }
 
         } catch (Exception $e) {
-            Plugin::error("FlagManager: Error updating flag {$apiFlag->id}: ".$e->getMessage());
+            Plugin::error("FlagManager: Error updating flag: ".$e->getMessage());
 
             return false;
         }
