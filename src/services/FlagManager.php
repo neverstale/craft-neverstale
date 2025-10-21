@@ -123,7 +123,7 @@ class FlagManager extends Component
             foreach ($flagsToRemove as $flagIdToRemove) {
                 // Find the flag in the content's current flags
                 $flagToRemove = array_values(array_filter($contentFlags, fn($f) => $f->flagId === $flagIdToRemove))[0] ?? null;
-                if ($flagToRemove && Craft::$app->getElements()->deleteElement($flagToRemove)) {
+                if ($flagToRemove && Craft::$app->getElements()->deleteElement($flagToRemove, hardDelete: true)) {
                     Plugin::debug("FlagManager: Removed obsolete flag {$flagIdToRemove} from content #{$content->id}");
                 }
             }
@@ -380,7 +380,7 @@ class FlagManager extends Component
 
             $cleanedCount = 0;
             foreach ($orphanedFlags as $flag) {
-                if (Craft::$app->getElements()->deleteElement($flag)) {
+                if (Craft::$app->getElements()->deleteElement($flag, hardDelete: true)) {
                     $cleanedCount++;
                 }
             }
