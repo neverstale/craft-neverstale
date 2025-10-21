@@ -492,18 +492,14 @@ class Content extends Component
         }
         $content->logTransaction($transaction);
 
-        // Sync flags if we have flag data
+        // Sync flags - always call even if empty to remove obsolete flags
         $flags = $transaction->getFlags();
         Plugin::webhookDebug("Flags received: " . json_encode($flags));
         Plugin::webhookDebug("Flag count: " . count($flags));
 
-        if (!empty($flags)) {
-            Plugin::webhookInfo("Syncing " . count($flags) . " flags for content #{$content->id}");
-            $syncResult = Plugin::getInstance()->flagManager->syncFlagsForContent($content, $flags);
-            Plugin::webhookDebug("Flag sync result: " . ($syncResult ? 'SUCCESS' : 'FAILED'));
-        } else {
-            Plugin::webhookDebug("No flags to sync");
-        }
+        Plugin::webhookInfo("Syncing " . count($flags) . " flags for content #{$content->id}");
+        $syncResult = Plugin::getInstance()->flagManager->syncFlagsForContent($content, $flags);
+        Plugin::webhookDebug("Flag sync result: " . ($syncResult ? 'SUCCESS' : 'FAILED'));
 
         return Plugin::getInstance()->content->save($content);
     }
