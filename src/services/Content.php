@@ -508,6 +508,11 @@ class Content extends Component
         $finalFlagCount = Plugin::getInstance()->flagManager->getFlagCountForContent($content);
         Plugin::webhookInfo("Final flag count for content #{$content->id}: {$finalFlagCount}");
 
+        // Warn if flag count doesn't match expected
+        if ($finalFlagCount != count($flags)) {
+            Plugin::webhookWarning("Flag count mismatch! Expected: " . count($flags) . ", Actual: {$finalFlagCount}. Check main neverstale log for details.");
+        }
+
         return Plugin::getInstance()->content->save($content);
     }
 
