@@ -502,7 +502,11 @@ class Content extends Component
 
         Plugin::webhookInfo("Syncing " . count($flags) . " flags for content #{$content->id}");
         $syncResult = Plugin::getInstance()->flagManager->syncFlagsForContent($content, $flags);
-        Plugin::webhookDebug("Flag sync result: " . ($syncResult ? 'SUCCESS' : 'FAILED'));
+        Plugin::webhookInfo("Flag sync result: " . ($syncResult ? 'SUCCESS' : 'FAILED'));
+
+        // Log final flag count for verification
+        $finalFlagCount = Plugin::getInstance()->flagManager->getFlagCountForContent($content);
+        Plugin::webhookInfo("Final flag count for content #{$content->id}: {$finalFlagCount}");
 
         return Plugin::getInstance()->content->save($content);
     }

@@ -27,6 +27,7 @@ class FlagManager extends Component
      */
     public function syncFlagsForContent(Content $content, array $apiFlags): bool
     {
+        Plugin::info("FlagManager: START syncFlagsForContent - ".count($apiFlags)." flags for content #{$content->id}");
         Plugin::debug("FlagManager: Syncing ".count($apiFlags)." flags for content #{$content->id}");
 
         try {
