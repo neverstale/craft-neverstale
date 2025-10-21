@@ -545,11 +545,12 @@ class Content extends Component
 
             $content = $this->findOrCreateContentFor($entry);
 
-            // Check if content is already processed
+            // Reset content to unsent status to trigger re-analysis
+            // This ensures that editing a published entry re-analyzes it
             if (!$content->isUnsent()) {
-                Plugin::debug("Content {$content->id} already processed for entry {$entry->id}, skipping");
-
-                return;
+                Plugin::debug("Content {$content->id} was previously analyzed (status: {$content->getAnalysisStatus()->value}), resetting to unsent for re-analysis");
+                $content->setAnalysisStatus(AnalysisStatus::UNSENT);
+                $this->save($content);
             }
 
             $this->queue($content);
