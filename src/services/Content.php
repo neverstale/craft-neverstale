@@ -442,23 +442,26 @@ class Content extends Component
             Plugin::webhookInfo("Processing webhook without version metadata (backward compatibility) for content #{$content->id}");
         } else {
             // Validate incoming version - reject obviously invalid timestamps
+            // Note: incomingVersion is in microseconds, need to convert to seconds for validation
             // Allow up to 1 hour in the future to account for minor clock skew
             $now = time();
             $maxFutureSkew = 3600; // 1 hour
+            $incomingVersionSeconds = (int)($incomingVersion / 1000000);
 
-            if ($incomingVersion > $now + $maxFutureSkew) {
+            if ($incomingVersionSeconds > $now + $maxFutureSkew) {
                 Plugin::webhookWarning(
                     "Rejecting webhook with future timestamp for content #{$content->id}. " .
-                    "Incoming version: {$incomingVersion}, Current time: {$now}, Difference: " . ($incomingVersion - $now) . " seconds"
+                    "Incoming version: {$incomingVersion} ({$incomingVersionSeconds}s), Current time: {$now}, Difference: " . ($incomingVersionSeconds - $now) . " seconds"
                 );
                 return true; // Return success - we intentionally ignored it
             }
 
             // If stored version is in the future, reset it
-            if ($content->lastWebhookVersion > $now + $maxFutureSkew) {
+            $storedVersionSeconds = (int)($content->lastWebhookVersion / 1000000);
+            if ($storedVersionSeconds > $now + $maxFutureSkew) {
                 Plugin::webhookWarning(
                     "Stored webhook version is in the future for content #{$content->id}. " .
-                    "Resetting from {$content->lastWebhookVersion} to 0"
+                    "Resetting from {$content->lastWebhookVersion} ({$storedVersionSeconds}s) to 0"
                 );
                 $content->lastWebhookVersion = 0;
             }
