@@ -44,14 +44,22 @@ class FlagManager extends Component
             }
 
             // Get existing flags by flagId (globally, since flagId is unique)
+            // Include trashed flags temporarily to handle legacy soft-deleted flags
             $existingFlags = [];
             if (!empty($apiFlagIds)) {
                 $existingFlagsList = Flag::find()
                     ->flagId($apiFlagIds)
+                    ->trashed(null) // Include soft-deleted flags to clean them up
                     ->all();
 
                 // Index by flagId
                 foreach ($existingFlagsList as $flag) {
+                    // If flag is soft-deleted, hard delete it so we can recreate it
+                    if ($flag->trashed) {
+                        Plugin::info("FlagManager: Cleaning up soft-deleted flag {$flag->flagId}, will recreate");
+                        Craft::$app->getElements()->deleteElement($flag, hardDelete: true);
+                        continue; // Don't add to existing flags, let it be recreated
+                    }
                     $existingFlags[$flag->flagId] = $flag;
                 }
             }
@@ -105,14 +113,26 @@ class FlagManager extends Component
                     if ($created) {
                         $successCount++;
                     } else {
-                        // Creation failed - might be race condition, try to find and update
-                        Plugin::warning("FlagManager: Failed to create flag {$flagId}, attempting to find and update (possible race condition)");
-                        $existingFlag = Flag::find()->flagId($flagId)->one();
+                        // Creation failed - might be race condition or soft-deleted flag
+                        Plugin::warning("FlagManager: Failed to create flag {$flagId}, checking for existing/soft-deleted flag");
+
+                        // Check for existing flag including soft-deleted ones
+                        $existingFlag = Flag::find()->flagId($flagId)->trashed(null)->one();
+
                         if ($existingFlag) {
-                            Plugin::info("FlagManager: Found flag {$flagId} after failed create, updating instead");
-                            if ($this->updateFlagFromApiData($existingFlag, $apiFlag)) {
-                                $successCount++;
+                            if ($existingFlag->trashed) {
+                                // Soft-deleted flag - hard delete and let next sync recreate it
+                                Plugin::info("FlagManager: Found soft-deleted flag {$flagId}, cleaning up");
+                                Craft::$app->getElements()->deleteElement($existingFlag, hardDelete: true);
+                            } else {
+                                // Active flag - update it
+                                Plugin::info("FlagManager: Found flag {$flagId} after failed create, updating instead");
+                                if ($this->updateFlagFromApiData($existingFlag, $apiFlag)) {
+                                    $successCount++;
+                                }
                             }
+                        } else {
+                            Plugin::error("FlagManager: Could not find flag {$flagId} after failed create - database may be in inconsistent state");
                         }
                     }
                 }
