@@ -5,6 +5,7 @@ namespace neverstale\neverstale\registrars;
 use craft\events\RegisterUserPermissionsEvent;
 use craft\services\UserPermissions;
 use neverstale\neverstale\enums\Permission;
+use neverstale\neverstale\Plugin;
 use yii\base\Event;
 
 /**
