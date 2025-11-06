@@ -304,6 +304,7 @@ class Content extends Element
     {
         return [
             'uiLabel',
+            'flags',
         ];
     }
 
@@ -550,5 +551,18 @@ class Content extends Element
     protected function cpEditUrl(): ?string
     {
         return UrlHelper::cpUrl('neverstale/content/'.$this->getCanonicalId());
+    }
+
+    protected function searchKeywords(string $attribute): string
+    {
+        // Add the flags to search terms:
+        if ($attribute === 'flags') {
+            return collect($this->getFlags())
+                ->map(fn (Flag $flag) => $flag->flag)
+                ->unique()
+                ->join(': ');
+        }
+
+        return parent::searchKeywords($attribute);
     }
 }
