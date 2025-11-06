@@ -36,12 +36,14 @@ use yii\web\Response;
  * @package neverstale/neverstale
  * @since   1.0.0
  * @see     https://github.com/zaengle/craft-neverstale
- * @property int              $entryId
- * @property int              $siteId
+ * @property int $entryId
+ * @property int $siteId
  * @property-read null|string $postEditUrl
- * @property-read string      $statusColor
- * @property-read string      $uiLabel
- * @property-read Entry|null  $entry
+ * @property-read string $statusColor
+ * @property-read string $uiLabel
+ * @property-read string $statusHtml
+ * @property-read Status $statusModel
+ * @property-read Entry|null $entry
  */
 class Content extends Element
 {
@@ -300,7 +302,9 @@ class Content extends Element
 
     protected static function defineSearchableAttributes(): array
     {
-        return [];
+        return [
+            'uiLabel',
+        ];
     }
 
     protected static function defineActions(?string $source = null): array
