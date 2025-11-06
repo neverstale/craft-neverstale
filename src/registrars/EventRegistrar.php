@@ -5,11 +5,15 @@ namespace neverstale\neverstale\registrars;
 use Craft;
 use craft\base\Element;
 use craft\base\Model;
+use craft\console\Application as ConsoleApplication;
+use craft\console\Controller as ConsoleController;
+use craft\console\controllers\ResaveController;
 use craft\elements\db\ElementQuery;
 use craft\elements\db\EntryQuery;
 use craft\elements\Entry;
 use craft\events\DefineAttributeHtmlEvent;
 use craft\events\DefineBehaviorsEvent;
+use craft\events\DefineConsoleActionsEvent;
 use craft\events\DefineFieldLayoutElementsEvent;
 use craft\events\DefineHtmlEvent;
 use craft\events\ModelEvent;
@@ -39,6 +43,7 @@ class EventRegistrar implements RegistrarInterface
         $this->attachEntryBehaviors();
         $this->attachElementSaveHandler();
         $this->attachElementDeleteHandler();
+        $this->attachResaveCommand();
     }
 
     /**
@@ -312,5 +317,33 @@ class EventRegistrar implements RegistrarInterface
                 }
             }
         );
+    }
+
+    private function attachResaveCommand(): void
+    {
+        if (!Craft::$app instanceof ConsoleApplication) {
+            return;
+        }
+
+        Event::on(ResaveController::class, ConsoleController::EVENT_DEFINE_ACTIONS, function(DefineConsoleActionsEvent $event) {
+            $event->actions['neverstale-content'] = [
+                'action' => function(): int {
+                    $controller = Craft::$app->controller;
+
+                    $criteria = [];
+
+                    if ($controller->contentId !== null) {
+                        $criteria['contentId'] = explode(',', $controller->contentId);
+                    }
+
+                    return $controller->resaveElements(Content::class, $criteria);
+                },
+                'options' => ['contentId'],
+                'helpSummary' => 'Re-saves Neverstale content items.',
+                'optionsHelp' => [
+                    'type' => 'The content ID of the elements to resave.',
+                ],
+            ];
+        });
     }
 }
