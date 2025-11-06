@@ -16,12 +16,15 @@ trait WebhookLogger
 {
     private static ?MonologTarget $webhookLogTarget = null;
 
+    public const NEVERSTALE_WEBHOOK = 'neverstale-webhook';
+
     /**
      * Log a webhook debug message
      */
     public static function webhookDebug(string $message): void
     {
-        self::logWebhookMessage($message, 'DEBUG');
+        self::ensureWebhookLogTarget();
+        Craft::debug($message, self::NEVERSTALE_WEBHOOK);
     }
 
     /**
@@ -29,7 +32,8 @@ trait WebhookLogger
      */
     public static function webhookInfo(string $message): void
     {
-        self::logWebhookMessage($message, 'INFO');
+        self::ensureWebhookLogTarget();
+        Craft::info($message, self::NEVERSTALE_WEBHOOK);
     }
 
     /**
@@ -37,7 +41,8 @@ trait WebhookLogger
      */
     public static function webhookWarning(string $message): void
     {
-        self::logWebhookMessage($message, 'WARNING');
+        self::ensureWebhookLogTarget();
+        Craft::warning($message, self::NEVERSTALE_WEBHOOK);
     }
 
     /**
@@ -45,27 +50,8 @@ trait WebhookLogger
      */
     public static function webhookError(string $message): void
     {
-        self::logWebhookMessage($message, 'ERROR');
-    }
-
-    /**
-     * Log message specifically for webhook operations
-     */
-    private static function logWebhookMessage(string $message, string $level): void
-    {
         self::ensureWebhookLogTarget();
-        
-        $formattedMessage = "[{$level}] {$message}";
-        $category = 'neverstale-webhook';
-
-        // Map log levels to Craft logging methods
-        match ($level) {
-            'DEBUG' => Craft::debug($formattedMessage, $category),
-            'INFO' => Craft::info($formattedMessage, $category),
-            'WARNING' => Craft::warning($formattedMessage, $category),
-            'ERROR' => Craft::error($formattedMessage, $category),
-            default => Craft::info($formattedMessage, $category),
-        };
+        Craft::error($message, self::NEVERSTALE_WEBHOOK);
     }
 
     /**
@@ -76,22 +62,20 @@ trait WebhookLogger
         if (self::$webhookLogTarget !== null) {
             return;
         }
-
-        $date = date('Y-m-d');
-        $logFileName = "neverstale-webhook-{$date}";
         
         self::$webhookLogTarget = new MonologTarget([
-            'name' => $logFileName,
-            'categories' => ['neverstale-webhook'],
+            'name' => self::NEVERSTALE_WEBHOOK,
+            'allowLineBreaks' => false,
+            'categories' => [ self::NEVERSTALE_WEBHOOK ],
             'level' => LogLevel::DEBUG,
             'logContext' => false,
-            'allowLineBreaks' => false,
             'formatter' => new LineFormatter(
-                format: "%datetime% %message%\n",
+                format: "%datetime% [%level_name%] %message%\n",
                 dateFormat: 'Y-m-d H:i:s',
+                ignoreEmptyContextAndExtra: true,
             ),
         ]);
 
-        Craft::getLogger()->dispatcher->targets[$logFileName] = self::$webhookLogTarget;
+        Craft::getLogger()->dispatcher->targets[self::NEVERSTALE_WEBHOOK] = self::$webhookLogTarget;
     }
 }
