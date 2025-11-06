@@ -1,5 +1,5 @@
 {
-  "name": "neverstale/craft-neverstale",
+  "name": "neverstale/craft-plugin",
   "type": "craft-plugin",
   "license": "MIT",
   "description": "Neverstale is a Craft CMS plugin that allows you track and manage stale content in your Craft CMS projects.",
